@@ -53,7 +53,13 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         scan(): Promise<Item | null>;
       }
 
-      declare var robot: Robot;
+      declare module "robot" {
+        const robot: Robot;
+        export default robot;
+      }
+      
+      // declare var robot: Robot;  <-- REMOVED GLOBAL
+
       declare var readline: {
         question(prompt: string): string;
       };

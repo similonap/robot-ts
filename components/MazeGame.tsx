@@ -8,7 +8,9 @@ import CodeEditor from './CodeEditor';
 import * as ts from 'typescript';
 
 // Initial code template
-const INITIAL_CODE = `async function main() {
+const INITIAL_CODE = `import robot from "robot";
+
+async function main() {
     // Keep running until the program is stopped or the maze is solved
     while (true) {
         // STRATEGY: RIGHT-HAND RULE
@@ -276,6 +278,10 @@ export default function MazeGame() {
 
             // Custom require implementation
             const customRequire = (path: string) => {
+                if (path === 'robot') {
+                    return { default: api.robot };
+                }
+
                 // simple resolution: remove './' and add '.ts' if missing, 
                 // or just match filename
                 let filename = path.replace(/^\.\//, '');
