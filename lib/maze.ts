@@ -30,11 +30,46 @@ export function generateMaze(width: number, height: number): MazeConfig {
   const startY = 1;
   carve(startX, startY);
 
+  // Generate items
+  const possibleItems = [
+    { name: 'Apple', emoji: '🍎', type: 'Food' },
+    { name: 'Battery', emoji: '🔋', type: 'Energy' },
+    { name: 'Gem', emoji: '💎', type: 'Treasure' },
+    { name: 'Key', emoji: '🗝️', type: 'Tool' },
+    { name: 'Potion', emoji: '🧪', type: 'Consumable' },
+    { name: 'Coin', emoji: '🪙', type: 'Treasure' },
+    { name: 'Map', emoji: '🗺️', type: 'Tool' },
+  ];
+
+  const items: any[] = [];
+  const itemCount = 8; // Increased count for testing grouping
+
+  for (let i = 0; i < itemCount; i++) {
+    let placed = false;
+    while (!placed) {
+      const x = Math.floor(Math.random() * width);
+      const y = Math.floor(Math.random() * height);
+
+      // Must be a path, not start, and not already occupied
+      if (!walls[y][x] && !(x === startX && y === startY) && !items.some(item => item.position.x === x && item.position.y === y)) {
+        const template = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+        items.push({
+          id: `item-${i}`,
+          name: template.name,
+          emoji: template.emoji,
+          type: template.type,
+          position: { x, y }
+        });
+        placed = true;
+      }
+    }
+  }
+
   return {
     width,
     height,
     start: { x: startX, y: startY },
-    end: { x: width - 2, y: height - 2 },
-    walls
+    walls,
+    items
   };
 }

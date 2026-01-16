@@ -1,4 +1,4 @@
-import { Direction, Position, RunnerState } from './types';
+import { Direction, Position, RunnerState, Item } from './types';
 
 export class CancelError extends Error {
     constructor(message: string = 'Execution cancelled') {
@@ -21,16 +21,23 @@ export class RobotController {
     private delayMs: number = 500;
     private signal?: AbortSignal;
 
+    private items: Item[] = [];
+    private collectedItemIds: Set<string> = new Set();
+
     constructor(
         initialState: RunnerState,
         walls: boolean[][],
         onUpdate: (state: RunnerState, log: string) => void,
-        signal?: AbortSignal
+        signal?: AbortSignal,
+        items: Item[] = []
     ) {
         this.state = { ...initialState };
         this.walls = walls;
         this.onUpdate = onUpdate;
         this.signal = signal;
+        this.items = items;
+        // Initialize collected based on initial state if needed
+        this.state.inventory.forEach(item => this.collectedItemIds.add(item.id));
     }
 
     private checkAborted() {
@@ -105,7 +112,22 @@ export class RobotController {
         }
 
         this.state.position = { x: newX, y: newY };
-        this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
+
+        // Check for items
+        const itemAtPos = this.items.find(item =>
+            item.position.x === newX &&
+            item.position.y === newY &&
+            !this.collectedItemIds.has(item.id)
+        );
+
+        if (itemAtPos) {
+            this.collectedItemIds.add(itemAtPos.id);
+            this.state.inventory = [...this.state.inventory, itemAtPos];
+            this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}. Collected ${itemAtPos.emoji} ${itemAtPos.name}!`);
+        } else {
+            this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
+        }
+
         await this.wait(this.delayMs);
         return true;
     }

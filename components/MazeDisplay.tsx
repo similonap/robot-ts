@@ -65,16 +65,28 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                 ))
             ))}
 
-            {/* Goal */}
-            <div
-                className="absolute bg-green-500/50 border-2 border-green-500 rounded-sm"
-                style={{
-                    left: maze.end.x * cellSize,
-                    top: maze.end.y * cellSize,
-                    width: cellSize,
-                    height: cellSize,
-                }}
-            />
+            {/* Items */}
+            {maze.items?.map((item) => {
+                const isCollected = robotState.inventory.some(i => i.id === item.id);
+                if (isCollected) return null;
+
+                return (
+                    <div
+                        key={item.id}
+                        className="absolute flex items-center justify-center text-xl animate-pulse"
+                        style={{
+                            left: item.position.x * cellSize,
+                            top: item.position.y * cellSize,
+                            width: cellSize,
+                            height: cellSize,
+                        }}
+                    >
+                        {item.emoji}
+                    </div>
+                );
+            })}
+
+
 
             {/* Robot */}
             <motion.div

@@ -5,15 +5,24 @@ export interface Position {
     y: number;
 }
 
+export interface Item {
+    id: string;
+    name: string;
+    emoji: string;
+    type: string;
+    position: Position;
+}
+
 export interface RunnerState {
     position: Position;
     direction: Direction;
+    inventory: Item[];
 }
 
 export interface MazeConfig {
     width: number;
     height: number;
     start: Position;
-    end: Position;
     walls: boolean[][]; // true = wall, false = path
+    items: Item[];
 }
