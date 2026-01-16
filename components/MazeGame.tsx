@@ -35,7 +35,15 @@ export default function MazeGame() {
     const [maze, setMaze] = useState<MazeConfig | null>(null);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
     const [code, setCode] = useState(INITIAL_CODE);
-    const [logs, setLogs] = useState<string[]>([]);
+    interface LogEntry {
+        id: string;
+        timestamp: number;
+        message: string;
+        type: 'robot' | 'user';
+    }
+
+    const [logs, setLogs] = useState<LogEntry[]>([]);
+    const [showRobotLogs, setShowRobotLogs] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isWaitingForInput, setIsWaitingForInput] = useState(false);
     const [inputPrompt, setInputPrompt] = useState('');
@@ -60,10 +68,15 @@ export default function MazeGame() {
     // Auto-scroll logs
     useEffect(() => {
         logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [logs, isWaitingForInput]);
+    }, [logs, isWaitingForInput, showRobotLogs]);
 
-    const addLog = (msg: string) => {
-        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    const addLog = (msg: string, type: 'robot' | 'user' = 'user') => {
+        setLogs(prev => [...prev, {
+            id: Math.random().toString(36).substring(7),
+            timestamp: Date.now(),
+            message: `[${new Date().toLocaleTimeString()}] ${msg}`,
+            type
+        }]);
     };
 
     const resetGame = () => {
@@ -100,7 +113,7 @@ export default function MazeGame() {
     const handleInputSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (inputResolveRef.current) {
-            addLog(`${inputPrompt}${inputValue}`);
+            addLog(`${inputPrompt}${inputValue}`, 'user');
             inputResolveRef.current(inputValue);
             inputResolveRef.current = null;
             setIsWaitingForInput(false);
@@ -139,7 +152,7 @@ export default function MazeGame() {
             });
             return result.outputText;
         } catch (e: any) {
-            addLog(`Compilation Error: ${e.message}`);
+            addLog(`Compilation Error: ${e.message}`, 'user');
             throw e;
         }
     };
@@ -156,7 +169,7 @@ export default function MazeGame() {
 
 
         setIsRunning(true);
-        addLog("Compiling...");
+        addLog("Compiling...", 'user');
 
         const abortController = new AbortController();
         abortControllerRef.current = abortController;
@@ -174,7 +187,7 @@ export default function MazeGame() {
             maze.walls,
             (newState, logMsg) => {
                 setRobotState(newState);
-                addLog(logMsg);
+                addLog(logMsg, 'robot');
 
 
             },
@@ -184,7 +197,7 @@ export default function MazeGame() {
 
         try {
             const jsCode = transpileCode(code);
-            addLog("Running...");
+            addLog("Running...", 'user');
 
             const api = {
                 robot: {
@@ -218,8 +231,8 @@ export default function MazeGame() {
                     return window.fetch(input, init);
                 },
                 console: {
-                    log: (...args: any[]) => addLog(`LOG: ${args.join(' ')}`),
-                    error: (...args: any[]) => addLog(`ERR: ${args.join(' ')}`),
+                    log: (...args: any[]) => addLog(`LOG: ${args.join(' ')}`, 'user'),
+                    error: (...args: any[]) => addLog(`ERR: ${args.join(' ')}`, 'user'),
                 }
             };
 
@@ -233,7 +246,7 @@ export default function MazeGame() {
 
             await runFn(api.robot, api.readline, api.fetch, api.console);
 
-            addLog("Execution finished.");
+            addLog("Execution finished.", 'user');
         } catch (e: any) {
             // DEBUG LOGGING
             console.log('Caught error:', e);
@@ -242,11 +255,11 @@ export default function MazeGame() {
             console.log('Is crash?', e instanceof CrashError);
 
             if (e instanceof CancelError || e.name === 'CancelError') {
-                addLog(`🛑 Execution Stopped.`);
+                addLog(`🛑 Execution Stopped.`, 'user');
             } else if (e instanceof CrashError || e.name === 'CrashError') {
-                addLog(`💥 CRASH! ${e.message}`);
+                addLog(`💥 CRASH! ${e.message}`, 'user');
             } else {
-                addLog(`Runtime Error: ${e.message}`);
+                addLog(`Runtime Error: ${e.message}`, 'user');
                 console.error(e);
             }
         } finally {
@@ -296,11 +309,26 @@ export default function MazeGame() {
                     </div>
 
                     <div className="flex-1 bg-gray-900 border border-gray-700 rounded p-2 font-mono text-sm overflow-y-auto flex flex-col">
-                        <div className="text-gray-400 border-b border-gray-700 pb-1 mb-2 sticky top-0 bg-gray-900">Terminal</div>
+                        <div className="flex justify-between items-center text-gray-400 border-b border-gray-700 pb-1 mb-2 sticky top-0 bg-gray-900">
+                            <span>Terminal</span>
+                            <label className="text-xs flex items-center gap-1 cursor-pointer hover:text-white">
+                                <input
+                                    type="checkbox"
+                                    checked={showRobotLogs}
+                                    onChange={(e) => setShowRobotLogs(e.target.checked)}
+                                    className="rounded bg-gray-700 border-gray-600 text-green-500 focus:ring-offset-gray-900 focus:ring-green-500"
+                                />
+                                Show Robot Logs
+                            </label>
+                        </div>
                         <div className="flex-1 overflow-y-auto">
-                            {logs.map((log, i) => (
-                                <div key={i} className="mb-1 break-words">{log}</div>
-                            ))}
+                            {logs
+                                .filter(log => log.type === 'user' || showRobotLogs)
+                                .map((log) => (
+                                    <div key={log.id} className={`mb-1 break-words ${log.type === 'robot' ? 'text-gray-500' : 'text-gray-200'}`}>
+                                        {log.message}
+                                    </div>
+                                ))}
                             <div ref={logsEndRef} />
                         </div>
 
