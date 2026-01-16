@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import { MazeConfig, RunnerState } from '../lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 
 interface MazeDisplayProps {
     maze: MazeConfig;
@@ -14,6 +14,33 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
     // Calculate exact pixel dimensions
     const pixelWidth = maze.width * cellSize;
     const pixelHeight = maze.height * cellSize;
+
+    // Maintain continuous rotation state to avoid wrapping issues (0->270 etc)
+    const dirs = ['North', 'East', 'South', 'West'];
+    const getDirIndex = (d: string) => dirs.indexOf(d);
+
+    // Initialize with correct rotation for starting direction
+    const [rotation, setRotation] = useState(() => getDirIndex(robotState.direction) * 90);
+    const lastDirRef = useRef(robotState.direction);
+
+    useEffect(() => {
+        const currentDir = robotState.direction;
+        if (currentDir === lastDirRef.current) return;
+
+        const oldIdx = getDirIndex(lastDirRef.current);
+        const newIdx = getDirIndex(currentDir);
+
+        let diff = newIdx - oldIdx;
+
+        // Handle wrapping for shortest path
+        // 3 (West) -> 0 (North) : -3 => +1 (90 deg right)
+        // 0 (North) -> 3 (West) : 3 => -1 (90 deg left)
+        if (diff === -3) diff = 1;
+        if (diff === 3) diff = -1;
+
+        setRotation(prev => prev + (diff * 90));
+        lastDirRef.current = currentDir;
+    }, [robotState.direction]);
 
     return (
         <div
@@ -56,10 +83,7 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                 animate={{
                     left: robotState.position.x * cellSize,
                     top: robotState.position.y * cellSize,
-                    rotate: robotState.direction === 'North' ? 0
-                        : robotState.direction === 'East' ? 90
-                            : robotState.direction === 'South' ? 180
-                                : 270
+                    rotate: rotation
                 }}
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 style={{
