@@ -8,23 +8,27 @@ import CodeEditor from './CodeEditor';
 import * as ts from 'typescript';
 
 // Initial code template
-const INITIAL_CODE = `
-// Available globals:
-// robot: { moveForward(), turnLeft(), turnRight() } (all async)
-// readline: { question(prompt) }
-// fetch: standard fetch API
+const INITIAL_CODE = `async function main() {
+    // Keep running until the program is stopped or the maze is solved
+    while (true) {
+        // STRATEGY: RIGHT-HAND RULE
+        
+        // 1. Always try to turn Right first. 
+        // We want to hug the right wall, so we assume the right path is the way to go.
+        robot.turnRight();
 
-console.log("Starting maze...");
+        // 2. Check if the path ahead is clear.
+        // If the path is blocked (wall), turn Left to check the next direction.
+        // - If we turned Right and it's blocked, turning Left faces us Forward again.
+        // - If Forward is blocked, turning Left faces us Left.
+        // - If Left is blocked, turning Left faces us Backward (dead end).
+        while (!(await robot.canMoveForward())) {
+            robot.turnLeft();
+        }
 
-// Example: simple right-hand rule or just move
-await robot.moveForward();
-
-// Test input (synchronous style!)
-const name = await readline.question("What is your name? ");
-console.log("Hello " + name);
-async function main() {
-    await robot.turnRight();
-    await robot.moveForward();
+        // 3. We found an opening! Move into it.
+        await robot.moveForward();
+    }
 }`;
 
 export default function MazeGame() {
