@@ -15,25 +15,38 @@ export default function CodeEditor({ code, onChange }: CodeEditorProps) {
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
             `
-      declare var robot: {
+      /**
+       * The main robot controller.
+       * Use this global object to control your robot in the maze.
+       */
+      interface Robot {
         /**
-         * Moves the robot forward one step.
-         * Returns true if successful, false if blocked by a wall.
+         * Moves the robot forward one step in the current direction.
+         * @returns {Promise<boolean>} Resolves to true if moved, false if blocked by a wall.
          */
         moveForward(): Promise<boolean>;
+
         /**
-         * Turns the robot 90 degrees to the left.
+         * Turns the robot 90 degrees to the left (counter-clockwise).
          */
         turnLeft(): Promise<void>;
+
         /**
-         * Turns the robot 90 degrees to the right.
+         * Turns the robot 90 degrees to the right (clockwise).
          */
         turnRight(): Promise<void>;
-      };
+      }
+
+      /**
+       * The global robot instance.
+       */
+      declare var robot: Robot;
 
       declare var readline: {
         /**
-         * Ask the user a question.
+         * Ask the user a question via a browser prompt.
+         * @param prompt The question to display.
+         * @returns The user's input.
          */
         question(prompt: string): string;
       };
