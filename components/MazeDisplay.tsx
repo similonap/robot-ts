@@ -68,6 +68,23 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                 }}
             >
                 🤖
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none">
+                    <svg
+                        width="30"
+                        height="30"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="opacity-80 drop-shadow-md"
+                    >
+                        {/* Simple arrow pointing up (North) */}
+                        <path d="M12 19V5" />
+                        <path d="M5 12l7-7 7 7" />
+                    </svg>
+                </div>
             </motion.div>
         </div>
     );
