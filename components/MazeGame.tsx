@@ -165,6 +165,7 @@ export default function MazeGame() {
         setRobotState({
             position: maze.start,
             direction: 'East',
+            inventory: [],
         });
 
 
