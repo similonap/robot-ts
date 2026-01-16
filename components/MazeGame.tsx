@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateMaze } from '../lib/maze';
 import { MazeConfig, RunnerState } from '../lib/types';
-import { RobotController } from '../lib/robot-api';
+import { RobotController, CancelError, CrashError } from '../lib/robot-api';
 import MazeDisplay from './MazeDisplay';
 import CodeEditor from './CodeEditor';
 import * as ts from 'typescript';
@@ -34,6 +34,7 @@ export default function MazeGame() {
     const [code, setCode] = useState(INITIAL_CODE);
     const [logs, setLogs] = useState<string[]>([]);
     const [isRunning, setIsRunning] = useState(false);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     // Initialize maze
     useEffect(() => {
@@ -51,12 +52,24 @@ export default function MazeGame() {
 
     const resetGame = () => {
         if (!maze) return;
+        // Stop any running code first
+        if (isRunning) {
+            stopExecution();
+        }
+
         setRobotState({
             position: maze.start,
             direction: 'East',
         });
         setLogs([]);
         setIsRunning(false);
+    };
+
+    const stopExecution = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
     };
 
     const transpileCode = (source: string) => {
@@ -75,24 +88,27 @@ export default function MazeGame() {
         if (!maze || !robotState) return;
 
         // Reset before running
-        resetGame();
+        // We manually reset state but keep logs or clear them? 
+        // Let's clear logs and reset position.
+        setLogs([]); // Clear logs for new run
+        setRobotState({
+            position: maze.start,
+            direction: 'East',
+        });
+
         setIsRunning(true);
         addLog("Compiling...");
 
-        // Create a NEW robot controller linked to the UI state
-        // We need a way to 'update' the UI state from the async execution
-        // BUT 'resetGame' sets the state async. 
-        // We should wait for reset, or just use a fresh initial state ref.
-        // Ideally we lock the "Run" button.
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
 
-        // Let's create a "live" robot controller that updates react state
-        // We start from the INITIAL position (maze start)
+        // Wait a tick for state update (or just use immediate values)
         const startState = {
             position: maze.start,
             direction: 'East' as const,
         };
 
-        // Immediate update to show reset
+        // Immediate update visual
         setRobotState(startState);
 
         const controller = new RobotController(
@@ -101,7 +117,8 @@ export default function MazeGame() {
             (newState, logMsg) => {
                 setRobotState(newState);
                 addLog(logMsg);
-            }
+            },
+            abortController.signal
         );
 
         try {
@@ -117,21 +134,25 @@ export default function MazeGame() {
                 },
                 readline: {
                     question: (promptText: string) => {
+                        if (abortController.signal.aborted) throw new CancelError();
                         const ans = window.prompt(promptText);
+                        if (ans === null) {
+                            // User cancelled prompt
+                            throw new CancelError("Prompt cancelled");
+                        }
                         addLog(`Input: ${ans}`);
                         return ans;
                     }
                 },
-                fetch: window.fetch.bind(window),
+                fetch: async (input: RequestInfo, init?: RequestInit) => {
+                    if (abortController.signal.aborted) throw new CancelError();
+                    return window.fetch(input, init);
+                },
                 console: {
                     log: (...args: any[]) => addLog(`LOG: ${args.join(' ')}`),
                     error: (...args: any[]) => addLog(`ERR: ${args.join(' ')}`),
                 }
             };
-
-            // Wrap in async function to allow top-level awaits if needed (though we wrapped in 'run' function in template)
-            // But user might change it.
-            // We will create a Function with arguments.
 
             const runFn = new Function('robot', 'readline', 'fetch', 'console', jsCode);
 
@@ -139,10 +160,17 @@ export default function MazeGame() {
 
             addLog("Execution finished.");
         } catch (e: any) {
-            addLog(`Runtime Error: ${e.message}`);
-            console.error(e);
+            if (e instanceof CancelError || e.name === 'CancelError') {
+                addLog(`🛑 Execution Stopped.`);
+            } else if (e instanceof CrashError || e.name === 'CrashError') {
+                addLog(`💥 CRASH! ${e.message}`);
+            } else {
+                addLog(`Runtime Error: ${e.message}`);
+                console.error(e);
+            }
         } finally {
             setIsRunning(false);
+            abortControllerRef.current = null;
         }
     };
 
@@ -161,11 +189,13 @@ export default function MazeGame() {
                         Reset
                     </button>
                     <button
-                        onClick={runCode}
-                        disabled={isRunning}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded disabled:opacity-50 font-bold"
+                        onClick={isRunning ? stopExecution : runCode}
+                        className={`px-4 py-2 rounded font-bold ${isRunning
+                                ? 'bg-red-600 hover:bg-red-500'
+                                : 'bg-green-600 hover:bg-green-500'
+                            }`}
                     >
-                        {isRunning ? 'Running...' : 'Run Code'}
+                        {isRunning ? 'Stop' : 'Run Code'}
                     </button>
                 </div>
             </header>
