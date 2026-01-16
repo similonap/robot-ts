@@ -14,20 +14,18 @@ const INITIAL_CODE = `
 // readline: { question(prompt) }
 // fetch: standard fetch API
 
-async function run() {
-  console.log("Starting maze...");
-  
-  // Example: simple right-hand rule or just move
-  await robot.moveForward();
+console.log("Starting maze...");
 
-  // Test input (synchronous style!)
-  const name = readline.question("What is your name? ");
-  console.log("Hello " + name);
-}
+// Example: simple right-hand rule or just move
+await robot.moveForward();
 
-// Don't forget to call run!
-run();
-`;
+// Test input (synchronous style!)
+const name = await readline.question("What is your name? ");
+console.log("Hello " + name);
+async function main() {
+    await robot.turnRight();
+    await robot.moveForward();
+}`;
 
 export default function MazeGame() {
     const [maze, setMaze] = useState<MazeConfig | null>(null);
@@ -128,7 +126,7 @@ export default function MazeGame() {
             };
 
             const result = ts.transpileModule(source, {
-                compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
+                compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2017 },
                 transformers: { before: [autoAwaitTransformer] }
             });
             return result.outputText;
@@ -209,12 +207,24 @@ export default function MazeGame() {
                 }
             };
 
-            const runFn = new Function('robot', 'readline', 'fetch', 'console', jsCode);
+            // Use AsyncFunction to allow top-level await and proper async execution
+            const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
+            // Append auto-runner for main function if it exists
+            const finalCode = jsCode + '\n\nif (typeof main === "function") { await main(); }';
+
+            const runFn = new AsyncFunction('robot', 'readline', 'fetch', 'console', finalCode);
 
             await runFn(api.robot, api.readline, api.fetch, api.console);
 
             addLog("Execution finished.");
         } catch (e: any) {
+            // DEBUG LOGGING
+            console.log('Caught error:', e);
+            console.log('e.name:', e.name);
+            console.log('e instanceof CancelError:', e instanceof CancelError);
+            console.log('Is crash?', e instanceof CrashError);
+
             if (e instanceof CancelError || e.name === 'CancelError') {
                 addLog(`🛑 Execution Stopped.`);
             } else if (e instanceof CrashError || e.name === 'CrashError') {
