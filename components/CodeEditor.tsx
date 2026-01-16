@@ -1,16 +1,32 @@
 'use client';
+import { useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 
 interface CodeEditorProps {
-    code: string;
+    files: Record<string, string>;
+    activeFile: string;
     onChange: (value: string | undefined) => void;
 }
 
-export default function CodeEditor({ code, onChange }: CodeEditorProps) {
+export default function CodeEditor({ files, activeFile, onChange }: CodeEditorProps) {
+    const editorRef = useRef<any>(null);
+    const monacoRef = useRef<any>(null);
+
     const handleEditorDidMount = (editor: any, monaco: any) => {
+        editorRef.current = editor;
+        monacoRef.current = monaco;
+
         monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
             noSemanticValidation: false,
             noSyntaxValidation: false,
+        });
+
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            target: monaco.languages.typescript.ScriptTarget.ES2017,
+            allowNonTsExtensions: true,
+            module: monaco.languages.typescript.ModuleKind.CommonJS,
+            noLib: false,
+            esModuleInterop: true,
         });
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
@@ -28,75 +44,55 @@ export default function CodeEditor({ code, onChange }: CodeEditorProps) {
         position: Position;
       }
 
-      /**
-       * The main robot controller.
-       * Use this global object to control your robot in the maze.
-       */
       interface Robot {
-        /**
-         * Moves the robot forward one step in the current direction.
-         * @returns {Promise<boolean>} Resolves to true if moved, false if blocked by a wall.
-         */
         moveForward(): Promise<boolean>;
-
-        /**
-         * Checks if the robot can move forward without actually moving.
-         * @returns {Promise<boolean>} Resolves to true if the path is clear, false if blocked by a wall.
-         */
         canMoveForward(): Promise<boolean>;
-
-        /**
-         * Turns the robot 90 degrees to the left (counter-clockwise).
-         */
         turnLeft(): Promise<void>;
-
-        /**
-         * Turns the robot 90 degrees to the right (clockwise).
-         */
         turnRight(): Promise<void>;
-
-        /**
-         * Picks up an item at the current location.
-         * @returns {Promise<boolean>} True if item collected, false if nothing to pickup.
-         */
         pickup(): Promise<boolean>;
-
-        /**
-         * Scans the item at the current location.
-         * @returns {Promise<Item | null>} The item object found, or null if nothing found.
-         */
         scan(): Promise<Item | null>;
       }
 
-      /**
-       * The global robot instance.
-       */
       declare var robot: Robot;
-
       declare var readline: {
-        /**
-         * Ask the user a question via the terminal.
-         * The execution will pause until you answer.
-         * @param prompt The question to display.
-         * @returns The user's input.
-         */
         question(prompt: string): string;
       };
-      
-      // Fetch is usually available, but we can ensure it is typed if needed
-      // declare function fetch(input: RequestInfo, init?: RequestInit): Promise<Response>;
       `,
             'ts:filename/globals.d.ts'
         );
     };
 
+    // Sync files to Monaco models
+    useEffect(() => {
+        if (!monacoRef.current) return;
+        const monaco = monacoRef.current;
+
+        Object.entries(files).forEach(([filename, content]) => {
+            const uri = monaco.Uri.parse(`file:///${filename}`);
+            let model = monaco.editor.getModel(uri);
+            if (!model) {
+                model = monaco.editor.createModel(content, 'typescript', uri);
+            } else if (model.getValue() !== content) {
+                // Avoid cursor jumping by only updating if content is different (e.g. external change)
+                // But for active file, the Editor component handles it. 
+                // We only need to sync inactive files if they changed externally, which they won't in this app structure yet.
+                // However, if we rename support later, this is needed.
+                // For now, simple check.
+                if (filename !== activeFile) {
+                    model.setValue(content);
+                }
+            }
+        });
+    }, [files, activeFile]);
+
     return (
         <div className="h-full w-full border border-gray-700 rounded-md overflow-hidden">
             <Editor
+                path={`file:///${activeFile}`}
                 height="100%"
                 defaultLanguage="typescript"
                 theme="vs-dark"
-                value={code}
+                value={files[activeFile]}
                 onChange={onChange}
                 onMount={handleEditorDidMount}
                 options={{

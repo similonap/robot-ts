@@ -15,7 +15,7 @@ const INITIAL_CODE = `async function main() {
         
         // 1. Always try to turn Right first. 
         // We want to hug the right wall, so we assume the right path is the way to go.
-        robot.turnRight();
+        await robot.turnRight();
 
         // 2. Check if the path ahead is clear.
         // If the path is blocked (wall), turn Left to check the next direction.
@@ -23,7 +23,7 @@ const INITIAL_CODE = `async function main() {
         // - If Forward is blocked, turning Left faces us Left.
         // - If Left is blocked, turning Left faces us Backward (dead end).
         while (!(await robot.canMoveForward())) {
-            robot.turnLeft();
+            await robot.turnLeft();
         }
 
         // 3. We found an opening! Move into it.
@@ -34,7 +34,10 @@ const INITIAL_CODE = `async function main() {
 export default function MazeGame() {
     const [maze, setMaze] = useState<MazeConfig | null>(null);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
-    const [code, setCode] = useState(INITIAL_CODE);
+    const [files, setFiles] = useState<Record<string, string>>({
+        'main.ts': INITIAL_CODE
+    });
+    const [activeFile, setActiveFile] = useState('main.ts');
     interface LogEntry {
         id: string;
         timestamp: number;
@@ -110,6 +113,33 @@ export default function MazeGame() {
         setIsWaitingForInput(false);
     };
 
+    const handleAddFile = () => {
+        const name = prompt("Enter file name (e.g. utils.ts):");
+        if (name) {
+            if (files[name]) {
+                alert("File already exists!");
+                return;
+            }
+            setFiles(prev => ({ ...prev, [name]: '' }));
+            setActiveFile(name);
+        }
+    };
+
+    const handleDeleteFile = (name: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (name === 'main.ts') return;
+        if (confirm(`Delete ${name}?`)) {
+            setFiles(prev => {
+                const newFiles = { ...prev };
+                delete newFiles[name];
+                return newFiles;
+            });
+            if (activeFile === name) {
+                setActiveFile('main.ts');
+            }
+        }
+    };
+
     const handleInputSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (inputResolveRef.current) {
@@ -147,7 +177,7 @@ export default function MazeGame() {
             };
 
             const result = ts.transpileModule(source, {
-                compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2017 },
+                compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
                 transformers: { before: [autoAwaitTransformer] }
             });
             return result.outputText;
@@ -197,7 +227,14 @@ export default function MazeGame() {
         );
 
         try {
-            const jsCode = transpileCode(code);
+            // Transpile all files
+            const modules: Record<string, any> = {};
+            const transpiledFiles: Record<string, string> = {};
+
+            for (const [filename, content] of Object.entries(files)) {
+                transpiledFiles[filename] = transpileCode(content);
+            }
+
             addLog("Running...", 'user');
 
             const api = {
@@ -237,15 +274,39 @@ export default function MazeGame() {
                 }
             };
 
-            // Use AsyncFunction to allow top-level await and proper async execution
+            // Custom require implementation
+            const customRequire = (path: string) => {
+                // simple resolution: remove './' and add '.ts' if missing, 
+                // or just match filename
+                let filename = path.replace(/^\.\//, '');
+                if (!filename.endsWith('.ts')) filename += '.ts';
+
+                if (modules[filename]) return modules[filename];
+
+                if (!transpiledFiles[filename]) {
+                    throw new Error(`Module not found: ${path}`);
+                }
+
+                const moduleExports = {};
+                modules[filename] = moduleExports;
+
+                // Execute module
+                const modFn = new Function('exports', 'require', 'robot', 'readline', 'fetch', 'console', transpiledFiles[filename]);
+                modFn(moduleExports, customRequire, api.robot, api.readline, api.fetch, api.console);
+
+                return moduleExports;
+            };
+
+            // Execution Main
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
-            // Append auto-runner for main function if it exists
-            const finalCode = jsCode + '\n\nif (typeof main === "function") { await main(); }';
+            // Allow top-level await only in main.ts
+            const finalCode = transpiledFiles['main.ts'] + '\n\nif (typeof main === "function") { await main(); }';
 
-            const runFn = new AsyncFunction('robot', 'readline', 'fetch', 'console', finalCode);
+            const runFn = new AsyncFunction('robot', 'readline', 'fetch', 'console', 'require', 'exports', finalCode);
 
-            await runFn(api.robot, api.readline, api.fetch, api.console);
+            const mainExports = {};
+            await runFn(api.robot, api.readline, api.fetch, api.console, customRequire, mainExports);
 
             addLog("Execution finished.", 'user');
         } catch (e: any) {
@@ -299,8 +360,43 @@ export default function MazeGame() {
 
             <div className="flex flex-1 gap-4 overflow-hidden">
                 {/* Editor Column */}
-                <div className="flex-1 flex flex-col min-w-0">
-                    <CodeEditor code={code} onChange={(val) => setCode(val || '')} />
+                <div className="flex-1 flex flex-col min-w-0 border border-gray-700 rounded-md overflow-hidden bg-gray-900">
+                    {/* Tabs */}
+                    <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto">
+                        {Object.keys(files).map(filename => (
+                            <div
+                                key={filename}
+                                onClick={() => setActiveFile(filename)}
+                                className={`group px-3 py-2 text-sm cursor-pointer flex items-center gap-2 border-r border-gray-700 select-none ${activeFile === filename ? 'bg-gray-900 text-white' : 'text-gray-400 hover:bg-gray-700'
+                                    }`}
+                            >
+                                <span>{filename}</span>
+                                {filename !== 'main.ts' && (
+                                    <button
+                                        onClick={(e) => handleDeleteFile(filename, e)}
+                                        className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        ×
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            onClick={handleAddFile}
+                            className="px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 text-lg leading-none"
+                            title="Add File"
+                        >
+                            +
+                        </button>
+                    </div>
+
+                    <div className="flex-1">
+                        <CodeEditor
+                            files={files}
+                            activeFile={activeFile}
+                            onChange={(val) => setFiles(prev => ({ ...prev, [activeFile]: val || '' }))}
+                        />
+                    </div>
                 </div>
 
                 {/* Game Column */}
