@@ -15,6 +15,19 @@ export default function CodeEditor({ code, onChange }: CodeEditorProps) {
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
             `
+      interface Position {
+        x: number;
+        y: number;
+      }
+
+      interface Item {
+        id: string;
+        name: string;
+        emoji: string;
+        type: string;
+        position: Position;
+      }
+
       /**
        * The main robot controller.
        * Use this global object to control your robot in the maze.
@@ -41,6 +54,18 @@ export default function CodeEditor({ code, onChange }: CodeEditorProps) {
          * Turns the robot 90 degrees to the right (clockwise).
          */
         turnRight(): Promise<void>;
+
+        /**
+         * Picks up an item at the current location.
+         * @returns {Promise<boolean>} True if item collected, false if nothing to pickup.
+         */
+        pickup(): Promise<boolean>;
+
+        /**
+         * Scans the item at the current location.
+         * @returns {Promise<Item | null>} The item object found, or null if nothing found.
+         */
+        scan(): Promise<Item | null>;
       }
 
       /**

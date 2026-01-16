@@ -192,6 +192,8 @@ export default function MazeGame() {
                     turnLeft: () => controller.turnLeft(),
                     turnRight: () => controller.turnRight(),
                     canMoveForward: () => controller.canMoveForward(),
+                    pickup: () => controller.pickup(),
+                    scan: () => controller.scan(),
                 },
                 readline: {
                     question: (promptText: string) => {

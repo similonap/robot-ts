@@ -112,24 +112,54 @@ export class RobotController {
         }
 
         this.state.position = { x: newX, y: newY };
+        this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
+        await this.wait(this.delayMs);
+        return true;
+    }
+
+    async pickup(): Promise<boolean> {
+        this.checkAborted();
+        const { x, y } = this.state.position;
 
         // Check for items
         const itemAtPos = this.items.find(item =>
-            item.position.x === newX &&
-            item.position.y === newY &&
+            item.position.x === x &&
+            item.position.y === y &&
             !this.collectedItemIds.has(item.id)
         );
 
         if (itemAtPos) {
             this.collectedItemIds.add(itemAtPos.id);
             this.state.inventory = [...this.state.inventory, itemAtPos];
-            this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}. Collected ${itemAtPos.emoji} ${itemAtPos.name}!`);
+            this.onUpdate({ ...this.state }, `Collected ${itemAtPos.emoji} ${itemAtPos.name}!`);
+            await this.wait(this.delayMs);
+            return true;
         } else {
-            this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
+            this.onUpdate({ ...this.state }, `Nothing to pick up here.`);
+            await this.wait(this.delayMs / 2);
+            return false;
         }
+    }
 
-        await this.wait(this.delayMs);
-        return true;
+    async scan(): Promise<Item | null> {
+        this.checkAborted();
+        const { x, y } = this.state.position;
+
+        const itemAtPos = this.items.find(item =>
+            item.position.x === x &&
+            item.position.y === y &&
+            !this.collectedItemIds.has(item.id)
+        );
+
+        await this.wait(this.delayMs / 2);
+
+        if (itemAtPos) {
+            this.onUpdate(this.state, `Scanned: ${itemAtPos.name} (${itemAtPos.type})`);
+            return itemAtPos;
+        } else {
+            this.onUpdate(this.state, `Scanned: Nothing`);
+            return null;
+        }
     }
 
     async turnLeft() {
