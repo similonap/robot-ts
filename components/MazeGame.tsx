@@ -166,7 +166,9 @@ export default function MazeGame() {
                                 ts.isIdentifier(expr.expression) &&
                                 expr.expression.text === 'readline' &&
                                 ts.isIdentifier(expr.name) &&
-                                expr.name.text === 'question') {
+                                (expr.name.text === 'question' ||
+                                    expr.name.text === 'questionInt' ||
+                                    expr.name.text === 'questionFloat')) {
 
                                 // Wrap in await
                                 return context.factory.createAwaitExpression(node);
@@ -252,18 +254,31 @@ export default function MazeGame() {
                     question: (promptText: string) => {
                         return new Promise<string>((resolve, reject) => {
                             if (abortController.signal.aborted) return reject(new CancelError());
-
                             setInputPrompt(promptText);
                             setIsWaitingForInput(true);
                             inputResolveRef.current = resolve;
-
-                            // Handle abort while waiting
                             abortController.signal.addEventListener('abort', () => {
                                 setIsWaitingForInput(false);
                                 inputResolveRef.current = null;
                                 reject(new CancelError());
                             });
                         });
+                    },
+                    questionInt: async (promptText: string) => {
+                        while (true) {
+                            const val = await api.readline.question(promptText);
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) return num;
+                            api.console.error("Please enter a valid integer.");
+                        }
+                    },
+                    questionFloat: async (promptText: string) => {
+                        while (true) {
+                            const val = await api.readline.question(promptText);
+                            const num = parseFloat(val);
+                            if (!isNaN(num)) return num;
+                            api.console.error("Please enter a valid number.");
+                        }
                     }
                 },
                 fetch: async (input: RequestInfo, init?: RequestInit) => {
@@ -280,6 +295,24 @@ export default function MazeGame() {
             const customRequire = (path: string) => {
                 if (path === 'robot') {
                     return { default: api.robot };
+                }
+                if (path === 'readline-sync') {
+                    // Since user does "import readline from 'readline-sync'", and we used "export function question..."
+                    // The default export isn't defined in the module declaration I just wrote above?
+                    // Wait, `import readline from ...` implies default export if esModuleInterop is true.
+                    // Or `import * as readline from ...`
+                    // My module decl: `export function question...`.
+                    // If I want `import readline from ...` to work with `readline.question`, I should either:
+                    // 1. Export default object with question.
+                    // 2. Or assume user uses `import * as readline`.
+                    // The user request said: 'the package is named "readline-sync"'.
+                    // Usually `readline-sync` (the real npm package) is `const readline = require('readline-sync')`.
+                    // So in TS `import readline = require('readline-sync')` or `import * as readline`.
+                    // To make `import readline from` work nicely we should provide a default.
+                    return {
+                        default: api.readline,
+                        ...api.readline
+                    };
                 }
 
                 // simple resolution: remove './' and add '.ts' if missing, 

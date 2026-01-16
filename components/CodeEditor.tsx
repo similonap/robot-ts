@@ -60,9 +60,13 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
       
       // declare var robot: Robot;  <-- REMOVED GLOBAL
 
-      declare var readline: {
-        question(prompt: string): string;
-      };
+      declare module "readline-sync" {
+        export function question(prompt: string): string;
+        export function questionInt(prompt: string): number;
+        export function questionFloat(prompt: string): number;
+      }
+
+      // declare var readline: ... <-- REMOVED GLOBAL
       `,
             'ts:filename/globals.d.ts'
         );
