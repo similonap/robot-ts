@@ -49,7 +49,7 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         canMoveForward(): Promise<boolean>;
         turnLeft(): Promise<void>;
         turnRight(): Promise<void>;
-        pickup(): Promise<boolean>;
+        pickup(): Promise<Item | null>;
         scan(): Promise<Item | null>;
       }
 

@@ -117,7 +117,7 @@ export class RobotController {
         return true;
     }
 
-    async pickup(): Promise<boolean> {
+    async pickup(): Promise<Item | null> {
         this.checkAborted();
         const { x, y } = this.state.position;
 
@@ -133,11 +133,11 @@ export class RobotController {
             this.state.inventory = [...this.state.inventory, itemAtPos];
             this.onUpdate({ ...this.state }, `Collected ${itemAtPos.emoji} ${itemAtPos.name}!`);
             await this.wait(this.delayMs);
-            return true;
+            return itemAtPos;
         } else {
             this.onUpdate({ ...this.state }, `Nothing to pick up here.`);
             await this.wait(this.delayMs / 2);
-            return false;
+            return null;
         }
     }
 
