@@ -1,0 +1,92 @@
+const ts = require('typescript');
+
+const codeCase1 = `
+async function run() {
+  console.log("Starting Case 1");
+  const name = readline.question("What is your name? ");
+  console.log("Hello " + name);
+  await robot.moveForward();
+}
+run();
+`;
+
+const codeCase2 = `
+async function run() {
+  console.log("Starting Case 2");
+  await robot.moveForward();
+  const name = readline.question("What is your name? ");
+  console.log("Hello " + name);
+}
+run();
+`;
+
+function transpileCode(source) {
+    const autoAwaitTransformer = (context) => {
+        return (sourceFile) => {
+            const visitor = (node) => {
+                if (ts.isCallExpression(node)) {
+                    const expr = node.expression;
+                    if (ts.isPropertyAccessExpression(expr) &&
+                        ts.isIdentifier(expr.expression) &&
+                        expr.expression.text === 'readline' &&
+                        ts.isIdentifier(expr.name) &&
+                        expr.name.text === 'question') {
+                        return context.factory.createAwaitExpression(node);
+                    }
+                }
+                return ts.visitEachChild(node, visitor, context);
+            };
+            return ts.visitNode(sourceFile, visitor);
+        };
+    };
+
+    const result = ts.transpileModule(source, {
+        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
+        transformers: { before: [autoAwaitTransformer] }
+    });
+    return result.outputText;
+}
+
+const mockApi = {
+    robot: {
+        moveForward: async () => {
+            console.log("Robot moving...");
+            await new Promise(r => setTimeout(r, 100));
+            console.log("Robot moved.");
+        }
+    },
+    readline: {
+        question: (prompt) => {
+            console.log("Question asked: " + prompt);
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log("Question answered (simulated)");
+                    resolve("User");
+                }, 100);
+            });
+        }
+    },
+    console: console,
+    fetch: () => { }
+};
+
+async function runTest(code) {
+    console.log("--- Transpiling ---");
+    const jsCode = transpileCode(code);
+    console.log(jsCode);
+    console.log("--- Executing ---");
+    const runFn = new Function('robot', 'readline', 'fetch', 'console', jsCode);
+    try {
+        await runFn(mockApi.robot, mockApi.readline, mockApi.fetch, mockApi.console);
+        console.log("Execution finished");
+    } catch (e) {
+        console.error("Execution error:", e);
+    }
+}
+
+// Run Case 1
+console.log(">>> Running Case 1");
+runTest(codeCase1).then(() => {
+    console.log("\n>>> Running Case 2");
+    runTest(codeCase2);
+});

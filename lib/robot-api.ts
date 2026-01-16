@@ -65,6 +65,25 @@ export class RobotController {
         return this.walls[y][x];
     }
 
+    async canMoveForward(): Promise<boolean> {
+        this.checkAborted();
+        const { x, y } = this.state.position;
+        let newX = x;
+        let newY = y;
+
+        switch (this.state.direction) {
+            case 'North': newY -= 1; break;
+            case 'East': newX += 1; break;
+            case 'South': newY += 1; break;
+            case 'West': newX -= 1; break;
+        }
+
+        // Simulate a small delay for "sensing"
+        await this.wait(this.delayMs / 2);
+
+        return !this.isWall(newX, newY);
+    }
+
     async moveForward() {
         this.checkAborted();
 

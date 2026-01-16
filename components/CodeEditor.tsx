@@ -27,6 +27,12 @@ export default function CodeEditor({ code, onChange }: CodeEditorProps) {
         moveForward(): Promise<boolean>;
 
         /**
+         * Checks if the robot can move forward without actually moving.
+         * @returns {Promise<boolean>} Resolves to true if the path is clear, false if blocked by a wall.
+         */
+        canMoveForward(): Promise<boolean>;
+
+        /**
          * Turns the robot 90 degrees to the left (counter-clockwise).
          */
         turnLeft(): Promise<void>;

@@ -36,6 +36,7 @@ export default function MazeGame() {
     const [isWaitingForInput, setIsWaitingForInput] = useState(false);
     const [inputPrompt, setInputPrompt] = useState('');
     const [inputValue, setInputValue] = useState('');
+    const [isWon, setIsWon] = useState(false);
 
     const abortControllerRef = useRef<AbortController | null>(null);
     const inputResolveRef = useRef<((value: string) => void) | null>(null);
@@ -74,6 +75,7 @@ export default function MazeGame() {
         setIsRunning(false);
         setIsWaitingForInput(false);
         setInputValue('');
+        setIsWon(false);
     };
 
     const stopExecution = () => {
@@ -145,6 +147,7 @@ export default function MazeGame() {
             position: maze.start,
             direction: 'East',
         });
+        setIsWon(false);
 
         setIsRunning(true);
         addLog("Compiling...");
@@ -165,6 +168,12 @@ export default function MazeGame() {
             (newState, logMsg) => {
                 setRobotState(newState);
                 addLog(logMsg);
+
+                // Check win condition
+                if (newState.position.x === maze.end.x && newState.position.y === maze.end.y) {
+                    addLog("✨🏆 YOU WON! 🏆✨");
+                    setIsWon(true);
+                }
             },
             abortController.signal
         );
@@ -178,6 +187,7 @@ export default function MazeGame() {
                     moveForward: () => controller.moveForward(),
                     turnLeft: () => controller.turnLeft(),
                     turnRight: () => controller.turnRight(),
+                    canMoveForward: () => controller.canMoveForward(),
                 },
                 readline: {
                     question: (promptText: string) => {
@@ -275,8 +285,15 @@ export default function MazeGame() {
 
                 {/* Game Column */}
                 <div className="flex-1 flex flex-col gap-4 min-w-0 overflow-y-auto">
-                    <div className="flex justify-center p-4 bg-gray-800 rounded-lg">
+                    <div className="flex justify-center p-4 bg-gray-800 rounded-lg relative">
                         <MazeDisplay maze={maze} robotState={robotState} />
+                        {isWon && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
+                                <div className="bg-green-600 text-white px-8 py-4 rounded-xl text-3xl font-bold border-4 border-white shadow-2xl animate-bounce">
+                                    🏆 VICTORY!
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex-1 bg-gray-900 border border-gray-700 rounded p-2 font-mono text-sm overflow-y-auto flex flex-col">
