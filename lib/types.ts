@@ -25,4 +25,5 @@ export interface MazeConfig {
     start: Position;
     walls: boolean[][]; // true = wall, false = path
     items: Item[];
+    stepCode?: string;
 }

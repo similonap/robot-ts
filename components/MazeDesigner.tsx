@@ -1,9 +1,19 @@
-'use client';
+"use client"
+
 import { useState } from 'react';
 import { MazeConfig, Position, Item } from '../lib/types';
+import CodeEditor from './CodeEditor';
 
 const INITIAL_WIDTH = 15;
 const INITIAL_HEIGHT = 15;
+const DEFAULT_STEP_CODE = `// Check conditions every step
+// Available: robot (state), maze, game
+/*
+if (robot.position.x === 10 && robot.position.y === 10) {
+    game.win("You reached the goal!");
+}
+*/
+`;
 
 const ITEM_TYPES = [
     { name: 'Apple', emoji: '🍎', type: 'Food' },
@@ -25,6 +35,7 @@ export default function MazeDesigner() {
     );
     const [start, setStart] = useState<Position>({ x: 1, y: 1 });
     const [items, setItems] = useState<Item[]>([]);
+    const [stepCode, setStepCode] = useState(DEFAULT_STEP_CODE);
 
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
@@ -105,7 +116,8 @@ export default function MazeDesigner() {
             height,
             start,
             walls,
-            items
+            items,
+            stepCode
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
         const downloadAnchorNode = document.createElement('a');
@@ -194,38 +206,52 @@ export default function MazeDesigner() {
                 </div>
 
                 {/* Grid Editor */}
-                <div className="flex-1 bg-gray-900 border border-gray-700 rounded p-4 overflow-auto flex justify-center items-center">
-                    <div
-                        className="grid gap-px bg-gray-700 select-none"
-                        style={{
-                            gridTemplateColumns: `repeat(${width}, 1fr)`,
-                            width: 'fit-content'
-                        }}
-                        onMouseDown={() => setIsDragging(true)}
-                        onMouseUp={() => setIsDragging(false)}
-                        onMouseLeave={() => setIsDragging(false)}
-                    >
-                        {walls.map((row, y) =>
-                            row.map((isWall, x) => {
-                                const isStart = start.x === x && start.y === y;
-                                const item = items.find(i => i.position.x === x && i.position.y === y);
+                <div className="flex-1 flex flex-col gap-4">
+                    <div className="flex-1 bg-gray-900 border border-gray-700 rounded p-4 overflow-auto flex justify-center items-center">
+                        <div
+                            className="grid gap-px bg-gray-700 select-none"
+                            style={{
+                                gridTemplateColumns: `repeat(${width}, 1fr)`,
+                                width: 'fit-content'
+                            }}
+                            onMouseDown={() => setIsDragging(true)}
+                            onMouseUp={() => setIsDragging(false)}
+                            onMouseLeave={() => setIsDragging(false)}
+                        >
+                            {walls.map((row, y) =>
+                                row.map((isWall, x) => {
+                                    const isStart = start.x === x && start.y === y;
+                                    const item = items.find(i => i.position.x === x && i.position.y === y);
 
-                                return (
-                                    <div
-                                        key={`${x}-${y}`}
-                                        onMouseDown={() => handleCellClick(x, y)}
-                                        onMouseEnter={() => handleCellEnter(x, y)}
-                                        className={`w-8 h-8 flex items-center justify-center cursor-pointer
-                                            ${isWall ? 'bg-gray-600' : 'bg-gray-800 hover:bg-gray-750'}
-                                            ${isStart ? 'ring-2 ring-inset ring-blue-500' : ''}
-                                        `}
-                                    >
-                                        {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
-                                        {item && !isStart && <span className="text-xl leading-none">{item.emoji}</span>}
-                                    </div>
-                                );
-                            })
-                        )}
+                                    return (
+                                        <div
+                                            key={`${x}-${y}`}
+                                            onMouseDown={() => handleCellClick(x, y)}
+                                            onMouseEnter={() => handleCellEnter(x, y)}
+                                            className={`w-8 h-8 flex items-center justify-center cursor-pointer
+                                                ${isWall ? 'bg-gray-600' : 'bg-gray-800 hover:bg-gray-750'}
+                                                ${isStart ? 'ring-2 ring-inset ring-blue-500' : ''}
+                                            `}
+                                        >
+                                            {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
+                                            {item && !isStart && <span className="text-xl leading-none">{item.emoji}</span>}
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Level Logic Editor */}
+                    <div className="h-48 bg-gray-900 border border-gray-700 rounded p-2 flex flex-col">
+                        <h3 className="text-sm font-bold text-gray-400 mb-2">Level Logic (Runs every step)</h3>
+                        <div className="flex-1 border border-gray-700">
+                            <CodeEditor
+                                files={{ 'logic.ts': stepCode }}
+                                activeFile="logic.ts"
+                                onChange={(val) => setStepCode(val || '')}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

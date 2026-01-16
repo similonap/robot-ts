@@ -8,7 +8,7 @@ import CodeEditor from './CodeEditor';
 import * as ts from 'typescript';
 
 // Initial code template
-const INITIAL_CODE = `import robot from "robot";
+const INITIAL_CODE = `import { robot } from "robot-maze";
 
 async function main() {
     // Keep running until the program is stopped or the maze is solved
@@ -58,6 +58,7 @@ export default function MazeGame() {
     const abortControllerRef = useRef<AbortController | null>(null);
     const inputResolveRef = useRef<((value: string) => void) | null>(null);
     const logsEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Initialize maze
     useEffect(() => {
@@ -142,6 +143,43 @@ export default function MazeGame() {
         }
     };
 
+    const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const json = event.target?.result as string;
+                const parsed = JSON.parse(json) as MazeConfig;
+
+                // Simple validation
+                if (!parsed.width || !parsed.height || !parsed.start || !parsed.walls) {
+                    throw new Error("Invalid maze content");
+                }
+
+                if (isRunning) stopExecution();
+
+                setMaze(parsed);
+                setRobotState({
+                    position: parsed.start,
+                    direction: 'East',
+                    inventory: [],
+                });
+                setLogs([]);
+                setIsRunning(false);
+                setIsWaitingForInput(false);
+                addLog("Maze imported successfully!", 'user');
+
+            } catch (err) {
+                alert("Failed to import maze: " + (err as any).message);
+            }
+        };
+        reader.readAsText(file);
+        // Reset input
+        e.target.value = '';
+    };
+
     const handleInputSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (inputResolveRef.current) {
@@ -209,6 +247,23 @@ export default function MazeGame() {
         const abortController = new AbortController();
         abortControllerRef.current = abortController;
 
+        // Ref to hold require function which is created later
+        const customRequireRef = { current: null as ((path: string) => any) | null };
+        const stepLogicFnRef = { current: null as Function | null };
+
+        const gameApi = {
+            win: (msg: string) => {
+                addLog(`🏆 WIN: ${msg}`, 'user');
+                alert(`🏆 WIN: ${msg}`);
+                stopExecution();
+            },
+            fail: (msg: string) => {
+                addLog(`💀 FAIL: ${msg}`, 'user');
+                // stopExecution(); 
+                throw new CrashError(msg);
+            }
+        };
+
         const startState = {
             position: maze.start,
             direction: 'East' as const,
@@ -224,11 +279,39 @@ export default function MazeGame() {
                 setRobotState(newState);
                 addLog(logMsg, 'robot');
 
+                // Execute Level Logic
+                if (maze.stepCode) {
+                    try {
+                        // We need a way to run this safely.
+                        // Since we are already in an async flow, we can just run it.
+                        // Ideally we pre-compiled this.
+                        if (!stepLogicFnRef.current) return;
 
+                        // Use the MAIN gameApi instance so it's consistent
+                        // Pass require and exports to support module transpilation
+                        const moduleExports = {};
+                        stepLogicFnRef.current(newState, maze, gameApi, customRequireRef.current, moduleExports);
+
+                    } catch (e: any) {
+                        if (e instanceof CrashError) throw e; // Propagate crash
+                        console.error("Level Logic Error:", e);
+                        addLog(`Level Logic Error: ${e.message}`, 'user');
+                    }
+                }
             },
             abortController.signal,
             maze.items
         );
+
+        if (maze.stepCode) {
+            try {
+                const js = transpileCode(maze.stepCode);
+                // Function(robot, maze, game, require, exports)
+                stepLogicFnRef.current = new Function('robot', 'maze', 'game', 'require', 'exports', js);
+            } catch (e) {
+                addLog(`Level Logic Compilation Failed: ${e}`, 'user');
+            }
+        }
 
         try {
             // Transpile all files
@@ -250,6 +333,7 @@ export default function MazeGame() {
                     pickup: () => controller.pickup(),
                     scan: () => controller.scan(),
                 },
+                game: gameApi,
                 readline: {
                     question: (promptText: string) => {
                         return new Promise<string>((resolve, reject) => {
@@ -293,8 +377,16 @@ export default function MazeGame() {
 
             // Custom require implementation
             const customRequire = (path: string) => {
+                if (path === 'robot-maze') {
+                    return { robot: api.robot, game: api.game };
+                }
                 if (path === 'robot') {
-                    return { default: api.robot };
+                    // Deprecated / Backwards compat if we wanted, 
+                    // but user asked to change logic.
+                    // We'll throw error or map it? 
+                    // Let's support it temporarily or just remove it per instructions "instead of".
+                    // I will remove it to be strict.
+                    throw new Error("Module 'robot' is deprecated. Use 'robot-maze'.");
                 }
                 if (path === 'readline-sync') {
                     // Since user does "import readline from 'readline-sync'", and we used "export function question..."
@@ -335,6 +427,9 @@ export default function MazeGame() {
 
                 return moduleExports;
             };
+
+            // Assign to ref for circular usage in callbacks
+            customRequireRef.current = customRequire;
 
             // Execution Main
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
@@ -378,6 +473,20 @@ export default function MazeGame() {
             <header className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">🤖 Robot Maze Runner</h1>
                 <div className="space-x-4">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileImport}
+                        className="hidden"
+                        accept=".json"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isRunning}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded disabled:opacity-50"
+                    >
+                        Import Maze
+                    </button>
                     <button
                         onClick={resetGame}
                         disabled={isRunning}

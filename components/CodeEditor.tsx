@@ -53,9 +53,14 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         scan(): Promise<Item | null>;
       }
 
-      declare module "robot" {
-        const robot: Robot;
-        export default robot;
+      interface Game {
+        win(message: string): void;
+        fail(message: string): void;
+      }
+
+      declare module "robot-maze" {
+        export const robot: Robot;
+        export const game: Game;
       }
       
       // declare var robot: Robot;  <-- REMOVED GLOBAL
