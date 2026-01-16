@@ -19,9 +19,10 @@ async function run() {
   
   // Example: simple right-hand rule or just move
   await robot.moveForward();
-  await robot.moveForward();
-  await robot.turnRight();
-  await robot.moveForward();
+
+  // Test input (synchronous style!)
+  const name = readline.question("What is your name? ");
+  console.log("Hello " + name);
 }
 
 // Don't forget to call run!
@@ -34,7 +35,13 @@ export default function MazeGame() {
     const [code, setCode] = useState(INITIAL_CODE);
     const [logs, setLogs] = useState<string[]>([]);
     const [isRunning, setIsRunning] = useState(false);
+    const [isWaitingForInput, setIsWaitingForInput] = useState(false);
+    const [inputPrompt, setInputPrompt] = useState('');
+    const [inputValue, setInputValue] = useState('');
+
     const abortControllerRef = useRef<AbortController | null>(null);
+    const inputResolveRef = useRef<((value: string) => void) | null>(null);
+    const logsEndRef = useRef<HTMLDivElement>(null);
 
     // Initialize maze
     useEffect(() => {
@@ -46,13 +53,17 @@ export default function MazeGame() {
         });
     }, []);
 
+    // Auto-scroll logs
+    useEffect(() => {
+        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [logs, isWaitingForInput]);
+
     const addLog = (msg: string) => {
         setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
     };
 
     const resetGame = () => {
         if (!maze) return;
-        // Stop any running code first
         if (isRunning) {
             stopExecution();
         }
@@ -63,19 +74,62 @@ export default function MazeGame() {
         });
         setLogs([]);
         setIsRunning(false);
+        setIsWaitingForInput(false);
+        setInputValue('');
     };
 
     const stopExecution = () => {
+        if (inputResolveRef.current) {
+            // If waiting for input, reject or resolve with null/empty to unblock or just abort?
+            // The abort signal in runCode's question handler should take care of it, 
+            // but we need to verify.
+        }
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
             abortControllerRef.current = null;
+        }
+        setIsWaitingForInput(false);
+    };
+
+    const handleInputSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (inputResolveRef.current) {
+            addLog(`${inputPrompt}${inputValue}`);
+            inputResolveRef.current(inputValue);
+            inputResolveRef.current = null;
+            setIsWaitingForInput(false);
+            setInputValue('');
         }
     };
 
     const transpileCode = (source: string) => {
         try {
+            // Custom transformer to auto-await readline.question
+            const autoAwaitTransformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
+                return (sourceFile) => {
+                    const visitor: ts.Visitor = (node) => {
+                        if (ts.isCallExpression(node)) {
+                            const expr = node.expression;
+                            // Check for readline.question(...)
+                            if (ts.isPropertyAccessExpression(expr) &&
+                                ts.isIdentifier(expr.expression) &&
+                                expr.expression.text === 'readline' &&
+                                ts.isIdentifier(expr.name) &&
+                                expr.name.text === 'question') {
+
+                                // Wrap in await
+                                return context.factory.createAwaitExpression(node);
+                            }
+                        }
+                        return ts.visitEachChild(node, visitor, context);
+                    };
+                    return ts.visitNode(sourceFile, visitor) as ts.SourceFile;
+                };
+            };
+
             const result = ts.transpileModule(source, {
-                compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 }
+                compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
+                transformers: { before: [autoAwaitTransformer] }
             });
             return result.outputText;
         } catch (e: any) {
@@ -88,9 +142,7 @@ export default function MazeGame() {
         if (!maze || !robotState) return;
 
         // Reset before running
-        // We manually reset state but keep logs or clear them? 
-        // Let's clear logs and reset position.
-        setLogs([]); // Clear logs for new run
+        setLogs([]);
         setRobotState({
             position: maze.start,
             direction: 'East',
@@ -102,13 +154,11 @@ export default function MazeGame() {
         const abortController = new AbortController();
         abortControllerRef.current = abortController;
 
-        // Wait a tick for state update (or just use immediate values)
         const startState = {
             position: maze.start,
             direction: 'East' as const,
         };
 
-        // Immediate update visual
         setRobotState(startState);
 
         const controller = new RobotController(
@@ -125,7 +175,6 @@ export default function MazeGame() {
             const jsCode = transpileCode(code);
             addLog("Running...");
 
-            // Sandbox / API injection
             const api = {
                 robot: {
                     moveForward: () => controller.moveForward(),
@@ -134,14 +183,20 @@ export default function MazeGame() {
                 },
                 readline: {
                     question: (promptText: string) => {
-                        if (abortController.signal.aborted) throw new CancelError();
-                        const ans = window.prompt(promptText);
-                        if (ans === null) {
-                            // User cancelled prompt
-                            throw new CancelError("Prompt cancelled");
-                        }
-                        addLog(`Input: ${ans}`);
-                        return ans;
+                        return new Promise<string>((resolve, reject) => {
+                            if (abortController.signal.aborted) return reject(new CancelError());
+
+                            setInputPrompt(promptText);
+                            setIsWaitingForInput(true);
+                            inputResolveRef.current = resolve;
+
+                            // Handle abort while waiting
+                            abortController.signal.addEventListener('abort', () => {
+                                setIsWaitingForInput(false);
+                                inputResolveRef.current = null;
+                                reject(new CancelError());
+                            });
+                        });
                     }
                 },
                 fetch: async (input: RequestInfo, init?: RequestInit) => {
@@ -170,7 +225,9 @@ export default function MazeGame() {
             }
         } finally {
             setIsRunning(false);
+            setIsWaitingForInput(false);
             abortControllerRef.current = null;
+            inputResolveRef.current = null;
         }
     };
 
@@ -191,8 +248,8 @@ export default function MazeGame() {
                     <button
                         onClick={isRunning ? stopExecution : runCode}
                         className={`px-4 py-2 rounded font-bold ${isRunning
-                                ? 'bg-red-600 hover:bg-red-500'
-                                : 'bg-green-600 hover:bg-green-500'
+                            ? 'bg-red-600 hover:bg-red-500'
+                            : 'bg-green-600 hover:bg-green-500'
                             }`}
                     >
                         {isRunning ? 'Stop' : 'Run Code'}
@@ -212,11 +269,28 @@ export default function MazeGame() {
                         <MazeDisplay maze={maze} robotState={robotState} />
                     </div>
 
-                    <div className="flex-1 bg-gray-900 border border-gray-700 rounded p-2 font-mono text-sm overflow-y-auto">
-                        <div className="text-gray-400 border-b border-gray-700 pb-1 mb-2">Logs</div>
-                        {logs.map((log, i) => (
-                            <div key={i} className="mb-1">{log}</div>
-                        ))}
+                    <div className="flex-1 bg-gray-900 border border-gray-700 rounded p-2 font-mono text-sm overflow-y-auto flex flex-col">
+                        <div className="text-gray-400 border-b border-gray-700 pb-1 mb-2 sticky top-0 bg-gray-900">Terminal</div>
+                        <div className="flex-1 overflow-y-auto">
+                            {logs.map((log, i) => (
+                                <div key={i} className="mb-1 break-words">{log}</div>
+                            ))}
+                            <div ref={logsEndRef} />
+                        </div>
+
+                        {isWaitingForInput && (
+                            <form onSubmit={handleInputSubmit} className="mt-2 border-t border-gray-700 pt-2 flex gap-2">
+                                <span className="text-green-500">{inputPrompt}</span>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    className="flex-1 bg-transparent border-none outline-none text-white focus:ring-0"
+                                    placeholder="..."
+                                />
+                            </form>
+                        )}
                     </div>
                 </div>
             </div>

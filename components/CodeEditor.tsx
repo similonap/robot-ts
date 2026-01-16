@@ -44,7 +44,8 @@ export default function CodeEditor({ code, onChange }: CodeEditorProps) {
 
       declare var readline: {
         /**
-         * Ask the user a question via a browser prompt.
+         * Ask the user a question via the terminal.
+         * The execution will pause until you answer.
          * @param prompt The question to display.
          * @returns The user's input.
          */
