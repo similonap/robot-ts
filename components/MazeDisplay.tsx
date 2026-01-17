@@ -10,10 +10,8 @@ interface MazeDisplayProps {
 
 export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
     const cellSize = 30;
-
-    // Calculate exact pixel dimensions
-    const pixelWidth = maze.width * cellSize;
-    const pixelHeight = maze.height * cellSize;
+    const width = maze.width * cellSize;
+    const height = maze.height * cellSize;
 
     // Maintain continuous rotation state to avoid wrapping issues (0->270 etc)
     const dirs = ['North', 'East', 'South', 'West'];
@@ -43,85 +41,89 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
     }, [robotState.direction]);
 
     return (
-        <div
-            className="relative bg-gray-900 border border-gray-700 rounded-md overflow-hidden"
-            style={{ width: pixelWidth, height: pixelHeight }}
-        >
-            {/* Walls */}
-            {maze.walls.map((row, y) => (
-                row.map((isWall, x) => (
-                    isWall && (
-                        <div
-                            key={`${x}-${y}`}
-                            className="absolute bg-blue-500"
-                            style={{
-                                left: x * cellSize,
-                                top: y * cellSize,
-                                width: cellSize,
-                                height: cellSize,
-                            }}
-                        />
-                    )
-                ))
-            ))}
-
-            {/* Items */}
-            {maze.items?.map((item) => {
-                const isCollected = robotState.inventory.some(i => i.id === item.id);
-                if (isCollected) return null;
-
-                return (
-                    <div
-                        key={item.id}
-                        className="absolute flex items-center justify-center text-xl animate-pulse"
-                        style={{
-                            left: item.position.x * cellSize,
-                            top: item.position.y * cellSize,
-                            width: cellSize,
-                            height: cellSize,
-                        }}
-                    >
-                        {item.emoji}
-                    </div>
-                );
-            })}
-
-
-
-            {/* Robot */}
-            <motion.div
-                className="absolute flex items-center justify-center text-2xl"
-                initial={false}
-                animate={{
-                    left: robotState.position.x * cellSize,
-                    top: robotState.position.y * cellSize,
-                    rotate: rotation
-                }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                style={{
-                    width: cellSize,
-                    height: cellSize,
-                }}
+        <div className="w-full h-full flex items-center justify-center overflow-hidden bg-gray-900 border border-gray-700 rounded-md">
+            <svg
+                viewBox={`0 0 ${width} ${height}`}
+                preserveAspectRatio="xMidYMid meet"
+                className="max-w-full max-h-full"
             >
-                🤖
-                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none">
-                    <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="opacity-80 drop-shadow-md"
-                    >
-                        {/* Simple arrow pointing up (North) */}
-                        <path d="M12 19V5" />
-                        <path d="M5 12l7-7 7 7" />
-                    </svg>
-                </div>
-            </motion.div>
+                {/* Background Grid (Optional) */}
+                <rect x="0" y="0" width={width} height={height} fill="#111827" />
+
+                {/* Walls */}
+                {maze.walls.map((row, y) => (
+                    row.map((isWall, x) => (
+                        isWall && (
+                            <rect
+                                key={`${x}-${y}`}
+                                x={x * cellSize}
+                                y={y * cellSize}
+                                width={cellSize + 0.5} // Slight overlap to prevent gaps
+                                height={cellSize + 0.5}
+                                fill="#3B82F6"
+                            />
+                        )
+                    ))
+                ))}
+
+                {/* Items */}
+                {maze.items?.map((item) => {
+                    const isCollected = robotState.inventory.some(i => i.id === item.id);
+                    if (isCollected) return null;
+
+                    return (
+                        <text
+                            key={item.id}
+                            x={item.position.x * cellSize + cellSize / 2}
+                            y={item.position.y * cellSize + cellSize / 2}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize={cellSize * 0.7}
+                            className="animate-pulse"
+                            style={{ userSelect: 'none' }}
+                        >
+                            {item.emoji}
+                        </text>
+                    );
+                })}
+
+                {/* Robot */}
+                <motion.g
+                    initial={false}
+                    animate={{
+                        x: robotState.position.x * cellSize + cellSize / 2,
+                        y: robotState.position.y * cellSize + cellSize / 2,
+                        rotate: rotation
+                    }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                >
+                    {/* Centered Group for Rotation */}
+                    <g transform={`translate(-${cellSize / 2}, -${cellSize / 2})`}>
+                        <text
+                            x={cellSize / 2}
+                            y={cellSize / 2}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize={cellSize}
+                            style={{ userSelect: 'none' }}
+                        >
+                            🤖
+                        </text>
+                        {/* Direction Arrow Overlay */}
+                        <g transform={`translate(${cellSize * 0.1}, ${cellSize * 0.1}) scale(0.8)`}>
+                            <path
+                                d="M15 22V8 M8 15l7-7 7 7"
+                                stroke="white"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                fill="none"
+                                opacity="0.9"
+                            />
+                        </g>
+                    </g>
+                </motion.g>
+            </svg>
         </div>
     );
 }
