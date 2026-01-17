@@ -53,6 +53,14 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         scan(): Promise<Item | null>;
       }
 
+      interface MazeConfig {
+        width: number;
+        height: number;
+        start: Position;
+        walls: boolean[][];
+        items: Item[];
+      }
+
       interface Game {
         win(message: string): void;
         fail(message: string): void;
@@ -62,6 +70,10 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         export const robot: Robot;
         export const game: Game;
       }
+
+      declare var robot: Robot;
+      declare var game: Game;
+      declare var maze: MazeConfig;
       
       // declare var robot: Robot;  <-- REMOVED GLOBAL
 
