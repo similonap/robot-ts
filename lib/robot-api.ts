@@ -179,4 +179,8 @@ export class RobotController {
         this.onUpdate({ ...this.state }, `Turned Right to ${this.state.direction}`);
         await this.wait(this.delayMs);
     }
+
+    getRemainingItems(): Item[] {
+        return this.items.filter(item => !this.collectedItemIds.has(item.id));
+    }
 }

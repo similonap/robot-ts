@@ -64,6 +64,7 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
       interface Game {
         win(message: string): void;
         fail(message: string): void;
+        items: Item[];
       }
 
       declare module "robot-maze" {

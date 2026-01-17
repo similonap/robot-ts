@@ -252,6 +252,8 @@ export default function MazeGame() {
         const customRequireRef = { current: null as ((path: string) => any) | null };
         const stepLogicFnRef = { current: null as Function | null };
 
+        let controller: RobotController;
+
         const gameApi = {
             win: (msg: string) => {
                 addLog(`🏆 WIN: ${msg}`, 'user');
@@ -262,6 +264,9 @@ export default function MazeGame() {
                 addLog(`💀 FAIL: ${msg}`, 'user');
                 // stopExecution(); 
                 throw new CrashError(msg);
+            },
+            get items() {
+                return controller?.getRemainingItems() || [];
             }
         };
 
@@ -273,7 +278,7 @@ export default function MazeGame() {
 
         setRobotState(startState);
 
-        const controller = new RobotController(
+        controller = new RobotController(
             startState,
             maze.walls,
             (newState, logMsg) => {
