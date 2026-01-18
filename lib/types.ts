@@ -8,7 +8,7 @@ export interface Position {
 export interface Item {
     id: string;
     name: string;
-    emoji: string;
+    icon: string;
     type: string;
     position: Position;
 }

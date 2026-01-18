@@ -32,13 +32,13 @@ export function generateMaze(width: number, height: number): MazeConfig {
 
   // Generate items
   const possibleItems = [
-    { name: 'Apple', emoji: '🍎', type: 'Food' },
-    { name: 'Battery', emoji: '🔋', type: 'Energy' },
-    { name: 'Gem', emoji: '💎', type: 'Treasure' },
-    { name: 'Key', emoji: '🗝️', type: 'Tool' },
-    { name: 'Potion', emoji: '🧪', type: 'Consumable' },
-    { name: 'Coin', emoji: '🪙', type: 'Treasure' },
-    { name: 'Map', emoji: '🗺️', type: 'Tool' },
+    { name: 'Apple', icon: '🍎', type: 'Food' },
+    { name: 'Battery', icon: '🔋', type: 'Energy' },
+    { name: 'Gem', icon: '💎', type: 'Treasure' },
+    { name: 'Key', icon: '🗝️', type: 'Tool' },
+    { name: 'Potion', icon: '🧪', type: 'Consumable' },
+    { name: 'Coin', icon: '🪙', type: 'Treasure' },
+    { name: 'Map', icon: '🗺️', type: 'Tool' },
   ];
 
   const items: any[] = [];
@@ -56,7 +56,7 @@ export function generateMaze(width: number, height: number): MazeConfig {
         items.push({
           id: `item-${i}`,
           name: template.name,
-          emoji: template.emoji,
+          icon: template.icon,
           type: template.type,
           position: { x, y }
         });

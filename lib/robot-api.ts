@@ -131,7 +131,7 @@ export class RobotController {
         if (itemAtPos) {
             this.collectedItemIds.add(itemAtPos.id);
             this.state.inventory = [...this.state.inventory, itemAtPos];
-            this.onUpdate({ ...this.state }, `Collected ${itemAtPos.emoji} ${itemAtPos.name}!`);
+            this.onUpdate({ ...this.state }, `Collected ${itemAtPos.icon} ${itemAtPos.name}!`);
             await this.wait(this.delayMs);
             return itemAtPos;
         } else {

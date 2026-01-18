@@ -82,7 +82,7 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                             className="animate-pulse"
                             style={{ userSelect: 'none' }}
                         >
-                            {item.emoji}
+                            {item.icon}
                         </text>
                     );
                 })}
