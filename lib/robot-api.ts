@@ -144,20 +144,29 @@ export class RobotController {
     async scan(): Promise<Item | null> {
         this.checkAborted();
         const { x, y } = this.state.position;
+        let scanX = x;
+        let scanY = y;
+
+        switch (this.state.direction) {
+            case 'North': scanY -= 1; break;
+            case 'East': scanX += 1; break;
+            case 'South': scanY += 1; break;
+            case 'West': scanX -= 1; break;
+        }
 
         const itemAtPos = this.items.find(item =>
-            item.position.x === x &&
-            item.position.y === y &&
+            item.position.x === scanX &&
+            item.position.y === scanY &&
             !this.collectedItemIds.has(item.id)
         );
 
         await this.wait(this.delayMs / 2);
 
         if (itemAtPos) {
-            this.onUpdate(this.state, `Scanned: ${itemAtPos.name} (${itemAtPos.type})`);
+            this.onUpdate(this.state, `Scanned ahead: ${itemAtPos.name} (${itemAtPos.type})`);
             return itemAtPos;
         } else {
-            this.onUpdate(this.state, `Scanned: Nothing`);
+            this.onUpdate(this.state, `Scanned ahead: Nothing`);
             return null;
         }
     }
