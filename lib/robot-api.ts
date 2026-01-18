@@ -192,4 +192,8 @@ export class RobotController {
     getRemainingItems(): Item[] {
         return this.items.filter(item => !this.collectedItemIds.has(item.id));
     }
+
+    setSpeed(delay: number) {
+        this.delayMs = delay;
+    }
 }

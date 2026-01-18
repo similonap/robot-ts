@@ -338,6 +338,7 @@ export default function MazeGame() {
                     canMoveForward: () => controller.canMoveForward(),
                     pickup: () => controller.pickup(),
                     scan: () => controller.scan(),
+                    setSpeed: (delay: number) => controller.setSpeed(delay),
                 },
                 game: gameApi,
                 readline: {

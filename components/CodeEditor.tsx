@@ -51,6 +51,7 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         turnRight(): Promise<void>;
         pickup(): Promise<Item | null>;
         scan(): Promise<Item | null>;
+        setSpeed(delay: number): void;
       }
 
       interface MazeConfig {
