@@ -68,6 +68,7 @@ export function generateMaze(width: number, height: number): MazeConfig {
   return {
     width,
     height,
+    doors: [],
     start: { x: startX, y: startY },
     walls,
     items

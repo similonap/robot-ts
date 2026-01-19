@@ -7,16 +7,25 @@ export interface Position {
 
 export interface Item {
     id: string;
+    type: 'item';
     name: string;
     icon: string;
     tags: string[];
     position: Position;
 }
 
+export interface Door {
+    id: string;
+    position: Position;
+    type: 'door';
+    isOpen: boolean;
+}
+
 export interface RunnerState {
     position: Position;
     direction: Direction;
     inventory: Item[];
+    doorStates: Record<string, boolean>; // id -> isOpen
 }
 
 export interface MazeConfig {
@@ -25,5 +34,42 @@ export interface MazeConfig {
     start: Position;
     walls: boolean[][]; // true = wall, false = path
     items: Item[];
+    doors: Door[];
     stepCode?: string;
+}
+
+
+export interface Robot {
+    moveForward(): Promise<boolean>;
+    canMoveForward(): Promise<boolean>;
+    turnLeft(): Promise<void>;
+    turnRight(): Promise<void>;
+    pickup(): Promise<Item | null>;
+    scan(): Promise<Item | Door | null>;
+    openDoor(): Promise<void>;
+    closeDoor(): Promise<void>;
+    setSpeed(delay: number): void;
+}
+
+export interface Game {
+    win(message: string): void;
+    fail(message: string): void;
+    items: Item[];
+}
+
+//@ts-ignore
+declare module "robot-maze" {
+    export const robot: Robot;
+    export const game: Game;
+}
+
+declare var robot: Robot;
+declare var game: Game;
+declare var maze: MazeConfig;
+
+//@ts-ignore
+declare module "readline-sync" {
+    export function question(prompt: string): string;
+    export function questionInt(prompt: string): number;
+    export function questionFloat(prompt: string): number;
 }

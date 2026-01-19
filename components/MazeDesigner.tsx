@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { MazeConfig, Position, Item } from '../lib/types';
+import { MazeConfig, Position, Item, Door } from '../lib/types';
 import CodeEditor from './CodeEditor';
 
 const INITIAL_WIDTH = 15;
@@ -25,9 +25,9 @@ const ITEM_TYPES = [
     { name: 'Map', icon: '🗺️', tags: ['Tool'] },
 ];
 
-type Tool = 'wall' | 'path' | 'start' | 'item' | null;
+type Tool = 'wall' | 'path' | 'start' | 'item' | 'door' | null;
 
-export default function MazeDesigner() {
+export default function MazeDesigner({ sharedTypes }: { sharedTypes?: string }) {
     const [width, setWidth] = useState(INITIAL_WIDTH);
     const [height, setHeight] = useState(INITIAL_HEIGHT);
     const [walls, setWalls] = useState<boolean[][]>(
@@ -35,13 +35,14 @@ export default function MazeDesigner() {
     );
     const [start, setStart] = useState<Position>({ x: 1, y: 1 });
     const [items, setItems] = useState<Item[]>([]);
+    const [doors, setDoors] = useState<Door[]>([]);
     const [stepCode, setStepCode] = useState(DEFAULT_STEP_CODE);
     const [zoom, setZoom] = useState(1);
 
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
     const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', tags: ['Food'] });
-    const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+    const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // Items or Doors
     const [isDragging, setIsDragging] = useState(false);
 
     const handleResize = (newW: number, newH: number) => {
@@ -61,6 +62,7 @@ export default function MazeDesigner() {
 
         // Filter items out of bounds
         setItems(prev => prev.filter(i => i.position.x < newW && i.position.y < newH));
+        setDoors(prev => prev.filter(d => d.position.x < newW && d.position.y < newH));
 
         // Reset start if OOB
         if (start.x >= newW || start.y >= newH) {
@@ -82,10 +84,11 @@ export default function MazeDesigner() {
     const handleCellClick = (x: number, y: number) => {
         // Priority: If item exists at this position, select it regardless of tool (unless we add specific override later)
         const existingItem = items.find(i => i.position.x === x && i.position.y === y);
+        const existingDoor = doors.find(d => d.position.x === x && d.position.y === y);
 
-        if (existingItem) {
+        if (existingItem || existingDoor) {
             // Implicit Selection Logic
-            setSelectedItemId(existingItem.id);
+            setSelectedItemId(existingItem?.id || existingDoor?.id || null);
             // Do not paint
             return;
         }
@@ -104,6 +107,7 @@ export default function MazeDesigner() {
             setWalls(newWalls);
             // Remove items at this pos
             setItems(prev => prev.filter(i => i.position.x !== x || i.position.y !== y));
+            setDoors(prev => prev.filter(d => d.position.x !== x || d.position.y !== y));
         } else if (selectedTool === 'path') {
             const newWalls = [...walls];
             newWalls[y] = [...newWalls[y]];
@@ -120,6 +124,7 @@ export default function MazeDesigner() {
             const filtered = items.filter(i => i.position.x !== x || i.position.y !== y);
             const newItem: Item = {
                 id: `item-${Date.now()}`,
+                type: 'item',
                 name: selectedItemTemplate.name,
                 icon: selectedItemTemplate.icon,
                 tags: [...selectedItemTemplate.tags],
@@ -130,6 +135,26 @@ export default function MazeDesigner() {
             setSelectedItemId(newItem.id);
 
             // Ensure path
+            const newWalls = [...walls];
+            newWalls[y][x] = false;
+            setWalls(newWalls);
+        } else if (selectedTool === 'door') {
+            // Remove existing item/door at pos
+            const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
+            const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
+
+            const newDoor: Door = {
+                id: `door-${Date.now()}`,
+                type: 'door',
+                isOpen: false, // Default closed
+                position: { x, y }
+            };
+
+            setItems(filteredItems);
+            setDoors([...filteredDoors, newDoor]);
+            setSelectedItemId(newDoor.id);
+
+            // Ensure path (doors are placed on paths, effectively)
             const newWalls = [...walls];
             newWalls[y][x] = false;
             setWalls(newWalls);
@@ -149,6 +174,7 @@ export default function MazeDesigner() {
             start,
             walls,
             items,
+            doors,
             stepCode
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
@@ -233,6 +259,12 @@ export default function MazeDesigner() {
                             >
                                 <div className="w-4 h-4 bg-blue-500 rounded-full"></div> Start
                             </button>
+                            <button
+                                onClick={() => setSelectedTool(prev => prev === 'door' ? null : 'door')}
+                                className={`px-4 py-2 rounded text-left flex items-center gap-2 ${selectedTool === 'door' ? 'bg-gray-700 border-l-4 border-blue-500' : 'hover:bg-gray-800'}`}
+                            >
+                                <div className="w-4 h-4 bg-yellow-900 border border-yellow-700"></div> Door
+                            </button>
                         </div>
                     </div>
 
@@ -282,7 +314,8 @@ export default function MazeDesigner() {
                                 row.map((isWall, x) => {
                                     const isStart = start.x === x && start.y === y;
                                     const item = items.find(i => i.position.x === x && i.position.y === y);
-                                    const isSelected = item && selectedItemId === item.id;
+                                    const door = doors.find(d => d.position.x === x && d.position.y === y);
+                                    const isSelected = (item && selectedItemId === item.id) || (door && selectedItemId === door.id);
 
                                     return (
                                         <div
@@ -298,6 +331,10 @@ export default function MazeDesigner() {
                                         >
                                             {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
                                             {item && !isStart && <span className="text-xl leading-none">{item.icon}</span>}
+                                            {door && !isStart && (
+                                                <div className={`w-6 h-6 border-2 transition-colors ${door.isOpen ? 'border-yellow-500 border-dashed' : 'bg-yellow-900 border-yellow-700'}`}>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })
@@ -313,6 +350,7 @@ export default function MazeDesigner() {
                                 files={{ 'logic.ts': stepCode }}
                                 activeFile="logic.ts"
                                 onChange={(val) => setStepCode(val || '')}
+                                sharedTypes={sharedTypes}
                             />
                         </div>
                     </div>
@@ -322,86 +360,134 @@ export default function MazeDesigner() {
                 <div className="w-64 bg-gray-900 p-4 rounded border border-gray-700 overflow-y-auto">
                     <h3 className="font-bold mb-4 text-gray-400 uppercase text-xs">Properties</h3>
 
-                    {selectedItemId && items.find(i => i.id === selectedItemId) ? (
+                    {selectedItemId && (items.find(i => i.id === selectedItemId) || doors.find(d => d.id === selectedItemId)) ? (
                         <div className="flex flex-col gap-4">
                             {(() => {
-                                const item = items.find(i => i.id === selectedItemId)!;
-                                return (
-                                    <div className="flex flex-col gap-3">
-                                        <div>
-                                            <label className="text-xs text-gray-400">ID</label>
-                                            <input
-                                                className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
-                                                value={item.id}
-                                                readOnly
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-gray-400">Name</label>
-                                            <input
-                                                className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
-                                                value={item.name}
-                                                onChange={e => {
-                                                    setItems(prev => prev.map(i => i.id === item.id ? { ...i, name: e.target.value } : i));
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <div className="w-16">
-                                                <label className="text-xs text-gray-400">Icon</label>
+                                const item = items.find(i => i.id === selectedItemId);
+                                const door = doors.find(d => d.id === selectedItemId);
+
+                                if (door) {
+                                    return (
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex gap-2 items-center text-yellow-500 font-bold border-b border-gray-700 pb-2">
+                                                <span>🚪 Door</span>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">ID</label>
                                                 <input
-                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-center"
-                                                    value={item.icon}
+                                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
+                                                    value={door.id}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">State</label>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.id ? { ...d, isOpen: true } : d))}
+                                                        className={`flex-1 px-2 py-1 rounded text-sm border ${door.isOpen ? 'bg-green-900 border-green-500 text-green-200' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                                                    >
+                                                        Open
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.id ? { ...d, isOpen: false } : d))}
+                                                        className={`flex-1 px-2 py-1 rounded text-sm border ${!door.isOpen ? 'bg-red-900 border-red-500 text-red-200' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                                                    >
+                                                        Closed
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setDoors(prev => prev.filter(d => d.id !== door.id));
+                                                    setSelectedItemId(null);
+                                                }}
+                                                className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800 mt-4"
+                                            >
+                                                Delete Door
+                                            </button>
+                                        </div>
+                                    );
+                                }
+
+                                if (item) {
+                                    return (
+                                        <div className="flex flex-col gap-3">
+                                            <div>
+                                                <label className="text-xs text-gray-400">ID</label>
+                                                <input
+                                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
+                                                    value={item.id}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">Name</label>
+                                                <input
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
+                                                    value={item.name}
                                                     onChange={e => {
-                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, icon: e.target.value } : i));
+                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, name: e.target.value } : i));
                                                     }}
                                                 />
                                             </div>
-                                            <div className="flex-1">
-                                                <label className="text-xs text-gray-400">Tags</label>
-                                                <div className="flex flex-wrap gap-1 mb-2">
-                                                    {item.tags.map((tag, idx) => (
-                                                        <span key={idx} className="bg-gray-800 text-xs px-2 py-1 rounded flex items-center gap-1 border border-gray-700">
-                                                            {tag}
-                                                            <button
-                                                                onClick={() => {
-                                                                    setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: i.tags.filter((_, tIdx) => tIdx !== idx) } : i));
-                                                                }}
-                                                                className="text-gray-500 hover:text-red-400"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                                <div className="flex gap-1">
+                                            <div className="flex gap-2">
+                                                <div className="w-16">
+                                                    <label className="text-xs text-gray-400">Icon</label>
                                                     <input
-                                                        className="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
-                                                        placeholder="Add tag..."
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                const val = e.currentTarget.value.trim();
-                                                                if (val && !item.tags.includes(val)) {
-                                                                    setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: [...i.tags, val] } : i));
-                                                                    e.currentTarget.value = '';
-                                                                }
-                                                            }
+                                                        className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-center"
+                                                        value={item.icon}
+                                                        onChange={e => {
+                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, icon: e.target.value } : i));
                                                         }}
                                                     />
                                                 </div>
+                                                <div className="flex-1">
+                                                    <label className="text-xs text-gray-400">Tags</label>
+                                                    <div className="flex flex-wrap gap-1 mb-2">
+                                                        {item.tags.map((tag, idx) => (
+                                                            <span key={idx} className="bg-gray-800 text-xs px-2 py-1 rounded flex items-center gap-1 border border-gray-700">
+                                                                {tag}
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: i.tags.filter((_, tIdx) => tIdx !== idx) } : i));
+                                                                    }}
+                                                                    className="text-gray-500 hover:text-red-400"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        <input
+                                                            className="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
+                                                            placeholder="Add tag..."
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    const val = e.currentTarget.value.trim();
+                                                                    if (val && !item.tags.includes(val)) {
+                                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: [...i.tags, val] } : i));
+                                                                        e.currentTarget.value = '';
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <button
+                                                onClick={() => {
+                                                    setItems(prev => prev.filter(i => i.id !== item.id));
+                                                    setSelectedItemId(null);
+                                                }}
+                                                className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800"
+                                            >
+                                                Delete Item
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => {
-                                                setItems(prev => prev.filter(i => i.id !== item.id));
-                                                setSelectedItemId(null);
-                                            }}
-                                            className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800"
-                                        >
-                                            Delete Item
-                                        </button>
-                                    </div>
-                                );
+                                    );
+                                }
                             })()}
                         </div>
                     ) : (

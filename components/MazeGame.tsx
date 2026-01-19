@@ -34,7 +34,7 @@ async function main() {
     }
 }`;
 
-export default function MazeGame() {
+export default function MazeGame({ sharedTypes }: { sharedTypes?: string }) {
     const [maze, setMaze] = useState<MazeConfig | null>(null);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
     const [files, setFiles] = useState<Record<string, string>>({
@@ -69,6 +69,7 @@ export default function MazeGame() {
             position: newMaze.start,
             direction: 'East',
             inventory: [],
+            doorStates: {}, // Will be populated by controller or custom logic if needed, but for init we can start empty or pre-populate
         });
     }, []);
 
@@ -96,6 +97,7 @@ export default function MazeGame() {
             position: maze.start,
             direction: 'East',
             inventory: [],
+            doorStates: {},
         });
         setLogs([]);
         setIsRunning(false);
@@ -166,6 +168,7 @@ export default function MazeGame() {
                     position: parsed.start,
                     direction: 'East',
                     inventory: [],
+                    doorStates: {},
                 });
                 setLogs([]);
                 setIsRunning(false);
@@ -239,6 +242,7 @@ export default function MazeGame() {
             position: maze.start,
             direction: 'East',
             inventory: [],
+            doorStates: {},
         });
 
 
@@ -274,6 +278,7 @@ export default function MazeGame() {
             position: maze.start,
             direction: 'East' as const,
             inventory: [],
+            doorStates: {},
         };
 
         setRobotState(startState);
@@ -306,7 +311,8 @@ export default function MazeGame() {
                 }
             },
             abortController.signal,
-            maze.items
+            maze.items,
+            maze.doors || []
         );
 
         if (maze.stepCode) {
@@ -338,6 +344,8 @@ export default function MazeGame() {
                     canMoveForward: () => controller.canMoveForward(),
                     pickup: () => controller.pickup(),
                     scan: () => controller.scan(),
+                    openDoor: () => controller.openDoor(),
+                    closeDoor: () => controller.closeDoor(),
                     setSpeed: (delay: number) => controller.setSpeed(delay),
                 },
                 game: gameApi,
@@ -555,6 +563,7 @@ export default function MazeGame() {
                                     files={files}
                                     activeFile={activeFile}
                                     onChange={(val) => setFiles(prev => ({ ...prev, [activeFile]: val || '' }))}
+                                    sharedTypes={sharedTypes}
                                 />
                             </div>
                         </div>

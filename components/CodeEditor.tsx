@@ -6,9 +6,10 @@ interface CodeEditorProps {
     files: Record<string, string>;
     activeFile: string;
     onChange: (value: string | undefined) => void;
+    sharedTypes?: string;
 }
 
-export default function CodeEditor({ files, activeFile, onChange }: CodeEditorProps) {
+export default function CodeEditor({ files, activeFile, onChange, sharedTypes }: CodeEditorProps) {
     const editorRef = useRef<any>(null);
     const monacoRef = useRef<any>(null);
 
@@ -29,64 +30,29 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
             esModuleInterop: true,
         });
 
+        // sharedTypes now contains EVERYTHING (interfaces, declared vars, modules) from lib/types.ts
+        // We just need to ensure 'export' keywords don't prevent them from being seen as global in the editor.
+
+        let libContent = '';
+
+        if (sharedTypes) {
+            const globalTypes = sharedTypes.replace(/export /g, '');
+            libContent = globalTypes;
+        } else {
+            // Fallback minimal types if something goes wrong with reading the file
+            libContent = `
+              interface Position { x: number; y: number; }
+              interface Item { id: string; type: 'item'; name: string; icon: string; tags: string[]; position: Position; }
+              interface Door { id: string; position: Position; type: 'door'; isOpen: boolean; }
+              // ... simplistic fallback
+              declare var robot: any;
+              declare var game: any;
+              declare var maze: any;
+              `;
+        }
+
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
-            `
-      interface Position {
-        x: number;
-        y: number;
-      }
-
-      interface Item {
-        id: string;
-        name: string;
-        icon: string;
-        tags: string[];
-        position: Position;
-      }
-
-      interface Robot {
-        moveForward(): Promise<boolean>;
-        canMoveForward(): Promise<boolean>;
-        turnLeft(): Promise<void>;
-        turnRight(): Promise<void>;
-        pickup(): Promise<Item | null>;
-        scan(): Promise<Item | null>;
-        setSpeed(delay: number): void;
-      }
-
-      interface MazeConfig {
-        width: number;
-        height: number;
-        start: Position;
-        walls: boolean[][];
-        items: Item[];
-      }
-
-      interface Game {
-        win(message: string): void;
-        fail(message: string): void;
-        items: Item[];
-      }
-
-      declare module "robot-maze" {
-        export const robot: Robot;
-        export const game: Game;
-      }
-
-      declare var robot: Robot;
-      declare var game: Game;
-      declare var maze: MazeConfig;
-      
-      // declare var robot: Robot;  <-- REMOVED GLOBAL
-
-      declare module "readline-sync" {
-        export function question(prompt: string): string;
-        export function questionInt(prompt: string): number;
-        export function questionFloat(prompt: string): number;
-      }
-
-      // declare var readline: ... <-- REMOVED GLOBAL
-      `,
+            libContent,
             'ts:filename/globals.d.ts'
         );
     };

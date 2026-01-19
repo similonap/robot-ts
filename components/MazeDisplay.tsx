@@ -66,6 +66,26 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                     ))
                 ))}
 
+                {/* Doors */}
+                {maze.doors?.map((door) => {
+                    const isOpen = robotState.doorStates ? robotState.doorStates[door.id] : door.isOpen;
+                    return (
+                        <g key={door.id} transform={`translate(${door.position.x * cellSize}, ${door.position.y * cellSize})`}>
+                            {isOpen ? (
+                                <rect
+                                    x={2} y={2} width={cellSize - 4} height={cellSize - 4}
+                                    fill="none" stroke="#EAB308" strokeWidth="2" strokeDasharray="4"
+                                />
+                            ) : (
+                                <rect
+                                    x={0} y={0} width={cellSize} height={cellSize}
+                                    fill="#713F12" stroke="#EAB308" strokeWidth="2"
+                                />
+                            )}
+                        </g>
+                    );
+                })}
+
                 {/* Items */}
                 {maze.items?.map((item) => {
                     const isCollected = robotState.inventory.some(i => i.id === item.id);
