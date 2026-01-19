@@ -40,7 +40,7 @@ export default function CodeEditor({ files, activeFile, onChange }: CodeEditorPr
         id: string;
         name: string;
         icon: string;
-        type: string;
+        tags: string[];
         position: Position;
       }
 

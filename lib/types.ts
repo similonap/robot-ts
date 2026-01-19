@@ -9,7 +9,7 @@ export interface Item {
     id: string;
     name: string;
     icon: string;
-    type: string;
+    tags: string[];
     position: Position;
 }
 

@@ -16,13 +16,13 @@ if (robot.position.x === 10 && robot.position.y === 10) {
 `;
 
 const ITEM_TYPES = [
-    { name: 'Apple', icon: '🍎', type: 'Food' },
-    { name: 'Battery', icon: '🔋', type: 'Energy' },
-    { name: 'Gem', icon: '💎', type: 'Treasure' },
-    { name: 'Key', icon: '🗝️', type: 'Tool' },
-    { name: 'Potion', icon: '🧪', type: 'Consumable' },
-    { name: 'Coin', icon: '🪙', type: 'Treasure' },
-    { name: 'Map', icon: '🗺️', type: 'Tool' },
+    { name: 'Apple', icon: '🍎', tags: ['Food'] },
+    { name: 'Battery', icon: '🔋', tags: ['Energy'] },
+    { name: 'Gem', icon: '💎', tags: ['Treasure'] },
+    { name: 'Key', icon: '🗝️', tags: ['Tool'] },
+    { name: 'Potion', icon: '🧪', tags: ['Consumable'] },
+    { name: 'Coin', icon: '🪙', tags: ['Treasure'] },
+    { name: 'Map', icon: '🗺️', tags: ['Tool'] },
 ];
 
 type Tool = 'wall' | 'path' | 'start' | 'item' | null;
@@ -40,7 +40,7 @@ export default function MazeDesigner() {
 
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
-    const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', type: 'Food' });
+    const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', tags: ['Food'] });
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -122,7 +122,7 @@ export default function MazeDesigner() {
                 id: `item-${Date.now()}`,
                 name: selectedItemTemplate.name,
                 icon: selectedItemTemplate.icon,
-                type: selectedItemTemplate.type,
+                tags: [...selectedItemTemplate.tags],
                 position: { x, y }
             };
             setItems([...filtered, newItem]);
@@ -358,18 +358,37 @@ export default function MazeDesigner() {
                                                 />
                                             </div>
                                             <div className="flex-1">
-                                                <label className="text-xs text-gray-400">Type</label>
-                                                <select
-                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
-                                                    value={item.type}
-                                                    onChange={e => {
-                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, type: e.target.value } : i));
-                                                    }}
-                                                >
-                                                    {['Food', 'Energy', 'Treasure', 'Tool', 'Consumable'].map(t => (
-                                                        <option key={t} value={t}>{t}</option>
+                                                <label className="text-xs text-gray-400">Tags</label>
+                                                <div className="flex flex-wrap gap-1 mb-2">
+                                                    {item.tags.map((tag, idx) => (
+                                                        <span key={idx} className="bg-gray-800 text-xs px-2 py-1 rounded flex items-center gap-1 border border-gray-700">
+                                                            {tag}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: i.tags.filter((_, tIdx) => tIdx !== idx) } : i));
+                                                                }}
+                                                                className="text-gray-500 hover:text-red-400"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </span>
                                                     ))}
-                                                </select>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <input
+                                                        className="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
+                                                        placeholder="Add tag..."
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                const val = e.currentTarget.value.trim();
+                                                                if (val && !item.tags.includes(val)) {
+                                                                    setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: [...i.tags, val] } : i));
+                                                                    e.currentTarget.value = '';
+                                                                }
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                         <button

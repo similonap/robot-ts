@@ -163,7 +163,7 @@ export class RobotController {
         await this.wait(this.delayMs / 2);
 
         if (itemAtPos) {
-            this.onUpdate(this.state, `Scanned ahead: ${itemAtPos.name} (${itemAtPos.type})`);
+            this.onUpdate(this.state, `Scanned ahead: ${itemAtPos.name} (tags: ${itemAtPos.tags.join(', ')})`);
             return itemAtPos;
         } else {
             this.onUpdate(this.state, `Scanned ahead: Nothing`);
