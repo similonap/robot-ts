@@ -55,6 +55,18 @@ export interface MazeConfig {
 }
 
 
+export interface Wall {
+    type: 'wall';
+    position: Position;
+}
+
+export type EchoEntity = Wall | Item | Door;
+
+export interface EchoResult {
+    distance: number;
+    entity: EchoEntity;
+}
+
 export interface Robot {
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
@@ -62,6 +74,7 @@ export interface Robot {
     turnRight(): Promise<void>;
     pickup(): Promise<Item | null>;
     scan(): Promise<Item | Door | null>;
+    echo(): Promise<EchoResult | null>;
     openDoor(): Promise<void>;
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;

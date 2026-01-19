@@ -348,6 +348,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                     canMoveForward: () => controller.canMoveForward(),
                     pickup: () => controller.pickup(),
                     scan: () => controller.scan(),
+                    echo: () => controller.echo(),
                     openDoor: () => controller.openDoor(),
                     closeDoor: () => controller.closeDoor(),
                     setSpeed: (delay: number) => controller.setSpeed(delay),

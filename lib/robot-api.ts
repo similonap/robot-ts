@@ -1,4 +1,4 @@
-import { Direction, Position, RunnerState, Item, Door } from './types';
+import { Direction, Position, RunnerState, Item, Door, EchoResult } from './types';
 
 export class CancelError extends Error {
     constructor(message: string = 'Execution cancelled') {
@@ -161,6 +161,94 @@ export class RobotController {
             await this.wait(this.delayMs / 2);
             return null;
         }
+    }
+
+    async echo(): Promise<EchoResult | null> {
+        this.checkAborted();
+        const { x, y } = this.state.position;
+        let dx = 0;
+        let dy = 0;
+
+        switch (this.state.direction) {
+            case 'North': dy = -1; break;
+            case 'East': dx = 1; break;
+            case 'South': dy = 1; break;
+            case 'West': dx = -1; break;
+        }
+
+        let distance = 0;
+        let cx = x;
+        let cy = y;
+
+        // Animate/Simulate ping delay
+        this.onUpdate(this.state, `Echo ping sent...`);
+        await this.wait(this.delayMs / 2);
+
+        while (true) {
+            // Move one step
+            cx += dx;
+            cy += dy;
+            distance++;
+
+            // Check bounds (World Wall)
+            if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) {
+                // Hit world boundary
+                const result: EchoResult = {
+                    distance,
+                    entity: { type: 'wall', position: { x: cx, y: cy } }
+                };
+                this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
+                return result;
+            }
+
+            // Check for Wall
+            if (this.walls[cy][cx]) {
+                const result: EchoResult = {
+                    distance,
+                    entity: { type: 'wall', position: { x: cx, y: cy } }
+                };
+                this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
+                return result;
+            }
+
+            // Check for Closed Door (blocks echo)
+            const door = this.doors.find(d => d.position.x === cx && d.position.y === cy);
+            if (door && !this.state.doorStates[door.id]) {
+                const result: EchoResult = {
+                    distance,
+                    entity: door
+                };
+                this.onUpdate(this.state, `Echo: Closed Door at distance ${distance}`);
+                return result;
+            }
+
+            // Check for Item
+            // Items do not block movement, but echo returns FIRST thing it hits? 
+            // User requirement: "returns the first Wall | Item | closed Door it hits".
+            // So items DO block the echo ray literally.
+            const item = this.items.find(i =>
+                i.position.x === cx &&
+                i.position.y === cy &&
+                !this.collectedItemIds.has(i.id)
+            );
+            if (item) {
+                const result: EchoResult = {
+                    distance,
+                    entity: item
+                };
+                this.onUpdate(this.state, `Echo: ${item.name} at distance ${distance}`);
+                return result;
+            }
+
+            // Limit distance infinite loop just in case
+            if (distance > Math.max(this.walls.length, this.walls[0].length)) {
+                // Should have hit a wall by now unless map is open? 
+                // But we have bounds check above.
+                break;
+            }
+        }
+
+        return null;
     }
 
     async scan(): Promise<Item | Door | null> {
