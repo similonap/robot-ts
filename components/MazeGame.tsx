@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { generateMaze } from '../lib/maze';
+
 import { MazeConfig, PublicApi, Robot, RunnerState } from '../lib/types';
 import { RobotController, CancelError, CrashError } from '../lib/robot-api';
 import MazeDisplay from './MazeDisplay';
@@ -34,8 +34,8 @@ async function main() {
     }
 }`;
 
-export default function MazeGame({ sharedTypes }: { sharedTypes: string }) {
-    const [maze, setMaze] = useState<MazeConfig | null>(null);
+export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: string; initialMaze: MazeConfig }) {
+    const [maze, setMaze] = useState<MazeConfig | null>(initialMaze);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
     const [files, setFiles] = useState<Record<string, string>>({
         'main.ts': INITIAL_CODE
@@ -61,17 +61,17 @@ export default function MazeGame({ sharedTypes }: { sharedTypes: string }) {
     const logsEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Initialize maze
+    // Initialize robot state
     useEffect(() => {
-        const newMaze = generateMaze(15, 15);
-        setMaze(newMaze);
-        setRobotState({
-            position: newMaze.start,
-            direction: 'East',
-            inventory: [],
-            doorStates: {}, // Will be populated by controller or custom logic if needed, but for init we can start empty or pre-populate
-        });
-    }, []);
+        if (maze) {
+            setRobotState({
+                position: maze.start,
+                direction: 'East',
+                inventory: [],
+                doorStates: {},
+            });
+        }
+    }, [maze]);
 
     // Auto-scroll logs
     useEffect(() => {
@@ -88,10 +88,14 @@ export default function MazeGame({ sharedTypes }: { sharedTypes: string }) {
     };
 
     const resetGame = () => {
-        if (!maze) return;
         if (isRunning) {
             stopExecution();
         }
+
+        // Reset to initial maze if needed? 
+        // User asked to just show random maze essentially.
+        // Actually, if we want "reset" to just reset position:
+        if (!maze) return;
 
         setRobotState({
             position: maze.start,

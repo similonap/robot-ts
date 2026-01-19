@@ -1,0 +1,61 @@
+{
+    "width": 5,
+    "height": 5,
+    "doors": [],
+    "start": {
+        "x": 1,
+        "y": 1
+    },
+    "walls": [
+        [
+            true,
+            true,
+            true,
+            true,
+            true
+        ],
+        [
+            true,
+            false,
+            false,
+            false,
+            true
+        ],
+        [
+            true,
+            false,
+            true,
+            false,
+            true
+        ],
+        [
+            true,
+            false,
+            false,
+            false,
+            true
+        ],
+        [
+            true,
+            true,
+            true,
+            true,
+            true
+        ]
+    ],
+    "items": [
+        {
+            "id": "item-1",
+            "name": "Apple",
+            "icon": "🍎",
+            "type": "item",
+            "tags": [
+                "food"
+            ],
+            "position": {
+                "x": 3,
+                "y": 1
+            }
+        }
+    ]
+}
