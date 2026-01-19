@@ -1,4 +1,4 @@
-import { Direction, Position, RunnerState, Item, Door, EchoResult } from './types';
+import { Direction, Position, RunnerState, Item, Door } from './types';
 
 export class CancelError extends Error {
     constructor(message: string = 'Execution cancelled') {
@@ -40,13 +40,15 @@ export class RobotController {
         this.items = items;
         this.doors = doors;
 
-        // Initialize doorStates if not present
+        // Initialize doorStates if not present or inconsistent
         if (!this.state.doorStates) {
             this.state.doorStates = {};
-            doors.forEach(d => {
-                this.state.doorStates[d.id] = d.isOpen;
-            });
         }
+        doors.forEach(d => {
+            if (this.state.doorStates[d.id] === undefined) {
+                this.state.doorStates[d.id] = d.isOpen;
+            }
+        });
 
         // Initialize collected based on initial state if needed
         this.state.inventory.forEach(item => this.collectedItemIds.add(item.id));
@@ -81,15 +83,19 @@ export class RobotController {
 
     private isWall(x: number, y: number): boolean {
         if (y < 0 || y >= this.walls.length || x < 0 || x >= this.walls[0].length) return true;
-        if (this.walls[y][x]) return true;
 
-        // Check for closed doors
-        // Note: doorStates must be populated in constructor
+        // Check for door logic FIRST:
+        // If there is an OPEN door here, it is NOT a wall, even if walls[y][x] is true.
         const door = this.doors.find(d => d.position.x === x && d.position.y === y);
         if (door) {
             const isOpen = this.state.doorStates[door.id];
-            if (!isOpen) return true;
+            if (isOpen) return false; // Open door = Walkable
+            // If closed, it acts as a wall
+            return true;
         }
+
+        // If no door, trust the wall grid
+        if (this.walls[y][x]) return true;
 
         return false;
     }
@@ -163,7 +169,7 @@ export class RobotController {
         }
     }
 
-    async echo(): Promise<EchoResult | null> {
+    async echo(): Promise<number> {
         this.checkAborted();
         const { x, y } = this.state.position;
         let dx = 0;
@@ -193,62 +199,47 @@ export class RobotController {
             // Check bounds (World Wall)
             if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) {
                 // Hit world boundary
-                const result: EchoResult = {
-                    distance,
-                    entity: { type: 'wall', position: { x: cx, y: cy } }
-                };
                 this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
-                return result;
+                return distance;
             }
 
-            // Check for Wall
-            if (this.walls[cy][cx]) {
-                const result: EchoResult = {
-                    distance,
-                    entity: { type: 'wall', position: { x: cx, y: cy } }
-                };
-                this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
-                return result;
-            }
+            // Check Logic:
+            // 1. Is there a Door? -> If Closed, it's an obstacle. If Open, it's explicitly NOT an obstacle (pass through).
+            // 2. Is there a Wall? -> If yes (and no open door overriding it), it's an obstacle.
 
-            // Check for Closed Door (blocks echo)
             const door = this.doors.find(d => d.position.x === cx && d.position.y === cy);
-            if (door && !this.state.doorStates[door.id]) {
-                const result: EchoResult = {
-                    distance,
-                    entity: door
-                };
-                this.onUpdate(this.state, `Echo: Closed Door at distance ${distance}`);
-                return result;
+            if (door) {
+                // If door is closed, we hit it.
+                // If door is open, we pass through (ignoring wall check below because door exists there)
+                if (!this.state.doorStates[door.id]) {
+                    this.onUpdate(this.state, `Echo: Closed Door at distance ${distance}`);
+                    return distance;
+                }
+                // Implicit else: Door is open, so we CONTINUE (skip wall check effectively)
+            } else {
+                // Only check wall if NO door exists at this tile
+                if (this.walls[cy][cx]) {
+                    this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
+                    return distance;
+                }
             }
 
             // Check for Item
-            // Items do not block movement, but echo returns FIRST thing it hits? 
-            // User requirement: "returns the first Wall | Item | closed Door it hits".
-            // So items DO block the echo ray literally.
             const item = this.items.find(i =>
                 i.position.x === cx &&
                 i.position.y === cy &&
                 !this.collectedItemIds.has(i.id)
             );
             if (item) {
-                const result: EchoResult = {
-                    distance,
-                    entity: item
-                };
                 this.onUpdate(this.state, `Echo: ${item.name} at distance ${distance}`);
-                return result;
+                return distance;
             }
 
             // Limit distance infinite loop just in case
             if (distance > Math.max(this.walls.length, this.walls[0].length)) {
-                // Should have hit a wall by now unless map is open? 
-                // But we have bounds check above.
-                break;
+                return distance;
             }
         }
-
-        return null;
     }
 
     async scan(): Promise<Item | Door | null> {
@@ -377,6 +368,10 @@ export class RobotController {
         this.state.direction = dirs[(idx + 1) % 4];
         this.onUpdate({ ...this.state }, `Turned Right to ${this.state.direction}`);
         await this.wait(this.delayMs);
+    }
+
+    get direction(): Direction {
+        return this.state.direction;
     }
 
     getRemainingItems(): Item[] {

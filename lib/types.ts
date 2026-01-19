@@ -60,21 +60,15 @@ export interface Wall {
     position: Position;
 }
 
-export type EchoEntity = Wall | Item | Door;
-
-export interface EchoResult {
-    distance: number;
-    entity: EchoEntity;
-}
-
 export interface Robot {
+    readonly direction: Direction;
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
     turnLeft(): Promise<void>;
     turnRight(): Promise<void>;
     pickup(): Promise<Item | null>;
     scan(): Promise<Item | Door | null>;
-    echo(): Promise<EchoResult | null>;
+    echo(): Promise<number>;
     openDoor(): Promise<void>;
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;

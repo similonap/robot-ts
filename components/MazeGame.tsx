@@ -342,6 +342,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
 
             const api: PublicApi = {
                 robot: {
+                    get direction() { return controller.direction; },
                     moveForward: () => controller.moveForward(),
                     turnLeft: () => controller.turnLeft(),
                     turnRight: () => controller.turnRight(),
