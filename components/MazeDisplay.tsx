@@ -68,7 +68,7 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
 
                 {/* Doors */}
                 {maze.doors?.map((door) => {
-                    const isOpen = robotState.doorStates ? robotState.doorStates[door.id] : door.isOpen;
+                    const isOpen = (robotState.doorStates && door.id in robotState.doorStates) ? robotState.doorStates[door.id] : door.isOpen;
                     return (
                         <g key={door.id} transform={`translate(${door.position.x * cellSize}, ${door.position.y * cellSize})`}>
                             {isOpen ? (
