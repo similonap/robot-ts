@@ -27,7 +27,7 @@ const ITEM_TYPES = [
 
 type Tool = 'wall' | 'path' | 'start' | 'item' | 'door' | null;
 
-export default function MazeDesigner({ sharedTypes }: { sharedTypes?: string }) {
+export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     const [width, setWidth] = useState(INITIAL_WIDTH);
     const [height, setHeight] = useState(INITIAL_HEIGHT);
     const [walls, setWalls] = useState<boolean[][]>(

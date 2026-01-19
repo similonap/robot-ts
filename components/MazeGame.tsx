@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { generateMaze } from '../lib/maze';
-import { MazeConfig, RunnerState } from '../lib/types';
+import { MazeConfig, PublicApi, Robot, RunnerState } from '../lib/types';
 import { RobotController, CancelError, CrashError } from '../lib/robot-api';
 import MazeDisplay from './MazeDisplay';
 import CodeEditor from './CodeEditor';
@@ -34,7 +34,7 @@ async function main() {
     }
 }`;
 
-export default function MazeGame({ sharedTypes }: { sharedTypes?: string }) {
+export default function MazeGame({ sharedTypes }: { sharedTypes: string }) {
     const [maze, setMaze] = useState<MazeConfig | null>(null);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
     const [files, setFiles] = useState<Record<string, string>>({
@@ -336,7 +336,7 @@ export default function MazeGame({ sharedTypes }: { sharedTypes?: string }) {
 
             addLog("Running...", 'user');
 
-            const api = {
+            const api: PublicApi = {
                 robot: {
                     moveForward: () => controller.moveForward(),
                     turnLeft: () => controller.turnLeft(),

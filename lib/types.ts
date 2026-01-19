@@ -1,5 +1,21 @@
 export type Direction = 'North' | 'East' | 'South' | 'West';
 
+export interface PublicApi {
+    robot: Robot;
+    game: Game;
+    readline: {
+        question: (promptText: string) => Promise<string>;
+        questionInt: (promptText: string) => Promise<number>;
+        questionFloat: (promptText: string) => Promise<number>;
+    }
+    fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+    console: {
+        log: (...args: any[]) => void;
+        error: (...args: any[]) => void;
+    }
+}
+
+
 export interface Position {
     x: number;
     y: number;

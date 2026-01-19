@@ -6,7 +6,7 @@ interface CodeEditorProps {
     files: Record<string, string>;
     activeFile: string;
     onChange: (value: string | undefined) => void;
-    sharedTypes?: string;
+    sharedTypes: string;
 }
 
 export default function CodeEditor({ files, activeFile, onChange, sharedTypes }: CodeEditorProps) {
@@ -30,26 +30,8 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes }:
             esModuleInterop: true,
         });
 
-        // sharedTypes now contains EVERYTHING (interfaces, declared vars, modules) from lib/types.ts
-        // We just need to ensure 'export' keywords don't prevent them from being seen as global in the editor.
+        let libContent = sharedTypes.replace(/export /g, '');
 
-        let libContent = '';
-
-        if (sharedTypes) {
-            const globalTypes = sharedTypes.replace(/export /g, '');
-            libContent = globalTypes;
-        } else {
-            // Fallback minimal types if something goes wrong with reading the file
-            libContent = `
-              interface Position { x: number; y: number; }
-              interface Item { id: string; type: 'item'; name: string; icon: string; tags: string[]; position: Position; }
-              interface Door { id: string; position: Position; type: 'door'; isOpen: boolean; }
-              // ... simplistic fallback
-              declare var robot: any;
-              declare var game: any;
-              declare var maze: any;
-              `;
-        }
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
             libContent,
