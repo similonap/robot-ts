@@ -1,17 +1,45 @@
-import { RunnerState } from "@/lib/types";
+import { MazeConfig, RunnerState } from "@/lib/types";
 import { useRef } from "react";
 
 interface HeaderProps {
     robotState: RunnerState | null;
     isRunning: boolean;
-    handleFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onMazeLoaded: (maze: MazeConfig) => void;
     resetGame: () => void;
     runCode: () => void;
     stopExecution: () => void;
 }
 
-const Header = ({ robotState, isRunning, handleFileImport, resetGame, runCode, stopExecution }: HeaderProps) => {
+const Header = ({ robotState, onMazeLoaded, isRunning, resetGame, runCode, stopExecution }: HeaderProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const json = event.target?.result as string;
+                const parsed = JSON.parse(json) as MazeConfig;
+
+                // Simple validation
+                if (!parsed.width || !parsed.height || !parsed.start || !parsed.walls) {
+                    throw new Error("Invalid maze content");
+                }
+
+                if (isRunning) stopExecution();
+
+                onMazeLoaded(parsed);
+
+            } catch (err) {
+                alert("Failed to import maze: " + (err as any).message);
+            }
+        };
+        reader.readAsText(file);
+        // Reset input
+        e.target.value = '';
+    };
 
     return (
         <header className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-700">

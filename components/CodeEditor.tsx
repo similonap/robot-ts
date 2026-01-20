@@ -5,7 +5,7 @@ import Editor from '@monaco-editor/react';
 interface CodeEditorProps {
     files: Record<string, string>;
     activeFile: string;
-    onChange: (value: string | undefined) => void;
+    onChange: (value: string) => void;
     sharedTypes: string;
 }
 
@@ -70,7 +70,10 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes }:
                 defaultLanguage="typescript"
                 theme="vs-dark"
                 value={files[activeFile]}
-                onChange={onChange}
+                onChange={(value) => {
+                    if (!value) return;
+                    onChange(value);
+                }}
                 onMount={handleEditorDidMount}
                 options={{
                     minimap: { enabled: false },
