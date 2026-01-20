@@ -4,8 +4,8 @@ import { createContext, RefObject, useContext, useEffect, useRef, useState } fro
 import ts from "typescript";
 
 interface MazeGameContextType {
-    maze: MazeConfig | null
-    robotState: RunnerState | null;
+    maze: MazeConfig;
+    robotState: RunnerState;
     isRunning: boolean;
     onMazeLoaded: (maze: MazeConfig) => void;
     resetGame: () => void;
@@ -31,9 +31,20 @@ interface MazeGameContextType {
     sharedTypes: string;
 }
 
+const INITIAL_ROBOT_STATE: RunnerState = {
+    position: { x: 0, y: 0 },
+    direction: 'East',
+    inventory: [],
+    doorStates: {},
+    revealedItemIds: [],
+    collectedItemIds: [],
+    speed: 500,
+    health: 100,
+}
+
 export const MazeGameContext = createContext<MazeGameContextType>({
-    maze: null,
-    robotState: null,
+    maze: {} as MazeConfig,
+    robotState: INITIAL_ROBOT_STATE,
     isRunning: false,
     onMazeLoaded: () => { },
     resetGame: () => { },
@@ -65,6 +76,8 @@ interface MazeGameProviderProps {
     sharedTypes: string;
 }
 
+
+
 // Initial code template
 const INITIAL_CODE = `import { robot } from "robot-maze";
 
@@ -92,8 +105,8 @@ async function main() {
 }`;
 
 export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
-    const [maze, setMaze] = useState<MazeConfig | null>(initialMaze);
-    const [robotState, setRobotState] = useState<RunnerState | null>(null);
+    const [maze, setMaze] = useState<MazeConfig>(initialMaze);
+    const [robotState, setRobotState] = useState<RunnerState>({ ...INITIAL_ROBOT_STATE, position: maze.start });
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [isWaitingForInput, setIsWaitingForInput] = useState(false);
@@ -115,23 +128,6 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         return 'main.ts';
     });
 
-    // Initialize robot state
-    useEffect(() => {
-        if (maze) {
-            setRobotState({
-                position: maze.start,
-                direction: 'East',
-                inventory: [],
-                doorStates: {},
-                revealedItemIds: [],
-                collectedItemIds: [],
-                speed: 500,
-                health: 100,
-            });
-        }
-    }, [maze]);
-
-
     const addLog = (msg: string, type: 'robot' | 'user' = 'user') => {
         setLogs(prev => [...prev, {
             id: Math.random().toString(36).substring(7),
@@ -141,19 +137,11 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         }]);
     };
 
-
-
     const onMazeLoaded = (maze: MazeConfig) => {
         setMaze(maze);
         setRobotState({
-            position: maze.start,
-            direction: 'East',
-            inventory: [],
-            doorStates: {},
-            revealedItemIds: [],
-            collectedItemIds: [],
-            speed: 500,
-            health: 100,
+            ...INITIAL_ROBOT_STATE,
+            position: maze.start
         });
         setLogs([]);
         setIsRunning(false);
@@ -515,14 +503,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         if (!maze) return;
 
         setRobotState({
+            ...INITIAL_ROBOT_STATE,
             position: maze.start,
-            direction: 'East',
-            revealedItemIds: [],
-            inventory: [],
-            doorStates: {},
-            collectedItemIds: [],
-            speed: 500,
-            health: 100,
         });
         setLogs([]);
         setIsRunning(false);

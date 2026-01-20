@@ -18,9 +18,8 @@ export default function MazeGameWrapper({ sharedTypes, initialMaze, initialFiles
 }
 
 function MazeGame() {
-    const { maze, robotState } = useMazeGameContext();
 
-    if (!maze || !robotState) return <div className="p-10">Loading Maze...</div>;
+
 
     return (
         <div className="flex flex-col h-screen bg-black text-white p-4 gap-4">
@@ -44,7 +43,7 @@ function MazeGame() {
                             maxSplit={80}
                             first={
                                 <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden relative flex items-center justify-center p-2">
-                                    <MazeDisplay maze={maze} robotState={robotState} />
+                                    <MazeDisplay />
                                 </div>
                             }
                             second={

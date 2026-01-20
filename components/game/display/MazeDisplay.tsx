@@ -2,13 +2,15 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { MazeConfig, RunnerState } from '@/lib/types';
 import { useState, useRef, useEffect } from 'react';
+import { useMazeGameContext } from '../context/MazeGameContext';
 
 interface MazeDisplayProps {
-    maze: MazeConfig;
-    robotState: RunnerState;
+
 }
 
-export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
+export default function MazeDisplay() {
+    const { maze, robotState } = useMazeGameContext();
+
     const cellSize = 30;
     const width = maze.width * cellSize;
     const height = maze.height * cellSize;
