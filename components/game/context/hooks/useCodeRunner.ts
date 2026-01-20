@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { CancelError, CrashError, RobotController } from "@/lib/robot-api";
+import { CancelError, CrashError, HealthDepletedError, RobotController } from "@/lib/robot-api";
 import { Item, MazeConfig, PublicApi, RunnerState } from "@/lib/types";
 import ts from "typescript";
 
@@ -283,6 +283,8 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
                 addLog(`🛑 Execution Stopped.`, 'user');
             } else if (e instanceof CrashError || e.name === 'CrashError') {
                 addLog(`💥 CRASH! ${e.message}`, 'user');
+            } else if (e instanceof HealthDepletedError || e.name === 'HealthDepletedError') {
+                addLog(`💀 GAME OVER! ${e.message}`, 'user');
             } else {
                 addLog(`Runtime Error: ${e.message}`, 'user');
                 console.error(e);

@@ -14,6 +14,13 @@ export class CrashError extends Error {
     }
 }
 
+export class HealthDepletedError extends Error {
+    constructor(message: string = 'Robot health depleted') {
+        super(message);
+        this.name = 'HealthDepletedError';
+    }
+}
+
 export class RobotController {
     private state: RunnerState;
     private walls: boolean[][];
@@ -228,6 +235,10 @@ export class RobotController {
         }
 
         await this.wait(this.delayMs);
+
+        if (this.state.health <= 0) {
+            throw new HealthDepletedError(`Did not survive damage from ${damageItems.map(i => i.name).join(', ')}`);
+        }
         return true;
     }
 

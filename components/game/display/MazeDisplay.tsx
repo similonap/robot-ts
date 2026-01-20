@@ -43,14 +43,27 @@ export default function MazeDisplay() {
     }, [robotState.direction]);
 
     return (
-        <div className="w-full h-full flex items-center justify-center overflow-hidden bg-gray-900 border border-gray-700">
+        <div className="w-full h-full flex items-center justify-center overflow-hidden bg-black/50 border-2 border-cyan-900/50 backdrop-blur-sm rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.1)]">
             <svg
                 viewBox={`0 0 ${width} ${height}`}
                 preserveAspectRatio="xMidYMid meet"
                 className="max-w-full max-h-full"
             >
-                {/* Background Grid (Optional) */}
-                <rect x="0" y="0" width={width} height={height} fill="#111827" />
+                {/* Background Grid */}
+                <defs>
+                    <pattern id="grid" width={cellSize} height={cellSize} patternUnits="userSpaceOnUse">
+                        <path d={`M ${cellSize} 0 L 0 0 0 ${cellSize}`} fill="none" stroke="#1e293b" strokeWidth="1" />
+                    </pattern>
+                    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <rect x="0" y="0" width={width} height={height} fill="#020617" />
+                <rect x="0" y="0" width={width} height={height} fill="url(#grid)" />
 
                 {/* Walls */}
                 {maze.walls.map((row, y) => (
@@ -58,11 +71,16 @@ export default function MazeDisplay() {
                         isWall && (
                             <rect
                                 key={`${x}-${y}`}
-                                x={x * cellSize}
-                                y={y * cellSize}
-                                width={cellSize + 0.5} // Slight overlap to prevent gaps
-                                height={cellSize + 0.5}
-                                fill="#3B82F6"
+                                x={x * cellSize + 2}
+                                y={y * cellSize + 2}
+                                width={cellSize - 4}
+                                height={cellSize - 4}
+                                rx={4}
+                                fill="#0ea5e9"
+                                fillOpacity="0.2"
+                                stroke="#0ea5e9"
+                                strokeWidth="2"
+                                filter="url(#neon-glow)"
                             />
                         )
                     ))
@@ -75,13 +93,15 @@ export default function MazeDisplay() {
                         <g key={door.id} transform={`translate(${door.position.x * cellSize}, ${door.position.y * cellSize})`}>
                             {isOpen ? (
                                 <rect
-                                    x={2} y={2} width={cellSize - 4} height={cellSize - 4}
-                                    fill="none" stroke="#EAB308" strokeWidth="2" strokeDasharray="4"
+                                    x={4} y={4} width={cellSize - 8} height={cellSize - 8}
+                                    fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="2 4"
+                                    rx={2}
                                 />
                             ) : (
                                 <rect
-                                    x={0} y={0} width={cellSize} height={cellSize}
-                                    fill="#713F12" stroke="#EAB308" strokeWidth="2"
+                                    x={2} y={2} width={cellSize - 4} height={cellSize - 4}
+                                    fill="#451a03" stroke="#f59e0b" strokeWidth="2"
+                                    rx={2}
                                 />
                             )}
                         </g>
@@ -102,24 +122,34 @@ export default function MazeDisplay() {
                         if (!isRevealed) return null;
 
                         return (
-                            <motion.text
+
+                            <motion.g
                                 key={item.id}
-                                initial={{ scale: 0, opacity: 0 }}
+                                initial={{ scale: 0, opacity: 0, x: item.position.x * cellSize + cellSize / 2, y: item.position.y * cellSize + cellSize / 2 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 exit={{ scale: 0, opacity: 0 }}
                                 transition={{
                                     duration: Math.min(0.5, robotState.speed / 1000),
                                     ease: "backOut"
                                 }}
-                                x={item.position.x * cellSize + cellSize / 2}
-                                y={item.position.y * cellSize + cellSize / 2}
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                fontSize={cellSize * 0.7}
-                                style={{ userSelect: 'none' }}
                             >
-                                {item.icon}
-                            </motion.text>
+                                <circle
+                                    r={cellSize * 0.4}
+                                    fill="#d946ef"
+                                    fillOpacity="0.1"
+                                    stroke="#d946ef"
+                                    strokeWidth="1"
+                                    strokeDasharray="2 1"
+                                />
+                                <text
+                                    textAnchor="middle"
+                                    dominantBaseline="central"
+                                    fontSize={cellSize * 0.6}
+                                    style={{ userSelect: 'none', filter: 'drop-shadow(0 0 5px #d946ef)' }}
+                                >
+                                    {item.icon}
+                                </text>
+                            </motion.g>
                         );
                     })}
                 </AnimatePresence>
@@ -160,11 +190,12 @@ export default function MazeDisplay() {
                                     key={i}
                                     d={`M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`}
                                     fill="none"
-                                    stroke="#3B82F6"
+                                    stroke="#0ea5e9"
                                     strokeWidth={2}
                                     strokeLinecap="round"
                                     vectorEffect="non-scaling-stroke"
                                     opacity={1 - (i * 0.2)}
+                                    filter="url(#neon-glow)"
                                 />
                             );
                         })}
@@ -189,14 +220,15 @@ export default function MazeDisplay() {
                         <circle
                             cx={0} cy={0} r={cellSize / 3}
                             fill="none"
-                            stroke="#EF4444"
+                            stroke="#ef4444"
                             strokeWidth={2}
                             vectorEffect="non-scaling-stroke"
+                            filter="url(#neon-glow)"
                         />
                         <circle
                             cx={0} cy={0} r={cellSize / 2}
                             fill="none"
-                            stroke="#EF4444"
+                            stroke="#ef4444"
                             strokeWidth={1}
                             strokeDasharray="2 2"
                             vectorEffect="non-scaling-stroke"
@@ -221,28 +253,30 @@ export default function MazeDisplay() {
                 >
                     {/* Centered Group for Rotation */}
                     <g transform={`translate(-${cellSize / 2}, -${cellSize / 2})`}>
-                        <text
-                            x={cellSize / 2}
-                            y={cellSize / 2}
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontSize={cellSize}
-                            style={{ userSelect: 'none' }}
-                        >
-                            🤖
-                        </text>
-                        {/* Direction Arrow Overlay */}
-                        <g transform={`translate(${cellSize * 0.1}, ${cellSize * 0.1}) scale(0.8)`}>
-                            <path
-                                d="M15 22V8 M8 15l7-7 7 7"
-                                stroke="white"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                                opacity="0.9"
-                            />
-                        </g>
+                        {/* Drone Body */}
+                        <circle
+                            cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.35}
+                            fill="#0f172a" stroke="#38bdf8" strokeWidth="2"
+                        />
+                        {/* Center Eye/Core */}
+                        <circle
+                            cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.15}
+                            fill="#38bdf8"
+                            filter="url(#neon-glow)"
+                        />
+                        {/* Direction Indicator (Front Tick) */}
+                        <path
+                            d={`M ${cellSize / 2} ${cellSize * 0.15} L ${cellSize / 2} ${cellSize * 0.05}`}
+                            stroke="#38bdf8"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                        />
+                        {/* Rear Detail */}
+                        <path
+                            d={`M ${cellSize * 0.3} ${cellSize * 0.8} L ${cellSize * 0.7} ${cellSize * 0.8}`}
+                            stroke="#38bdf8"
+                            strokeWidth="2"
+                        />
                     </g>
                 </motion.g>
             </svg>
