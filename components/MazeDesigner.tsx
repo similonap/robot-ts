@@ -186,11 +186,51 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
         downloadAnchorNode.remove();
     };
 
+    const importJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const json = JSON.parse(event.target?.result as string) as MazeConfig;
+
+                // Basic validation
+                if (typeof json.width === 'number' && typeof json.height === 'number' && Array.isArray(json.walls)) {
+                    setWidth(json.width);
+                    setHeight(json.height);
+                    setWalls(json.walls);
+                    setStart(json.start || { x: 1, y: 1 });
+                    setItems(json.items || []);
+                    setDoors(json.doors || []);
+                    setStepCode(json.stepCode || DEFAULT_STEP_CODE);
+                } else {
+                    alert('Invalid maze file format');
+                }
+            } catch (err) {
+                console.error('Failed to parse maze file:', err);
+                alert('Failed to parse maze file');
+            }
+        };
+        reader.readAsText(file);
+        // Reset input value so same file can be selected again if needed
+        e.target.value = '';
+    };
+
     return (
         <div className="flex flex-col h-screen bg-black text-white p-4 gap-4">
             <header className="flex justify-between items-center border-b border-gray-700 pb-4">
                 <h1 className="text-2xl font-bold">🏗️ Maze Designer</h1>
                 <div className="flex gap-4">
+                    <label className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 cursor-pointer">
+                        Import JSON
+                        <input
+                            type="file"
+                            accept=".json"
+                            onChange={importJson}
+                            className="hidden"
+                        />
+                    </label>
                     <button onClick={exportJson} className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">
                         Export JSON
                     </button>
@@ -560,6 +600,35 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div className="border-t border-gray-700 pt-3 mt-1 mb-3">
+                                                <label className="text-xs text-gray-400 font-bold block mb-2">Properties</label>
+                                                <div>
+                                                    <label className="text-xs text-gray-500">Damage Amount</label>
+                                                    <input
+                                                        type="number"
+                                                        className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-red-400"
+                                                        value={item.damageAmount || 0}
+                                                        onChange={e => {
+                                                            const val = parseInt(e.target.value) || 0;
+                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, damageAmount: val } : i));
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="mt-2">
+                                                    <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="rounded bg-gray-700 border-gray-600 text-red-500 focus:ring-0"
+                                                            checked={item.destroyOnContact === true}
+                                                            onChange={(e) => {
+                                                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, destroyOnContact: e.target.checked } : i));
+                                                            }}
+                                                        />
+                                                        Destroy on Contact?
+                                                    </label>
+                                                </div>
+                                            </div>
+
                                             <button
                                                 onClick={() => {
                                                     setItems(prev => prev.filter(i => i.id !== item.id));

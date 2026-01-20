@@ -70,7 +70,9 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                 inventory: [],
                 doorStates: {},
                 revealedItemIds: [],
+                collectedItemIds: [],
                 speed: 500,
+                health: 100,
             });
         }
     }, [maze]);
@@ -105,7 +107,9 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             revealedItemIds: [],
             inventory: [],
             doorStates: {},
+            collectedItemIds: [],
             speed: 500,
+            health: 100,
         });
         setLogs([]);
         setIsRunning(false);
@@ -178,7 +182,9 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                     inventory: [],
                     doorStates: {},
                     revealedItemIds: [],
+                    collectedItemIds: [],
                     speed: 500,
+                    health: 100,
                 });
                 setLogs([]);
                 setIsRunning(false);
@@ -255,6 +261,8 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             revealedItemIds: [],
             doorStates: {},
             speed: 500,
+            health: 100,
+            collectedItemIds: [],
         });
 
 
@@ -278,8 +286,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             },
             fail: (msg: string) => {
                 addLog(`💀 FAIL: ${msg}`, 'user');
-                // stopExecution(); 
-                throw new CrashError(msg);
+                stopExecution();
             },
             get items() {
                 return controller?.getRemainingItems() || [];
@@ -292,7 +299,9 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             inventory: [],
             doorStates: {},
             revealedItemIds: [],
+            collectedItemIds: [],
             speed: 500,
+            health: 100,
         };
 
         setRobotState(startState);
@@ -354,6 +363,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                 robot: {
                     get direction() { return controller.direction; },
                     get inventory() { return controller.inventory; },
+                    get health() { return controller.health; },
                     moveForward: () => controller.moveForward(),
                     turnLeft: () => controller.turnLeft(),
                     turnRight: () => controller.turnRight(),
@@ -502,8 +512,24 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
 
     return (
         <div className="flex flex-col h-screen bg-black text-white p-4 gap-4">
-            <header className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">🤖 Robot Maze Runner</h1>
+            <header className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-700">
+                <div className="flex items-center gap-4">
+                    <h1 className="text-xl font-bold">🤖 Robot Maze Runner</h1>
+                    {robotState && (
+                        <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-400">Health:</span>
+                            <div className="w-32 h-4 bg-gray-700 rounded-full overflow-hidden border border-gray-600">
+                                <div
+                                    className={`h-full transition-all duration-300 ${robotState.health > 50 ? 'bg-green-500' : robotState.health > 20 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                    style={{ width: `${robotState.health}%` }}
+                                />
+                            </div>
+                            <span className={`font-mono font-bold ${robotState.health > 50 ? 'text-green-500' : robotState.health > 20 ? 'text-yellow-500' : 'text-red-500'}`}>
+                                {robotState.health}/100
+                            </span>
+                        </div>
+                    )}
+                </div>
                 <div className="space-x-4">
                     <input
                         type="file"

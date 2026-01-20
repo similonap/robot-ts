@@ -29,6 +29,8 @@ export interface Item {
     tags: string[];
     position: Position;
     isRevealed?: boolean;
+    damageAmount?: number;
+    destroyOnContact?: boolean;
 }
 
 export interface Door {
@@ -54,6 +56,8 @@ export interface RunnerState {
     echoWave?: { x: number; y: number; direction: Direction; timestamp: number };
     echoHit?: { x: number; y: number; timestamp: number };
     speed: number;
+    health: number;
+    collectedItemIds: string[];
 }
 
 export interface MazeConfig {
@@ -82,6 +86,7 @@ export interface OpenResult {
 export interface Robot {
     readonly direction: Direction;
     readonly inventory: Item[];
+    readonly health: number;
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
     turnLeft(): Promise<void>;

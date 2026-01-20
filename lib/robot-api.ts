@@ -58,6 +58,23 @@ export class RobotController {
         // Initialize collected based on initial state if needed
         this.state.inventory.forEach(item => this.collectedItemIds.add(item.id));
 
+        // Initialize health if not present
+        if (this.state.health === undefined) {
+            this.state.health = 100;
+        }
+
+        // Ensure collectedItemIds is set
+        if (!this.state.collectedItemIds) {
+            this.state.collectedItemIds = [];
+        }
+
+        // Sync initial collected items
+        this.collectedItemIds.forEach(id => {
+            if (!this.state.collectedItemIds.includes(id)) {
+                this.state.collectedItemIds.push(id);
+            }
+        });
+
         // Ensure speed is set in state if not already
         if (this.state.speed === undefined) {
             this.state.speed = this.delayMs;
@@ -110,6 +127,12 @@ export class RobotController {
         if (this.walls[y][x]) return true;
 
         return false;
+    }
+
+
+
+    get health(): number {
+        return this.state.health;
     }
 
     async canMoveForward(): Promise<boolean> {
@@ -168,6 +191,48 @@ export class RobotController {
             this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
         }
 
+        // Check for DAMAGE items
+        const damageItems = this.items.filter(item =>
+            item.position.x === newX &&
+            item.position.y === newY &&
+            item.damageAmount && item.damageAmount > 0
+        );
+
+        if (damageItems.length > 0) {
+            let totalDamage = 0;
+            damageItems.forEach(item => totalDamage += (item.damageAmount || 0));
+
+            this.state.health = Math.max(0, this.state.health - totalDamage);
+            const msg = `Ouch! Took ${totalDamage} damage from ${damageItems.map(i => i.name).join(', ')}. Health: ${this.state.health}`;
+            this.onUpdate({ ...this.state }, msg);
+
+            if (this.state.health <= 0) {
+                this.onUpdate({ ...this.state }, "Robot destroyed by damage!");
+                throw new CrashError("Robot destroyed by damage!");
+            }
+        }
+
+        // Check for DESTROY items
+        const destroyItems = this.items.filter(item =>
+            item.position.x === newX &&
+            item.position.y === newY &&
+            item.destroyOnContact === true &&
+            !this.collectedItemIds.has(item.id)
+        );
+
+        if (destroyItems.length > 0) {
+            destroyItems.forEach(item => {
+                this.collectedItemIds.add(item.id);
+                if (!this.state.collectedItemIds.includes(item.id)) {
+                    this.state.collectedItemIds.push(item.id);
+                }
+                // We add to collected so it's removed from board, but NOT to inventory unless picked up?
+                // Usually pickup() is separate. If it's "destroy on contact", it just disappears.
+                // We won't add to this.state.inventory.
+            });
+            this.onUpdate({ ...this.state }, `Destroyed ${destroyItems.map(i => i.name).join(', ')}!`);
+        }
+
         await this.wait(this.delayMs);
         return true;
     }
@@ -188,6 +253,9 @@ export class RobotController {
 
         if (itemAtPos) {
             this.collectedItemIds.add(itemAtPos.id);
+            if (!this.state.collectedItemIds.includes(itemAtPos.id)) {
+                this.state.collectedItemIds.push(itemAtPos.id);
+            }
             this.state.inventory = [...this.state.inventory, itemAtPos];
             this.onUpdate({ ...this.state }, `Collected ${itemAtPos.icon} ${itemAtPos.name}!`);
             await this.wait(this.delayMs);

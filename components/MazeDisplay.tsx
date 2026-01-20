@@ -1,5 +1,5 @@
 'use client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MazeConfig, RunnerState } from '../lib/types';
 import { useMemo, useState, useRef, useEffect } from 'react';
 
@@ -87,33 +87,40 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                 })}
 
                 {/* Items */}
-                {maze.items?.map((item) => {
-                    const isCollected = robotState.inventory.some(i => i.id === item.id);
-                    if (isCollected) return null;
+                <AnimatePresence>
+                    {maze.items?.map((item) => {
+                        // Filter logic:
+                        // Show item if it is NOT collected/destroyed (in collectedItemIds)
+                        // AND it IS revealed.
 
-                    const isRevealed = item.isRevealed !== false || (robotState.revealedItemIds && robotState.revealedItemIds.includes(item.id));
-                    if (!isRevealed) return null;
+                        const isCollected = robotState.collectedItemIds?.includes(item.id);
+                        if (isCollected) return null; // AnimatePresence handles exit
 
-                    return (
-                        <motion.text
-                            key={item.id}
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{
-                                duration: Math.min(0.5, robotState.speed / 1000),
-                                ease: "backOut"
-                            }}
-                            x={item.position.x * cellSize + cellSize / 2}
-                            y={item.position.y * cellSize + cellSize / 2}
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontSize={cellSize * 0.7}
-                            style={{ userSelect: 'none' }}
-                        >
-                            {item.icon}
-                        </motion.text>
-                    );
-                })}
+                        const isRevealed = item.isRevealed !== false || (robotState.revealedItemIds && robotState.revealedItemIds.includes(item.id));
+                        if (!isRevealed) return null;
+
+                        return (
+                            <motion.text
+                                key={item.id}
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{
+                                    duration: Math.min(0.5, robotState.speed / 1000),
+                                    ease: "backOut"
+                                }}
+                                x={item.position.x * cellSize + cellSize / 2}
+                                y={item.position.y * cellSize + cellSize / 2}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={cellSize * 0.7}
+                                style={{ userSelect: 'none' }}
+                            >
+                                {item.icon}
+                            </motion.text>
+                        );
+                    })}
+                </AnimatePresence>
 
                 {/* Echo Wave - Radar Style */}
                 {robotState.echoWave && (
