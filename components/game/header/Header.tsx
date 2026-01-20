@@ -1,16 +1,14 @@
-import { MazeConfig, RunnerState } from "@/lib/types";
+import { MazeConfig } from "@/lib/types";
 import { useRef } from "react";
+import { useMazeGameContext } from "../context/MazeGameContext";
 
 interface HeaderProps {
-    robotState: RunnerState | null;
-    isRunning: boolean;
-    onMazeLoaded: (maze: MazeConfig) => void;
-    resetGame: () => void;
-    runCode: () => void;
-    stopExecution: () => void;
+
 }
 
-const Header = ({ robotState, onMazeLoaded, isRunning, resetGame, runCode, stopExecution }: HeaderProps) => {
+const Header = () => {
+    const { onMazeLoaded, isRunning, stopExecution, robotState, resetGame, runCode } = useMazeGameContext();
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {

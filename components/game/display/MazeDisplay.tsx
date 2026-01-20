@@ -1,7 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MazeConfig, RunnerState } from '../lib/types';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { MazeConfig, RunnerState } from '@/lib/types';
+import { useState, useRef, useEffect } from 'react';
 
 interface MazeDisplayProps {
     maze: MazeConfig;
