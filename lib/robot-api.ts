@@ -1,4 +1,4 @@
-import { Direction, Position, RunnerState, Item, Door } from './types';
+import { Direction, Position, RunnerState, Item, Door, OpenResult } from './types';
 
 export class CancelError extends Error {
     constructor(message: string = 'Execution cancelled') {
@@ -187,7 +187,16 @@ export class RobotController {
         let cy = y;
 
         // Animate/Simulate ping delay
-        this.onUpdate(this.state, `Echo ping sent...`);
+        this.state.echoWave = {
+            x,
+            y,
+            direction: this.state.direction,
+            timestamp: Date.now()
+        };
+        // Reset hit so we don't show old hit
+        this.state.echoHit = undefined;
+
+        this.onUpdate({ ...this.state }, `Echo ping sent...`);
         await this.wait(this.delayMs / 2);
 
         while (true) {
@@ -199,7 +208,8 @@ export class RobotController {
             // Check bounds (World Wall)
             if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) {
                 // Hit world boundary
-                this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
+                this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
+                this.onUpdate({ ...this.state }, `Echo: Wall at distance ${distance}`);
                 return distance;
             }
 
@@ -212,14 +222,16 @@ export class RobotController {
                 // If door is closed, we hit it.
                 // If door is open, we pass through (ignoring wall check below because door exists there)
                 if (!this.state.doorStates[door.id]) {
-                    this.onUpdate(this.state, `Echo: Closed Door at distance ${distance}`);
+                    this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
+                    this.onUpdate({ ...this.state }, `Echo: Closed Door at distance ${distance}`);
                     return distance;
                 }
                 // Implicit else: Door is open, so we CONTINUE (skip wall check effectively)
             } else {
                 // Only check wall if NO door exists at this tile
                 if (this.walls[cy][cx]) {
-                    this.onUpdate(this.state, `Echo: Wall at distance ${distance}`);
+                    this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
+                    this.onUpdate({ ...this.state }, `Echo: Wall at distance ${distance}`);
                     return distance;
                 }
             }
@@ -231,7 +243,8 @@ export class RobotController {
                 !this.collectedItemIds.has(i.id)
             );
             if (item) {
-                this.onUpdate(this.state, `Echo: ${item.name} at distance ${distance}`);
+                this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
+                this.onUpdate({ ...this.state }, `Echo: ${item.name} at distance ${distance}`);
                 return distance;
             }
 
@@ -284,7 +297,7 @@ export class RobotController {
         }
     }
 
-    async openDoor() {
+    async openDoor(key?: string | Item | Item[]): Promise<OpenResult> {
         this.checkAborted();
         const { x, y } = this.state.position;
         let targetX = x;
@@ -300,15 +313,79 @@ export class RobotController {
         const door = this.doors.find(d => d.position.x === targetX && d.position.y === targetY);
         if (door) {
             if (this.state.doorStates[door.id]) {
-                this.onUpdate(this.state, "Door is already open.");
-            } else {
-                this.state.doorStates = { ...this.state.doorStates, [door.id]: true };
-                this.onUpdate({ ...this.state }, "Opened door.");
+                const msg = "Door is already open.";
+                this.onUpdate(this.state, msg);
+                await this.wait(this.delayMs);
+                return { success: true, message: msg };
             }
+
+            // Check Lock
+            if (door.lock) {
+                if (door.lock.type === 'password') {
+                    if (typeof key !== 'string') {
+                        const msg = `Door is locked (password required).`;
+                        this.onUpdate(this.state, msg);
+                        await this.wait(this.delayMs);
+                        return { success: false, message: msg, requiredAuth: 'PASSWORD' };
+                    }
+                    if (key !== door.lock.value) {
+                        const msg = `Incorrect password for door.`;
+                        this.onUpdate(this.state, msg);
+                        await this.wait(this.delayMs);
+                        return { success: false, message: msg, requiredAuth: 'PASSWORD' };
+                    }
+                } else if (door.lock.type === 'item') {
+                    const requiredItemIds = door.lock.itemIds;
+                    const providedItems = Array.isArray(key) ? key : (key ? [key] : []);
+
+                    // Filter provided items that are actually Items (not strings)
+                    const providedItemObjects = providedItems.filter(i => typeof i === 'object' && 'id' in i);
+                    const providedIds = new Set(providedItemObjects.map(i => i.id));
+
+                    // Identify Missing Items
+                    const missingRequiredIds = requiredItemIds.filter(id => !providedIds.has(id));
+
+                    if (missingRequiredIds.length > 0) {
+                        // Find names of missing items
+                        const missingNames = missingRequiredIds.map(id => {
+                            const item = this.items.find(i => i.id === id);
+                            return item ? item.name : 'Unknown Item';
+                        });
+
+                        const msg = `You did not provide the correct items. Missing: ${missingNames.join(', ')}`;
+                        this.onUpdate(this.state, msg);
+                        await this.wait(this.delayMs);
+                        return {
+                            success: false,
+                            message: msg,
+                            requiredAuth: 'ITEMS',
+                            missingItems: missingRequiredIds
+                        };
+                    }
+
+                    // Check if Provided Items are in Inventory
+                    const inventoryIds = new Set(this.state.inventory.map(i => i.id));
+                    const missingFromInventory = providedItemObjects.filter(i => !inventoryIds.has(i.id));
+
+                    if (missingFromInventory.length > 0) {
+                        const msg = `You don't have these items in your inventory: ${missingFromInventory.map(i => i.name).join(', ')}`;
+                        this.onUpdate(this.state, msg);
+                        await this.wait(this.delayMs);
+                        return { success: false, message: msg, requiredAuth: 'ITEMS' };
+                    }
+                }
+            }
+
+            this.state.doorStates = { ...this.state.doorStates, [door.id]: true };
+            this.onUpdate({ ...this.state }, "Opened door.");
+            await this.wait(this.delayMs);
+            return { success: true, message: "Opened door." };
         } else {
-            this.onUpdate(this.state, "No door to open.");
+            const msg = "No door to open.";
+            this.onUpdate(this.state, msg);
+            await this.wait(this.delayMs);
+            return { success: false, message: msg };
         }
-        await this.wait(this.delayMs);
     }
 
     async closeDoor() {
@@ -372,6 +449,10 @@ export class RobotController {
 
     get direction(): Direction {
         return this.state.direction;
+    }
+
+    get inventory(): Item[] {
+        return [...this.state.inventory]; // Return copy to be safe
     }
 
     getRemainingItems(): Item[] {

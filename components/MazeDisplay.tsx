@@ -107,6 +107,86 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                     );
                 })}
 
+                {/* Echo Wave - Radar Style */}
+                {robotState.echoWave && (
+                    <motion.g
+                        key={`wave-${robotState.echoWave.timestamp}`}
+                        initial={{
+                            opacity: 0.8,
+                            scale: 0.1,
+                            x: robotState.echoWave.x * cellSize + cellSize / 2,
+                            y: robotState.echoWave.y * cellSize + cellSize / 2,
+                            rotate: getDirIndex(robotState.echoWave.direction) * 90
+                        }}
+                        style={{ transformOrigin: "0px 0px" }}
+                        animate={{ opacity: 0, scale: 4 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                    >
+                        {/* 3 Concentric Signal Arcs */}
+                        {[1, 0.7, 0.4].map((r, i) => {
+                            const radius = cellSize * r;
+                            // Coords for +/- 30 degrees arc facing UP (-Y) inside the group
+                            // -30 deg: x = -sin(30)*radius = -0.5*radius, y = -cos(30)*radius = -0.866*radius
+                            // +30 deg: x = 0.5*radius, y = -0.866*radius
+
+                            // We need to construct the path string.
+                            // Start point (Left): M x1 y1
+                            // Arc to (Right): A rx ry x-axis-rotation large-arc-flag sweep-flag x2 y2
+
+                            const x1 = -0.5 * radius;
+                            const y1 = -0.866 * radius;
+                            const x2 = 0.5 * radius;
+                            const y2 = -0.866 * radius;
+
+                            return (
+                                <path
+                                    key={i}
+                                    d={`M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`}
+                                    fill="none"
+                                    stroke="#3B82F6"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    vectorEffect="non-scaling-stroke"
+                                    opacity={1 - (i * 0.2)}
+                                />
+                            );
+                        })}
+                    </motion.g>
+                )}
+
+                {/* Echo Hit - Radar Blip */}
+                {robotState.echoHit && (
+                    <motion.g
+                        key={`hit-${robotState.echoHit.timestamp}`}
+                        initial={{
+                            scale: 0,
+                            opacity: 1,
+                            x: robotState.echoHit.x * cellSize + cellSize / 2,
+                            y: robotState.echoHit.y * cellSize + cellSize / 2
+                        }}
+                        style={{ transformOrigin: "0px 0px" }}
+                        animate={{ scale: 1.5, opacity: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                    >
+                        {/* Expanding rings */}
+                        <circle
+                            cx={0} cy={0} r={cellSize / 3}
+                            fill="none"
+                            stroke="#EF4444"
+                            strokeWidth={2}
+                            vectorEffect="non-scaling-stroke"
+                        />
+                        <circle
+                            cx={0} cy={0} r={cellSize / 2}
+                            fill="none"
+                            stroke="#EF4444"
+                            strokeWidth={1}
+                            strokeDasharray="2 2"
+                            vectorEffect="non-scaling-stroke"
+                        />
+                    </motion.g>
+                )}
+
                 {/* Robot */}
                 <motion.g
                     initial={false}

@@ -397,6 +397,90 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     </button>
                                                 </div>
                                             </div>
+
+                                            <div className="border-t border-gray-700 pt-3 mt-1">
+                                                <label className="text-xs text-gray-400 font-bold block mb-2">Lock Configuration</label>
+
+                                                <div className="flex flex-col gap-2 mb-3">
+                                                    <label className="text-xs text-gray-500">Lock Type</label>
+                                                    <select
+                                                        className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-white"
+                                                        value={door.lock?.type || 'none'}
+                                                        onChange={(e) => {
+                                                            const type = e.target.value;
+                                                            setDoors(prev => prev.map(d => {
+                                                                if (d.id !== door.id) return d;
+                                                                if (type === 'none') {
+                                                                    const { lock, ...rest } = d;
+                                                                    return rest;
+                                                                }
+                                                                if (type === 'password') {
+                                                                    return { ...d, lock: { type: 'password', value: '' } };
+                                                                }
+                                                                if (type === 'item') {
+                                                                    return { ...d, lock: { type: 'item', itemIds: [] } };
+                                                                }
+                                                                return d;
+                                                            }));
+                                                        }}
+                                                    >
+                                                        <option value="none">None (Unlocked)</option>
+                                                        <option value="password">Password</option>
+                                                        <option value="item">Items</option>
+                                                    </select>
+                                                </div>
+
+                                                {door.lock?.type === 'password' && (
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Password</label>
+                                                        <input
+                                                            type="text"
+                                                            className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-yellow-300 font-mono"
+                                                            placeholder="Enter password..."
+                                                            value={door.lock.value}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setDoors(prev => prev.map(d => d.id === door.id ? { ...d, lock: { type: 'password', value: val } } : d));
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {door.lock?.type === 'item' && (
+                                                    <div className="flex flex-col gap-2">
+                                                        <label className="text-xs text-gray-500">Required Items</label>
+                                                        <div className="flex flex-col gap-1 max-h-32 overflow-y-auto bg-gray-900 border border-gray-700 rounded p-1">
+                                                            {items.length === 0 && <span className="text-xs text-gray-600 p-1">No items in maze.</span>}
+                                                            {items.map(i => {
+                                                                const isSelected = (door.lock as any).itemIds.includes(i.id);
+                                                                return (
+                                                                    <label key={i.id} className="flex items-center gap-2 text-xs p-1 hover:bg-gray-800 rounded cursor-pointer">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={isSelected}
+                                                                            onChange={(e) => {
+                                                                                const checked = e.target.checked;
+                                                                                setDoors(prev => prev.map(d => {
+                                                                                    if (d.id !== door.id || d.lock?.type !== 'item') return d;
+                                                                                    const currentIds = d.lock.itemIds;
+                                                                                    const newIds = checked
+                                                                                        ? [...currentIds, i.id]
+                                                                                        : currentIds.filter(id => id !== i.id);
+                                                                                    return { ...d, lock: { ...d.lock, itemIds: newIds } };
+                                                                                }));
+                                                                            }}
+                                                                            className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-0"
+                                                                        />
+                                                                        <span className="text-lg leading-none">{i.icon}</span>
+                                                                        <span className="truncate">{i.name}</span>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             <button
                                                 onClick={() => {
                                                     setDoors(prev => prev.filter(d => d.id !== door.id));

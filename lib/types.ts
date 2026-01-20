@@ -35,6 +35,13 @@ export interface Door {
     position: Position;
     type: 'door';
     isOpen: boolean;
+    lock?: {
+        type: 'password';
+        value: string;
+    } | {
+        type: 'item';
+        itemIds: string[];
+    };
 }
 
 export interface RunnerState {
@@ -42,6 +49,8 @@ export interface RunnerState {
     direction: Direction;
     inventory: Item[];
     doorStates: Record<string, boolean>; // id -> isOpen
+    echoWave?: { x: number; y: number; direction: Direction; timestamp: number };
+    echoHit?: { x: number; y: number; timestamp: number };
 }
 
 export interface MazeConfig {
@@ -60,8 +69,16 @@ export interface Wall {
     position: Position;
 }
 
+export interface OpenResult {
+    success: boolean;
+    message?: string;
+    requiredAuth?: 'PASSWORD' | 'ITEMS';
+    missingItems?: string[];
+}
+
 export interface Robot {
     readonly direction: Direction;
+    readonly inventory: Item[];
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
     turnLeft(): Promise<void>;
@@ -69,7 +86,7 @@ export interface Robot {
     pickup(): Promise<Item | null>;
     scan(): Promise<Item | Door | null>;
     echo(): Promise<number>;
-    openDoor(): Promise<void>;
+    openDoor(key?: string | Item | Item[]): Promise<OpenResult>;
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;
 }

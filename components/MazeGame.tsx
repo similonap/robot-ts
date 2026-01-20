@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 
-import { MazeConfig, PublicApi, Robot, RunnerState } from '../lib/types';
+import { MazeConfig, PublicApi, Robot, RunnerState, Item } from '../lib/types';
 import { RobotController, CancelError, CrashError } from '../lib/robot-api';
 import MazeDisplay from './MazeDisplay';
 import CodeEditor from './CodeEditor';
@@ -343,6 +343,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             const api: PublicApi = {
                 robot: {
                     get direction() { return controller.direction; },
+                    get inventory() { return controller.inventory; },
                     moveForward: () => controller.moveForward(),
                     turnLeft: () => controller.turnLeft(),
                     turnRight: () => controller.turnRight(),
@@ -350,7 +351,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                     pickup: () => controller.pickup(),
                     scan: () => controller.scan(),
                     echo: () => controller.echo(),
-                    openDoor: () => controller.openDoor(),
+                    openDoor: (key?: string | Item | Item[]) => controller.openDoor(key),
                     closeDoor: () => controller.closeDoor(),
                     setSpeed: (delay: number) => controller.setSpeed(delay),
                 },
