@@ -43,7 +43,7 @@ export default function MazeDisplay() {
     }, [robotState.direction]);
 
     return (
-        <div className="w-full h-full flex items-center justify-center overflow-hidden bg-black/50 border-2 border-cyan-900/50 backdrop-blur-sm rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.1)]">
+        <div className="w-full h-full flex items-center justify-center overflow-hidden bg-black/50 border-2 border-cyan-900/50 backdrop-blur-sm shadow-[0_0_15px_rgba(14,165,233,0.1)]">
             <svg
                 viewBox={`0 0 ${width} ${height}`}
                 preserveAspectRatio="xMidYMid meet"

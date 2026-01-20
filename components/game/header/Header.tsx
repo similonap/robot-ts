@@ -40,25 +40,37 @@ const Header = () => {
     };
 
     return (
-        <header className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-700">
-            <div className="flex items-center gap-4">
-                <h1 className="text-xl font-bold">🤖 Robot Maze Runner</h1>
+        <header className="flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-3 border-b border-cyan-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)] sticky top-0 z-50">
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                    <span className="text-2xl">🤖</span>
+                    <h1 className="text-xl font-bold font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 uppercase">
+                        Robot Maze Runner
+                    </h1>
+                </div>
+
                 {robotState && (
-                    <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-400">Health:</span>
-                        <div className="w-32 h-4 bg-gray-700 rounded-full overflow-hidden border border-gray-600">
+                    <div className="flex items-center gap-3 text-sm px-4 py-1.5 bg-black/20 rounded-full border border-gray-800">
+                        <span className="text-gray-400 font-mono text-xs uppercase tracking-wide">Sys.Health</span>
+                        <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
                             <div
-                                className={`h-full transition-all duration-300 ${robotState.health > 50 ? 'bg-green-500' : robotState.health > 20 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                className={`h-full transition-all duration-300 shadow-[0_0_8px_currentColor] ${robotState.health > 50 ? 'bg-emerald-500 text-emerald-500' :
+                                        robotState.health > 20 ? 'bg-yellow-500 text-yellow-500' :
+                                            'bg-red-500 text-red-500'
+                                    }`}
                                 style={{ width: `${robotState.health}%` }}
                             />
                         </div>
-                        <span className={`font-mono font-bold ${robotState.health > 50 ? 'text-green-500' : robotState.health > 20 ? 'text-yellow-500' : 'text-red-500'}`}>
-                            {robotState.health}/100
+                        <span className={`font-mono font-bold w-12 text-right ${robotState.health > 50 ? 'text-emerald-400' :
+                                robotState.health > 20 ? 'text-yellow-400' :
+                                    'text-red-400'
+                            }`}>
+                            {robotState.health}%
                         </span>
                     </div>
                 )}
             </div>
-            <div className="space-x-4">
+            <div className="flex items-center gap-3">
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -66,28 +78,31 @@ const Header = () => {
                     className="hidden"
                     accept=".json"
                 />
+
+                <div className="h-8 w-px bg-gray-800 mx-1"></div>
+
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isRunning}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded disabled:opacity-50"
+                    className="px-4 py-1.5 text-sm font-mono text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    Import Maze
+                    IMPORT_MAZE
                 </button>
                 <button
                     onClick={resetGame}
                     disabled={isRunning}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50"
+                    className="px-4 py-1.5 text-sm font-mono text-gray-400 hover:text-white hover:bg-white/5 border border-gray-700 hover:border-gray-500 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    Reset
+                    RESET
                 </button>
                 <button
                     onClick={isRunning ? stopExecution : runCode}
-                    className={`px-4 py-2 rounded font-bold ${isRunning
-                        ? 'bg-red-600 hover:bg-red-500'
-                        : 'bg-green-600 hover:bg-green-500'
+                    className={`px-6 py-1.5 text-sm font-mono font-bold rounded shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all ${isRunning
+                        ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)]'
                         }`}
                 >
-                    {isRunning ? 'Stop' : 'Run Code'}
+                    {isRunning ? '[ STOP_EXECUTION ]' : '[ RUN_CODE ]'}
                 </button>
             </div>
         </header>
