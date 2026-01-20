@@ -10,7 +10,7 @@ interface Props {
 
 export default async function Page({ params }: Props) {
     const { slug } = await params;
-    const filePath = path.join(process.cwd(), 'mazes', `${slug}.json`);
+    const filePath = path.join(process.cwd(), 'mazes', slug, 'maze.json');
 
     if (!fs.existsSync(filePath)) {
         notFound();
@@ -28,13 +28,23 @@ export default async function Page({ params }: Props) {
 
     const typesContent = fs.readFileSync(path.join(process.cwd(), 'lib/types.ts'), 'utf-8');
 
-    const mdFilePath = path.join(process.cwd(), 'mazes', `${slug}.md`);
+    const mdFilePath = path.join(process.cwd(), 'mazes', slug, 'README.md');
     let initialFiles: Record<string, string> | undefined;
 
     if (fs.existsSync(mdFilePath)) {
         const mdContent = fs.readFileSync(mdFilePath, 'utf-8');
         initialFiles = {
+            ...(initialFiles || {}),
             'README': mdContent
+        };
+    }
+
+    const mainTsPath = path.join(process.cwd(), 'mazes', slug, 'main.ts');
+    if (fs.existsSync(mainTsPath)) {
+        const mainTsContent = fs.readFileSync(mainTsPath, 'utf-8');
+        initialFiles = {
+            ...(initialFiles || {}),
+            'main.ts': mainTsContent
         };
     }
 

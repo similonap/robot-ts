@@ -40,8 +40,8 @@ export default function MazeGame({ sharedTypes, initialMaze, initialFiles }: { s
     const [maze, setMaze] = useState<MazeConfig | null>(initialMaze);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
     const [files, setFiles] = useState<Record<string, string>>({
-        ...initialFiles,
-        'main.ts': INITIAL_CODE
+        'main.ts': INITIAL_CODE,
+        ...initialFiles
     });
     const [activeFile, setActiveFile] = useState(initialFiles && initialFiles['README'] ? 'README' : 'main.ts');
     interface LogEntry {
@@ -577,7 +577,13 @@ export default function MazeGame({ sharedTypes, initialMaze, initialFiles }: { s
                         <div className="w-full h-full flex flex-col min-w-0 border border-gray-700 rounded-md overflow-hidden bg-gray-900">
                             {/* Tabs */}
                             <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto flex-shrink-0">
-                                {Object.keys(files).map(filename => (
+                                {Object.keys(files).sort((a, b) => {
+                                    if (a === 'README' || a === 'README.md') return -1;
+                                    if (b === 'README' || b === 'README.md') return 1;
+                                    if (a === 'main.ts') return -1;
+                                    if (b === 'main.ts') return 1;
+                                    return a.localeCompare(b);
+                                }).map(filename => (
                                     <div
                                         key={filename}
                                         onClick={() => setActiveFile(filename)}
