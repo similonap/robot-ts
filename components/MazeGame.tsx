@@ -43,7 +43,12 @@ export default function MazeGame({ sharedTypes, initialMaze, initialFiles }: { s
         'main.ts': INITIAL_CODE,
         ...initialFiles
     });
-    const [activeFile, setActiveFile] = useState(initialFiles && initialFiles['README'] ? 'README' : 'main.ts');
+    const [activeFile, setActiveFile] = useState(() => {
+        if (!initialFiles) return 'main.ts';
+        if (initialFiles['README']) return 'README';
+        if (initialFiles['README.md']) return 'README.md';
+        return 'main.ts';
+    });
     interface LogEntry {
         id: string;
         timestamp: number;
@@ -148,7 +153,7 @@ export default function MazeGame({ sharedTypes, initialMaze, initialFiles }: { s
 
     const handleDeleteFile = (name: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (name === 'main.ts' || name === 'README') return;
+        if (name === 'main.ts' || name === 'README' || name === 'README.md') return;
         if (confirm(`Delete ${name}?`)) {
             setFiles(prev => {
                 const newFiles = { ...prev };

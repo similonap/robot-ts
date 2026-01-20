@@ -8,6 +8,18 @@ interface Props {
     params: Promise<{ slug: string }>;
 }
 
+
+export async function generateStaticParams() {
+    const mazesDir = path.join(process.cwd(), 'mazes');
+    const entries = fs.readdirSync(mazesDir, { withFileTypes: true });
+
+    return entries
+        .filter(entry => entry.isDirectory())
+        .map(entry => ({
+            slug: entry.name,
+        }));
+}
+
 export default async function Page({ params }: Props) {
     const { slug } = await params;
     const filePath = path.join(process.cwd(), 'mazes', slug, 'maze.json');
@@ -28,24 +40,20 @@ export default async function Page({ params }: Props) {
 
     const typesContent = fs.readFileSync(path.join(process.cwd(), 'lib/types.ts'), 'utf-8');
 
-    const mdFilePath = path.join(process.cwd(), 'mazes', slug, 'README.md');
+    const mazeDir = path.join(process.cwd(), 'mazes', slug);
     let initialFiles: Record<string, string> | undefined;
 
-    if (fs.existsSync(mdFilePath)) {
-        const mdContent = fs.readFileSync(mdFilePath, 'utf-8');
-        initialFiles = {
-            ...(initialFiles || {}),
-            'README': mdContent
-        };
-    }
+    // Read all files in the directory
+    if (fs.existsSync(mazeDir)) {
+        const entries = fs.readdirSync(mazeDir, { withFileTypes: true });
 
-    const mainTsPath = path.join(process.cwd(), 'mazes', slug, 'main.ts');
-    if (fs.existsSync(mainTsPath)) {
-        const mainTsContent = fs.readFileSync(mainTsPath, 'utf-8');
-        initialFiles = {
-            ...(initialFiles || {}),
-            'main.ts': mainTsContent
-        };
+        initialFiles = {};
+        for (const entry of entries) {
+            if (entry.isFile() && entry.name !== 'maze.json') {
+                const content = fs.readFileSync(path.join(mazeDir, entry.name), 'utf-8');
+                initialFiles[entry.name] = content;
+            }
+        }
     }
 
     return (
