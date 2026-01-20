@@ -1,4 +1,4 @@
-import MazeGame from '../components/MazeGame';
+import MazeGame from '../components/game/MazeGame';
 import fs from 'fs';
 import path from 'path';
 import { generateMaze } from '../lib/maze';

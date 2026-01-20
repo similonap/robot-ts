@@ -99,6 +99,13 @@ export interface Robot {
     setSpeed(delay: number): void;
 }
 
+export interface LogEntry {
+    id: string;
+    timestamp: number;
+    message: string;
+    type: 'robot' | 'user';
+}
+
 export interface Game {
     win(message: string): void;
     fail(message: string): void;
