@@ -57,6 +57,13 @@ export class RobotController {
 
         // Initialize collected based on initial state if needed
         this.state.inventory.forEach(item => this.collectedItemIds.add(item.id));
+
+        // Ensure speed is set in state if not already
+        if (this.state.speed === undefined) {
+            this.state.speed = this.delayMs;
+        } else {
+            this.delayMs = this.state.speed;
+        }
     }
 
     private checkAborted() {
@@ -491,5 +498,11 @@ export class RobotController {
 
     setSpeed(delay: number) {
         this.delayMs = delay;
+        // Update state so UI knows about the speed change
+        this.state.speed = delay;
+        // We don't necessarily need to trigger a full update just for speed change 
+        // unless we want immediate visual feedback of "speed changed" (unlikely to be visible until move).
+        // But doing so ensures the UI has the latest speed value for the NEXT move's animation.
+        this.onUpdate({ ...this.state }, `Speed set to ${delay}ms`);
     }
 }

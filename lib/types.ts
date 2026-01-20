@@ -53,6 +53,7 @@ export interface RunnerState {
     revealedItemIds: string[];
     echoWave?: { x: number; y: number; direction: Direction; timestamp: number };
     echoHit?: { x: number; y: number; timestamp: number };
+    speed: number;
 }
 
 export interface MazeConfig {

@@ -70,6 +70,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                 inventory: [],
                 doorStates: {},
                 revealedItemIds: [],
+                speed: 500,
             });
         }
     }, [maze]);
@@ -101,8 +102,10 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
         setRobotState({
             position: maze.start,
             direction: 'East',
+            revealedItemIds: [],
             inventory: [],
             doorStates: {},
+            speed: 500,
         });
         setLogs([]);
         setIsRunning(false);
@@ -175,6 +178,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                     inventory: [],
                     doorStates: {},
                     revealedItemIds: [],
+                    speed: 500,
                 });
                 setLogs([]);
                 setIsRunning(false);
@@ -248,7 +252,9 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             position: maze.start,
             direction: 'East',
             inventory: [],
+            revealedItemIds: [],
             doorStates: {},
+            speed: 500,
         });
 
 
@@ -286,6 +292,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             inventory: [],
             doorStates: {},
             revealedItemIds: [],
+            speed: 500,
         };
 
         setRobotState(startState);

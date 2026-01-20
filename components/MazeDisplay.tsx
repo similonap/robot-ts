@@ -198,7 +198,12 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                         y: robotState.position.y * cellSize + cellSize / 2,
                         rotate: rotation
                     }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    transition={{
+                        type: robotState.speed < 200 ? "tween" : "spring",
+                        duration: robotState.speed < 200 ? robotState.speed / 1000 : undefined,
+                        stiffness: robotState.speed < 200 ? undefined : 200,
+                        damping: robotState.speed < 200 ? undefined : 20,
+                    }}
                 >
                     {/* Centered Group for Rotation */}
                     <g transform={`translate(-${cellSize / 2}, -${cellSize / 2})`}>
