@@ -569,6 +569,23 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             >
                                                 Delete Item
                                             </button>
+
+                                            <div className="border-t border-gray-700 pt-3 mt-1">
+                                                <label className="text-xs text-gray-400 font-bold block mb-2">Visibility</label>
+                                                <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-0"
+                                                        checked={item.isRevealed !== false}
+                                                        onChange={(e) => {
+                                                            const isRevealed = e.target.checked;
+                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, isRevealed } : i));
+                                                        }}
+                                                    />
+                                                    Revealed from start?
+                                                </label>
+                                            </div>
+
                                         </div>
                                     );
                                 }

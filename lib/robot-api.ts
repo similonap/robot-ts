@@ -50,6 +50,11 @@ export class RobotController {
             }
         });
 
+        // Initialize revealedItemIds if not present
+        if (!this.state.revealedItemIds) {
+            this.state.revealedItemIds = [];
+        }
+
         // Initialize collected based on initial state if needed
         this.state.inventory.forEach(item => this.collectedItemIds.add(item.id));
     }
@@ -140,7 +145,22 @@ export class RobotController {
         }
 
         this.state.position = { x: newX, y: newY };
-        this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
+
+        // Check for hidden items at new position to reveal them
+        const hiddenItemsHere = this.items.filter(item =>
+            item.position.x === newX &&
+            item.position.y === newY &&
+            item.isRevealed === false &&
+            !this.state.revealedItemIds.includes(item.id)
+        );
+
+        if (hiddenItemsHere.length > 0) {
+            hiddenItemsHere.forEach(item => this.state.revealedItemIds.push(item.id));
+            this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}. Revealed ${hiddenItemsHere.map(i => i.name).join(', ')}!`);
+        } else {
+            this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
+        }
+
         await this.wait(this.delayMs);
         return true;
     }
@@ -155,6 +175,9 @@ export class RobotController {
             item.position.y === y &&
             !this.collectedItemIds.has(item.id)
         );
+
+        // Only allow picking up if it is revealed? Usually yes, if you are ON it, you revealed it just now.
+        // Since moveForward reveals it, it should be visible now.
 
         if (itemAtPos) {
             this.collectedItemIds.add(itemAtPos.id);
@@ -242,6 +265,9 @@ export class RobotController {
                 i.position.y === cy &&
                 !this.collectedItemIds.has(i.id)
             );
+            // Should echo detect hidden items? 
+            // Usually sonar detects object presence regardless of visual "revealed" state. 
+            // So we will keep it as is.
             if (item) {
                 this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
                 this.onUpdate({ ...this.state }, `Echo: ${item.name} at distance ${distance}`);
@@ -282,14 +308,18 @@ export class RobotController {
         if (doorAtPos) {
             const state = this.state.doorStates[doorAtPos.id] ? 'Open' : 'Closed';
             this.onUpdate(this.state, `Scanned ahead: Door (${state})`);
-            // We return a door object but user might need to differentiate?
-            // User code expects Item usually, so this is a breaking change for types if users typed scan return.
-            // But JS users are fine.
             return { ...doorAtPos, isOpen: this.state.doorStates[doorAtPos.id] };
         }
 
         if (itemAtPos) {
-            this.onUpdate(this.state, `Scanned ahead: ${itemAtPos.name} (tags: ${itemAtPos.tags.join(', ')})`);
+            // Check if hidden
+            if (itemAtPos.isRevealed === false && !this.state.revealedItemIds.includes(itemAtPos.id)) {
+                // REVEAL IT!
+                this.state.revealedItemIds.push(itemAtPos.id);
+                this.onUpdate(this.state, `Scanned ahead: ${itemAtPos.name} (Revealed!)`);
+            } else {
+                this.onUpdate(this.state, `Scanned ahead: ${itemAtPos.name} (tags: ${itemAtPos.tags.join(', ')})`);
+            }
             return itemAtPos;
         } else {
             this.onUpdate(this.state, `Scanned ahead: Nothing`);

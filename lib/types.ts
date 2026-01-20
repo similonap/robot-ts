@@ -28,6 +28,7 @@ export interface Item {
     icon: string;
     tags: string[];
     position: Position;
+    isRevealed?: boolean;
 }
 
 export interface Door {
@@ -49,6 +50,7 @@ export interface RunnerState {
     direction: Direction;
     inventory: Item[];
     doorStates: Record<string, boolean>; // id -> isOpen
+    revealedItemIds: string[];
     echoWave?: { x: number; y: number; direction: Direction; timestamp: number };
     echoHit?: { x: number; y: number; timestamp: number };
 }

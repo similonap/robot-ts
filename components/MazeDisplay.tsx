@@ -91,6 +91,9 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                     const isCollected = robotState.inventory.some(i => i.id === item.id);
                     if (isCollected) return null;
 
+                    const isRevealed = item.isRevealed !== false || (robotState.revealedItemIds && robotState.revealedItemIds.includes(item.id));
+                    if (!isRevealed) return null;
+
                     return (
                         <text
                             key={item.id}

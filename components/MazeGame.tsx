@@ -69,6 +69,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                 direction: 'East',
                 inventory: [],
                 doorStates: {},
+                revealedItemIds: [],
             });
         }
     }, [maze]);
@@ -173,6 +174,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                     direction: 'East',
                     inventory: [],
                     doorStates: {},
+                    revealedItemIds: [],
                 });
                 setLogs([]);
                 setIsRunning(false);
@@ -283,6 +285,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
             direction: 'East' as const,
             inventory: [],
             doorStates: {},
+            revealedItemIds: [],
         };
 
         setRobotState(startState);
