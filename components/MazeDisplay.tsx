@@ -202,47 +202,73 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                     </motion.g>
                 )}
 
-                {/* Robot */}
-                <motion.g
-                    initial={false}
-                    animate={{
-                        x: robotState.position.x * cellSize + cellSize / 2,
-                        y: robotState.position.y * cellSize + cellSize / 2,
-                        rotate: rotation
-                    }}
-                    transition={{
-                        type: robotState.speed < 200 ? "tween" : "spring",
-                        duration: robotState.speed < 200 ? robotState.speed / 1000 : undefined,
-                        stiffness: robotState.speed < 200 ? undefined : 200,
-                        damping: robotState.speed < 200 ? undefined : 20,
-                    }}
-                >
-                    {/* Centered Group for Rotation */}
-                    <g transform={`translate(-${cellSize / 2}, -${cellSize / 2})`}>
+                {/* Explosion Animation */}
+                {robotState.crashedAt && (
+                    <motion.g
+                        key={`crash-${robotState.crashedAt.x}-${robotState.crashedAt.y}`}
+                        initial={{
+                            scale: 0,
+                            opacity: 1,
+                            x: robotState.crashedAt.x * cellSize + cellSize / 2,
+                            y: robotState.crashedAt.y * cellSize + cellSize / 2
+                        }}
+                        animate={{ scale: [1, 2, 2.5], opacity: [1, 1, 0] }}
+                        transition={{ duration: 0.8, times: [0, 0.2, 1] }}
+                    >
                         <text
-                            x={cellSize / 2}
-                            y={cellSize / 2}
                             textAnchor="middle"
                             dominantBaseline="central"
-                            fontSize={cellSize}
+                            fontSize={cellSize * 1.5}
                             style={{ userSelect: 'none' }}
                         >
-                            🤖
+                            💥
                         </text>
-                        {/* Direction Arrow Overlay */}
-                        <g transform={`translate(${cellSize * 0.1}, ${cellSize * 0.1}) scale(0.8)`}>
-                            <path
-                                d="M15 22V8 M8 15l7-7 7 7"
-                                stroke="white"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                                opacity="0.9"
-                            />
+                    </motion.g>
+                )}
+
+                {/* Robot */}
+                {!robotState.crashedAt && (
+                    <motion.g
+                        initial={false}
+                        animate={{
+                            x: robotState.position.x * cellSize + cellSize / 2,
+                            y: robotState.position.y * cellSize + cellSize / 2,
+                            rotate: rotation
+                        }}
+                        transition={{
+                            type: robotState.speed < 200 ? "tween" : "spring",
+                            duration: robotState.speed < 200 ? robotState.speed / 1000 : undefined,
+                            stiffness: robotState.speed < 200 ? undefined : 200,
+                            damping: robotState.speed < 200 ? undefined : 20,
+                        }}
+                    >
+                        {/* Centered Group for Rotation */}
+                        <g transform={`translate(-${cellSize / 2}, -${cellSize / 2})`}>
+                            <text
+                                x={cellSize / 2}
+                                y={cellSize / 2}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize={cellSize}
+                                style={{ userSelect: 'none' }}
+                            >
+                                🤖
+                            </text>
+                            {/* Direction Arrow Overlay */}
+                            <g transform={`translate(${cellSize * 0.1}, ${cellSize * 0.1}) scale(0.8)`}>
+                                <path
+                                    d="M15 22V8 M8 15l7-7 7 7"
+                                    stroke="white"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    fill="none"
+                                    opacity="0.9"
+                                />
+                            </g>
                         </g>
-                    </g>
-                </motion.g>
+                    </motion.g>
+                )}
             </svg>
         </div>
     );

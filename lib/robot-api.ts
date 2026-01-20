@@ -191,6 +191,28 @@ export class RobotController {
             this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
         }
 
+        // Check for DESTROY items
+        const destroyItems = this.items.filter(item =>
+            item.position.x === newX &&
+            item.position.y === newY &&
+            item.destroyOnContact === true &&
+            !this.collectedItemIds.has(item.id)
+        );
+
+        if (destroyItems.length > 0) {
+            destroyItems.forEach(item => {
+                this.collectedItemIds.add(item.id);
+                if (!this.state.collectedItemIds.includes(item.id)) {
+                    this.state.collectedItemIds.push(item.id);
+                }
+            });
+            // We optimize log: merge with move or just log?
+            // If we are about to crash, maybe we don't log "Destroyed" separately if it feels spammy, 
+            // but for now let's keep it or append to move log?
+            // The previous code had it separate. Let's keep it separate but before damage.
+            this.onUpdate({ ...this.state }, `Destroyed ${destroyItems.map(i => i.name).join(', ')}!`);
+        }
+
         // Check for DAMAGE items
         const damageItems = this.items.filter(item =>
             item.position.x === newX &&
@@ -210,27 +232,6 @@ export class RobotController {
                 this.onUpdate({ ...this.state }, "Robot destroyed by damage!");
                 throw new CrashError("Robot destroyed by damage!");
             }
-        }
-
-        // Check for DESTROY items
-        const destroyItems = this.items.filter(item =>
-            item.position.x === newX &&
-            item.position.y === newY &&
-            item.destroyOnContact === true &&
-            !this.collectedItemIds.has(item.id)
-        );
-
-        if (destroyItems.length > 0) {
-            destroyItems.forEach(item => {
-                this.collectedItemIds.add(item.id);
-                if (!this.state.collectedItemIds.includes(item.id)) {
-                    this.state.collectedItemIds.push(item.id);
-                }
-                // We add to collected so it's removed from board, but NOT to inventory unless picked up?
-                // Usually pickup() is separate. If it's "destroy on contact", it just disappears.
-                // We won't add to this.state.inventory.
-            });
-            this.onUpdate({ ...this.state }, `Destroyed ${destroyItems.map(i => i.name).join(', ')}!`);
         }
 
         await this.wait(this.delayMs);

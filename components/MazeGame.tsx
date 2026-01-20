@@ -496,6 +496,13 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                 addLog(`🛑 Execution Stopped.`, 'user');
             } else if (e instanceof CrashError || e.name === 'CrashError') {
                 addLog(`💥 CRASH! ${e.message}`, 'user');
+                // Set crash state for animation
+                if (robotState) {
+                    setRobotState(prev => prev ? {
+                        ...prev,
+                        crashedAt: prev.position
+                    } : null);
+                }
             } else {
                 addLog(`Runtime Error: ${e.message}`, 'user');
                 console.error(e);
