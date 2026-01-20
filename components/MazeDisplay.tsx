@@ -95,18 +95,23 @@ export default function MazeDisplay({ maze, robotState }: MazeDisplayProps) {
                     if (!isRevealed) return null;
 
                     return (
-                        <text
+                        <motion.text
                             key={item.id}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{
+                                duration: Math.min(0.5, robotState.speed / 1000),
+                                ease: "backOut"
+                            }}
                             x={item.position.x * cellSize + cellSize / 2}
                             y={item.position.y * cellSize + cellSize / 2}
                             textAnchor="middle"
                             dominantBaseline="central"
                             fontSize={cellSize * 0.7}
-                            className="animate-pulse"
                             style={{ userSelect: 'none' }}
                         >
                             {item.icon}
-                        </text>
+                        </motion.text>
                     );
                 })}
 
