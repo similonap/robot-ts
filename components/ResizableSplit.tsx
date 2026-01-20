@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface ResizableSplitProps {
-    id: string; // Key for local storage persistence
+    id: string;
     isVertical?: boolean;
-    initialSplit?: number; // Percentage (0-100)
+    initialSplit?: number;
     minSplit?: number;
     maxSplit?: number;
     first: React.ReactNode;
@@ -25,13 +25,6 @@ export default function ResizableSplit({
     const [split, setSplit] = useState(initialSplit);
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef(false);
-
-    useEffect(() => {
-        const stored = localStorage.getItem(`split-${id}`);
-        if (stored) {
-            setSplit(parseFloat(stored));
-        }
-    }, [id]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -57,7 +50,6 @@ export default function ResizableSplit({
                 isDragging.current = false;
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
-                localStorage.setItem(`split-${id}`, split.toString());
             }
         };
 

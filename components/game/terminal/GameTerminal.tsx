@@ -22,7 +22,7 @@ const GameTerminal = () => {
     };
 
     return (
-        <div className="w-full h-full bg-gray-900 border border-gray-700 rounded p-2 font-mono text-sm overflow-hidden flex flex-col">
+        <div className="w-full h-full bg-gray-900 border border-gray-700 p-2 font-mono text-sm overflow-hidden flex flex-col">
             <div className="flex justify-between items-center text-gray-400 border-b border-gray-700 pb-1 mb-2 bg-gray-900 flex-shrink-0">
                 <span>Terminal</span>
                 <label className="text-xs flex items-center gap-1 cursor-pointer hover:text-white">

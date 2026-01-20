@@ -8,7 +8,7 @@ const GameEditor = () => {
     const { files, activeFile, setActiveFile, handleAddFile, handleDeleteFile, changeFile, sharedTypes } = useMazeGameContext();
 
     return (
-        <div className="w-full h-full flex flex-col min-w-0 border border-gray-700 rounded-md overflow-hidden bg-gray-900">
+        <div className="w-full h-full flex flex-col min-w-0 border border-gray-700 overflow-hidden bg-gray-900">
             {/* Tabs */}
             <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto flex-shrink-0">
                 {Object.keys(files).sort((a, b) => {
@@ -64,11 +64,11 @@ const GameEditor = () => {
                                     const match = /language-(\w+)/.exec(className || '');
                                     const isInline = !match && !String(children).includes('\n');
                                     return isInline ? (
-                                        <code className="bg-gray-800 rounded px-1.5 py-0.5 text-sm font-mono text-pink-400" {...props}>
+                                        <code className="bg-gray-800  px-1.5 py-0.5 text-sm font-mono text-pink-400" {...props}>
                                             {children}
                                         </code>
                                     ) : (
-                                        <code className="block bg-gray-800 rounded p-4 mb-4 text-sm font-mono overflow-x-auto whitespace-pre" {...props}>
+                                        <code className="block bg-gray-800 p-4 mb-4 text-sm font-mono overflow-x-auto whitespace-pre" {...props}>
                                             {children}
                                         </code>
                                     );

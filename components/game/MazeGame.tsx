@@ -18,9 +18,6 @@ export default function MazeGameWrapper({ sharedTypes, initialMaze, initialFiles
 }
 
 function MazeGame() {
-
-
-
     return (
         <div className="flex flex-col h-screen bg-black text-white p-4 gap-4">
             <Header />
@@ -42,9 +39,7 @@ function MazeGame() {
                             minSplit={20}
                             maxSplit={80}
                             first={
-                                <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden relative flex items-center justify-center p-2">
-                                    <MazeDisplay />
-                                </div>
+                                <MazeDisplay />
                             }
                             second={
                                 <GameTerminal />

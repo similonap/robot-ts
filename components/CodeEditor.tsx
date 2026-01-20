@@ -63,7 +63,7 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes }:
     }, [files, activeFile]);
 
     return (
-        <div className="h-full w-full border border-gray-700 rounded-md overflow-hidden">
+        <div className="h-full w-full border border-gray-700 overflow-hidden">
             <Editor
                 path={`file:///${activeFile}`}
                 height="100%"
