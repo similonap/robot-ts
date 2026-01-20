@@ -28,7 +28,17 @@ export default async function Page({ params }: Props) {
 
     const typesContent = fs.readFileSync(path.join(process.cwd(), 'lib/types.ts'), 'utf-8');
 
+    const mdFilePath = path.join(process.cwd(), 'mazes', `${slug}.md`);
+    let initialFiles: Record<string, string> | undefined;
+
+    if (fs.existsSync(mdFilePath)) {
+        const mdContent = fs.readFileSync(mdFilePath, 'utf-8');
+        initialFiles = {
+            'README': mdContent
+        };
+    }
+
     return (
-        <MazeGame sharedTypes={typesContent} initialMaze={mazeConfig} />
+        <MazeGame sharedTypes={typesContent} initialMaze={mazeConfig} initialFiles={initialFiles} />
     );
 }

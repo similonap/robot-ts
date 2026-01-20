@@ -58,7 +58,6 @@ export interface RunnerState {
     speed: number;
     health: number;
     collectedItemIds: string[];
-    crashedAt?: { x: number, y: number };
 }
 
 export interface MazeConfig {

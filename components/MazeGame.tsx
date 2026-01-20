@@ -7,6 +7,8 @@ import MazeDisplay from './MazeDisplay';
 import CodeEditor from './CodeEditor';
 import ResizableSplit from './ResizableSplit';
 import * as ts from 'typescript';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Initial code template
 const INITIAL_CODE = `import { robot } from "robot-maze";
@@ -34,13 +36,14 @@ async function main() {
     }
 }`;
 
-export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: string; initialMaze: MazeConfig }) {
+export default function MazeGame({ sharedTypes, initialMaze, initialFiles }: { sharedTypes: string; initialMaze: MazeConfig; initialFiles?: Record<string, string> }) {
     const [maze, setMaze] = useState<MazeConfig | null>(initialMaze);
     const [robotState, setRobotState] = useState<RunnerState | null>(null);
     const [files, setFiles] = useState<Record<string, string>>({
+        ...initialFiles,
         'main.ts': INITIAL_CODE
     });
-    const [activeFile, setActiveFile] = useState('main.ts');
+    const [activeFile, setActiveFile] = useState(initialFiles && initialFiles['README'] ? 'README' : 'main.ts');
     interface LogEntry {
         id: string;
         timestamp: number;
@@ -145,7 +148,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
 
     const handleDeleteFile = (name: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (name === 'main.ts') return;
+        if (name === 'main.ts' || name === 'README') return;
         if (confirm(`Delete ${name}?`)) {
             setFiles(prev => {
                 const newFiles = { ...prev };
@@ -442,7 +445,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                     // The user request said: 'the package is named "readline-sync"'.
                     // Usually `readline-sync` (the real npm package) is `const readline = require('readline-sync')`.
                     // So in TS `import readline = require('readline-sync')` or `import * as readline`.
-                    // To make `import readline from` work nicely we should provide a default.
+                    // To make `import readline from ...` work nicely we should provide a default.
                     return {
                         default: api.readline,
                         ...api.readline
@@ -496,13 +499,6 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                 addLog(`🛑 Execution Stopped.`, 'user');
             } else if (e instanceof CrashError || e.name === 'CrashError') {
                 addLog(`💥 CRASH! ${e.message}`, 'user');
-                // Set crash state for animation
-                if (robotState) {
-                    setRobotState(prev => prev ? {
-                        ...prev,
-                        crashedAt: prev.position
-                    } : null);
-                }
             } else {
                 addLog(`Runtime Error: ${e.message}`, 'user');
                 console.error(e);
@@ -589,7 +585,7 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                                             }`}
                                     >
                                         <span>{filename}</span>
-                                        {filename !== 'main.ts' && (
+                                        {filename !== 'main.ts' && filename !== 'README' && (
                                             <button
                                                 onClick={(e) => handleDeleteFile(filename, e)}
                                                 className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -609,12 +605,47 @@ export default function MazeGame({ sharedTypes, initialMaze }: { sharedTypes: st
                             </div>
 
                             <div className="flex-1 relative overflow-hidden">
-                                <CodeEditor
-                                    files={files}
-                                    activeFile={activeFile}
-                                    onChange={(val) => setFiles(prev => ({ ...prev, [activeFile]: val || '' }))}
-                                    sharedTypes={sharedTypes}
-                                />
+                                {activeFile === 'README' || activeFile.endsWith('.md') ? (
+                                    <div className="w-full h-full p-6 overflow-auto bg-gray-900 text-gray-200">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            components={{
+                                                h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mb-4 text-white pb-2 border-b border-gray-700" {...props} />,
+                                                h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-6 mb-3 text-white" {...props} />,
+                                                h3: ({ node, ...props }) => <h3 className="text-xl font-bold mt-4 mb-2 text-white" {...props} />,
+                                                h4: ({ node, ...props }) => <h4 className="text-lg font-bold mt-3 mb-2 text-white" {...props} />,
+                                                p: ({ node, ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
+                                                ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 pl-2 space-y-1" {...props} />,
+                                                ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-4 pl-2 space-y-1" {...props} />,
+                                                li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                                                a: ({ node, ...props }) => <a className="text-blue-400 hover:text-blue-300 underline" {...props} />,
+                                                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-600 pl-4 italic my-4 text-gray-400" {...props} />,
+                                                code: ({ node, className, children, ...props }) => {
+                                                    const match = /language-(\w+)/.exec(className || '');
+                                                    const isInline = !match && !String(children).includes('\n');
+                                                    return isInline ? (
+                                                        <code className="bg-gray-800 rounded px-1.5 py-0.5 text-sm font-mono text-pink-400" {...props}>
+                                                            {children}
+                                                        </code>
+                                                    ) : (
+                                                        <code className="block bg-gray-800 rounded p-4 mb-4 text-sm font-mono overflow-x-auto whitespace-pre" {...props}>
+                                                            {children}
+                                                        </code>
+                                                    );
+                                                }
+                                            }}
+                                        >
+                                            {files[activeFile]}
+                                        </ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <CodeEditor
+                                        files={files}
+                                        activeFile={activeFile}
+                                        onChange={(val) => setFiles(prev => ({ ...prev, [activeFile]: val || '' }))}
+                                        sharedTypes={sharedTypes}
+                                    />
+                                )}
                             </div>
                         </div>
                     }

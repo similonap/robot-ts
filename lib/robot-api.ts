@@ -191,6 +191,21 @@ export class RobotController {
             this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
         }
 
+        // Check for DAMAGE items
+        const damageItems = this.items.filter(item =>
+            item.position.x === newX &&
+            item.position.y === newY &&
+            item.damageAmount && item.damageAmount > 0
+        );
+
+        if (damageItems.length > 0) {
+            let totalDamage = 0;
+            damageItems.forEach(item => totalDamage += (item.damageAmount || 0));
+
+            this.state.health = Math.max(0, this.state.health - totalDamage);
+            this.onUpdate({ ...this.state }, `Ouch! Took ${totalDamage} damage from ${damageItems.map(i => i.name).join(', ')}. Health: ${this.state.health}`);
+        }
+
         // Check for DESTROY items
         const destroyItems = this.items.filter(item =>
             item.position.x === newX &&
@@ -205,33 +220,11 @@ export class RobotController {
                 if (!this.state.collectedItemIds.includes(item.id)) {
                     this.state.collectedItemIds.push(item.id);
                 }
+                // We add to collected so it's removed from board, but NOT to inventory unless picked up?
+                // Usually pickup() is separate. If it's "destroy on contact", it just disappears.
+                // We won't add to this.state.inventory.
             });
-            // We optimize log: merge with move or just log?
-            // If we are about to crash, maybe we don't log "Destroyed" separately if it feels spammy, 
-            // but for now let's keep it or append to move log?
-            // The previous code had it separate. Let's keep it separate but before damage.
             this.onUpdate({ ...this.state }, `Destroyed ${destroyItems.map(i => i.name).join(', ')}!`);
-        }
-
-        // Check for DAMAGE items
-        const damageItems = this.items.filter(item =>
-            item.position.x === newX &&
-            item.position.y === newY &&
-            item.damageAmount && item.damageAmount > 0
-        );
-
-        if (damageItems.length > 0) {
-            let totalDamage = 0;
-            damageItems.forEach(item => totalDamage += (item.damageAmount || 0));
-
-            this.state.health = Math.max(0, this.state.health - totalDamage);
-            const msg = `Ouch! Took ${totalDamage} damage from ${damageItems.map(i => i.name).join(', ')}. Health: ${this.state.health}`;
-            this.onUpdate({ ...this.state }, msg);
-
-            if (this.state.health <= 0) {
-                this.onUpdate({ ...this.state }, "Robot destroyed by damage!");
-                throw new CrashError("Robot destroyed by damage!");
-            }
         }
 
         await this.wait(this.delayMs);
