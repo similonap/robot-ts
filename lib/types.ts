@@ -60,7 +60,7 @@ export interface RunnerState {
     inventory: Item[];
     doorStates: Record<string, boolean>; // id -> isOpen
     revealedItemIds: string[];
-    echoWave?: { x: number; y: number; direction: Direction; timestamp: number };
+    echoWave?: { x: number; y: number; direction: Direction; timestamp: number; distance: number };
     echoHit?: { x: number; y: number; timestamp: number };
     speed: number;
     health: number;

@@ -289,19 +289,7 @@ export class RobotController {
         let cx = x;
         let cy = y;
 
-        // Animate/Simulate ping delay
-        this.state.echoWave = {
-            x,
-            y,
-            direction: this.state.direction,
-            timestamp: Date.now()
-        };
-        // Reset hit so we don't show old hit
-        this.state.echoHit = undefined;
-
-        this.onUpdate({ ...this.state }, `Echo ping sent...`);
-        await this.wait(this.delayMs / 2);
-
+        // PRE-CALCULATE Distance
         while (true) {
             // Move one step
             cx += dx;
@@ -311,54 +299,72 @@ export class RobotController {
             // Check bounds (World Wall)
             if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) {
                 // Hit world boundary
-                this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
-                this.onUpdate({ ...this.state }, `Echo: Wall at distance ${distance}`);
-                return distance;
+                break;
             }
-
-            // Check Logic:
-            // 1. Is there a Door? -> If Closed, it's an obstacle. If Open, it's explicitly NOT an obstacle (pass through).
-            // 2. Is there a Wall? -> If yes (and no open door overriding it), it's an obstacle.
 
             const door = this.doors.find(d => d.position.x === cx && d.position.y === cy);
             if (door) {
-                // If door is closed, we hit it.
-                // If door is open, we pass through (ignoring wall check below because door exists there)
                 if (!this.state.doorStates[door.id]) {
-                    this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
-                    this.onUpdate({ ...this.state }, `Echo: Closed Door at distance ${distance}`);
-                    return distance;
+                    // Closed door = Hit
+                    break;
                 }
-                // Implicit else: Door is open, so we CONTINUE (skip wall check effectively)
             } else {
-                // Only check wall if NO door exists at this tile
                 if (this.walls[cy][cx]) {
-                    this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
-                    this.onUpdate({ ...this.state }, `Echo: Wall at distance ${distance}`);
-                    return distance;
+                    // Wall = Hit
+                    break;
                 }
             }
 
-            // Check for Item
             const item = this.items.find(i =>
                 i.position.x === cx &&
                 i.position.y === cy &&
                 !this.collectedItemIds.has(i.id)
             );
-            // Should echo detect hidden items? 
-            // Usually sonar detects object presence regardless of visual "revealed" state. 
-            // So we will keep it as is.
             if (item) {
-                this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
-                this.onUpdate({ ...this.state }, `Echo: ${item.name} at distance ${distance}`);
-                return distance;
+                // Item = Hit
+                break;
             }
 
             // Limit distance infinite loop just in case
             if (distance > Math.max(this.walls.length, this.walls[0].length)) {
-                return distance;
+                break;
             }
         }
+
+        // Animate Wave
+        this.state.echoWave = {
+            x,
+            y,
+            direction: this.state.direction,
+            timestamp: Date.now(),
+            distance: distance // Pass pre-calculated distance
+        };
+        this.state.echoHit = undefined;
+
+        this.onUpdate({ ...this.state }, `Echo ping sent...`);
+
+        // Wait for wave traversal (roughly proportional to distance, but capped?)
+        // Or fixed delay? Original was delay/2 then loop. 
+        // Let's use standard delay to let animation play out.
+        await this.wait(this.delayMs);
+
+        // Show Hit
+        this.state.echoHit = { x: cx, y: cy, timestamp: Date.now() };
+
+        // Log result
+        let hitType = "Nothing";
+        if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) hitType = "World Boundary";
+        else {
+            const door = this.doors.find(d => d.position.x === cx && d.position.y === cy);
+            const item = this.items.find(i => i.position.x === cx && i.position.y === cy && !this.collectedItemIds.has(i.id));
+
+            if (door && !this.state.doorStates[door.id]) hitType = "Closed Door";
+            else if (item) hitType = item.name;
+            else if (this.walls[cy][cx]) hitType = "Wall";
+        }
+
+        this.onUpdate({ ...this.state }, `Echo: ${hitType} at distance ${distance}`);
+        return distance;
     }
 
     async scan(): Promise<Item | Door | null> {

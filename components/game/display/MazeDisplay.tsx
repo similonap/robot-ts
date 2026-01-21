@@ -137,46 +137,51 @@ export default function MazeDisplay() {
                     <motion.g
                         key={`wave-${robotState.echoWave.timestamp}`}
                         initial={{
-                            opacity: 0.8,
-                            scale: 0.1,
-                            x: robotState.echoWave.x * cellSize + cellSize / 2,
-                            y: robotState.echoWave.y * cellSize + cellSize / 2,
-                            rotate: getDirIndex(robotState.echoWave.direction) * 90
+                            opacity: 1,
+                            // Start from slightly in front of center
+                            x: (robotState.echoWave.x * cellSize) + (cellSize / 2) + Math.sign(getDirIndex(robotState.echoWave.direction) === 1 ? 1 : getDirIndex(robotState.echoWave.direction) === 3 ? -1 : 0) * (cellSize / 2),
+                            y: (robotState.echoWave.y * cellSize) + (cellSize / 2) + Math.sign(getDirIndex(robotState.echoWave.direction) === 2 ? 1 : getDirIndex(robotState.echoWave.direction) === 0 ? -1 : 0) * (cellSize / 2),
+                            rotate: getDirIndex(robotState.echoWave.direction) * 90,
+                            scale: 0.2 // Start small
                         }}
-                        style={{ transformOrigin: "0px 0px" }}
-                        animate={{ opacity: 0, scale: 4 }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        // We want to animate the POSITION of the wave traveling forward
+                        animate={{
+                            opacity: [1, 1, 0], // Fade out at the very end
+                            // Calculate endpoint based on distance
+                            // x + distance * dx
+                            x: (robotState.echoWave.x * cellSize) + (cellSize / 2) +
+                                (getDirIndex(robotState.echoWave.direction) === 1 ? 1 : getDirIndex(robotState.echoWave.direction) === 3 ? -1 : 0) * (robotState.echoWave.distance * cellSize),
+                            y: (robotState.echoWave.y * cellSize) + (cellSize / 2) +
+                                (getDirIndex(robotState.echoWave.direction) === 2 ? 1 : getDirIndex(robotState.echoWave.direction) === 0 ? -1 : 0) * (robotState.echoWave.distance * cellSize),
+                            scale: 1 // Grow to full cell size but no larger
+                        }}
+                        // Use linear ease for consistent travel speed, duration based on distance? 
+                        // Or fixed duration matching robot delay? 
+                        // Robot delay is usually 500ms. We can match that or be slightly faster.
+                        transition={{ duration: 0.5, ease: "linear" }}
                     >
-                        {/* 3 Concentric Signal Arcs */}
-                        {[1, 0.7, 0.4].map((r, i) => {
-                            const radius = cellSize * r;
-                            // Coords for +/- 30 degrees arc facing UP (-Y) inside the group
-                            // -30 deg: x = -sin(30)*radius = -0.5*radius, y = -cos(30)*radius = -0.866*radius
-                            // +30 deg: x = 0.5*radius, y = -0.866*radius
+                        {/* Radar Arc */}
+                        {/* Draw a curved line (arc) representing the sound front */}
+                        <path
+                            d={`M -${cellSize / 2} 0 Q 0 ${cellSize / 2} ${cellSize / 2} 0`}
+                            fill="none"
+                            stroke="#0ea5e9"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            filter="url(#neon-glow)"
+                            transform="rotate(180)" // Rotate so the convex side faces forward (up for 0 deg rotation)
+                        />
 
-                            // We need to construct the path string.
-                            // Start point (Left): M x1 y1
-                            // Arc to (Right): A rx ry x-axis-rotation large-arc-flag sweep-flag x2 y2
-
-                            const x1 = -0.5 * radius;
-                            const y1 = -0.866 * radius;
-                            const x2 = 0.5 * radius;
-                            const y2 = -0.866 * radius;
-
-                            return (
-                                <path
-                                    key={i}
-                                    d={`M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`}
-                                    fill="none"
-                                    stroke="#0ea5e9"
-                                    strokeWidth={2}
-                                    strokeLinecap="round"
-                                    vectorEffect="non-scaling-stroke"
-                                    opacity={1 - (i * 0.2)}
-                                    filter="url(#neon-glow)"
-                                />
-                            );
-                        })}
+                        {/* Inner echo lines for effect */}
+                        <path
+                            d={`M -${cellSize / 3} 0 Q 0 ${cellSize / 3} ${cellSize / 3} 0`}
+                            fill="none"
+                            stroke="#0ea5e9"
+                            strokeWidth="1.5"
+                            strokeOpacity="0.6"
+                            strokeLinecap="round"
+                            transform="rotate(180)"
+                        />
                     </motion.g>
                 )}
 

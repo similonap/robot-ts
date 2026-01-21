@@ -104,8 +104,7 @@ export default function MazeItemDisplay({ item, cellSize, showAnimations = true 
                     y={y}
                     width={width}
                     height={height}
-                    // preserveAspectRatio="none" // We calculated exact dims
-                    style={{ filter: 'drop-shadow(0 0 5px #d946ef)' }}
+                // preserveAspectRatio="none" // We calculated exact dims
                 />
             );
         } else {
@@ -114,7 +113,7 @@ export default function MazeItemDisplay({ item, cellSize, showAnimations = true 
                     textAnchor="middle"
                     dominantBaseline="central"
                     fontSize={cellSize * 0.6}
-                    style={{ userSelect: 'none', filter: 'drop-shadow(0 0 5px #d946ef)' }}
+                    style={{ userSelect: 'none' }}
                 >
                     {item.icon}
                 </text>
@@ -130,14 +129,7 @@ export default function MazeItemDisplay({ item, cellSize, showAnimations = true 
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ duration: 0.5, ease: "backOut" }}
             >
-                <circle
-                    r={cellSize * 0.4}
-                    fill="#d946ef"
-                    fillOpacity="0.1"
-                    stroke="#d946ef"
-                    strokeWidth="1"
-                    strokeDasharray="2 1"
-                />
+
                 {renderContent()}
             </motion.g>
         );
