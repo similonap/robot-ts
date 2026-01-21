@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { MazeConfig, Position, Item, Door } from '../lib/types';
 import CodeEditor from './CodeEditor';
+import MazeItemDisplay from './game/display/MazeItemDisplay';
 
 const INITIAL_WIDTH = 15;
 const INITIAL_HEIGHT = 15;
@@ -370,7 +371,15 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             `}
                                         >
                                             {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
-                                            {item && !isStart && <span className="text-xl leading-none">{item.icon}</span>}
+                                            {item && !isStart && (
+                                                <div className="w-full h-full flex items-center justify-center pointer-events-none">
+                                                    <svg width="32" height="32" viewBox="0 0 32 32">
+                                                        <g transform={`translate(${-item.position.x * 32}, ${-item.position.y * 32})`}>
+                                                            <MazeItemDisplay item={item} cellSize={32} showAnimations={false} />
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                            )}
                                             {door && !isStart && (
                                                 <div className={`w-6 h-6 border-2 transition-colors ${door.isOpen ? 'border-yellow-500 border-dashed' : 'bg-yellow-900 border-yellow-700'}`}>
                                                 </div>
@@ -600,6 +609,21 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div className="mt-2">
+                                                <label className="text-xs text-gray-400">Image URL (Overrides Icon)</label>
+                                                <input
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-blue-300"
+                                                    placeholder="https://..."
+                                                    value={item.imageUrl || ''}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, imageUrl: val } : i));
+                                                    }}
+                                                />
+                                            </div>
+                                            {item.imageUrl && (
+                                                <div className="mt-2"></div>
+                                            )}
                                             <div className="border-t border-gray-700 pt-3 mt-1 mb-3">
                                                 <label className="text-xs text-gray-400 font-bold block mb-2">Properties</label>
                                                 <div>

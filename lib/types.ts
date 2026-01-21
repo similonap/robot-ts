@@ -37,6 +37,7 @@ export interface Item {
     isRevealed?: boolean;
     damageAmount?: number;
     destroyOnContact?: boolean;
+    imageUrl?: string;
 }
 
 export interface Door {

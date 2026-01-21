@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MazeConfig, RunnerState } from '@/lib/types';
 import { useState, useRef, useEffect } from 'react';
 import { useMazeGameContext } from '../context/MazeGameContext';
+import MazeItemDisplay from './MazeItemDisplay';
 
 interface MazeDisplayProps {
 
@@ -122,34 +123,11 @@ export default function MazeDisplay() {
                         if (!isRevealed) return null;
 
                         return (
-
-                            <motion.g
+                            <MazeItemDisplay
                                 key={item.id}
-                                initial={{ scale: 0, opacity: 0, x: item.position.x * cellSize + cellSize / 2, y: item.position.y * cellSize + cellSize / 2 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0, opacity: 0 }}
-                                transition={{
-                                    duration: Math.min(0.5, robotState.speed / 1000),
-                                    ease: "backOut"
-                                }}
-                            >
-                                <circle
-                                    r={cellSize * 0.4}
-                                    fill="#d946ef"
-                                    fillOpacity="0.1"
-                                    stroke="#d946ef"
-                                    strokeWidth="1"
-                                    strokeDasharray="2 1"
-                                />
-                                <text
-                                    textAnchor="middle"
-                                    dominantBaseline="central"
-                                    fontSize={cellSize * 0.6}
-                                    style={{ userSelect: 'none', filter: 'drop-shadow(0 0 5px #d946ef)' }}
-                                >
-                                    {item.icon}
-                                </text>
-                            </motion.g>
+                                item={item}
+                                cellSize={cellSize}
+                            />
                         );
                     })}
                 </AnimatePresence>
