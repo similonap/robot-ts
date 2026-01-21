@@ -578,4 +578,9 @@ export class RobotController {
         // But doing so ensures the UI has the latest speed value for the NEXT move's animation.
         this.onUpdate({ ...this.state }, `Speed set to ${delay}ms`);
     }
+
+    setAppearance(appearance: { url: string; width?: number; height?: number }) {
+        this.state.appearance = appearance;
+        this.onUpdate({ ...this.state }, `Appearance updated`);
+    }
 }

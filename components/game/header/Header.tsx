@@ -45,7 +45,7 @@ const Header = () => {
                 <div className="flex items-center gap-3">
                     <span className="text-2xl">🤖</span>
                     <h1 className="text-xl font-bold font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 uppercase">
-                        Robot Maze Runner
+                        Circuit Crawler
                     </h1>
                 </div>
 
@@ -55,15 +55,15 @@ const Header = () => {
                         <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
                             <div
                                 className={`h-full transition-all duration-300 shadow-[0_0_8px_currentColor] ${robotState.health > 50 ? 'bg-emerald-500 text-emerald-500' :
-                                        robotState.health > 20 ? 'bg-yellow-500 text-yellow-500' :
-                                            'bg-red-500 text-red-500'
+                                    robotState.health > 20 ? 'bg-yellow-500 text-yellow-500' :
+                                        'bg-red-500 text-red-500'
                                     }`}
                                 style={{ width: `${robotState.health}%` }}
                             />
                         </div>
                         <span className={`font-mono font-bold w-12 text-right ${robotState.health > 50 ? 'text-emerald-400' :
-                                robotState.health > 20 ? 'text-yellow-400' :
-                                    'text-red-400'
+                            robotState.health > 20 ? 'text-yellow-400' :
+                                'text-red-400'
                             }`}>
                             {robotState.health}%
                         </span>

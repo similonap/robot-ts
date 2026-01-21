@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { CancelError, CrashError, HealthDepletedError, RobotController } from "@/lib/robot-api";
-import { Item, MazeConfig, PublicApi, RunnerState } from "@/lib/types";
+import { Item, MazeConfig, PublicApi, RobotAppearance, RunnerState } from "@/lib/types";
 import ts from "typescript";
 
 interface UseCodeRunnerProps {
@@ -187,6 +187,7 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
                     openDoor: (key?: string | Item | Item[]) => controller.openDoor(key),
                     closeDoor: () => controller.closeDoor(),
                     setSpeed: (delay: number) => controller.setSpeed(delay),
+                    setAppearance: (appearance: RobotAppearance) => controller.setAppearance(appearance),
                 },
                 game: gameApi,
                 readline: {

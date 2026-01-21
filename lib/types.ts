@@ -15,6 +15,12 @@ export interface PublicApi {
     }
 }
 
+export interface RobotAppearance {
+    url: string;
+    width?: number;
+    height?: number;
+}
+
 
 export interface Position {
     x: number;
@@ -58,6 +64,7 @@ export interface RunnerState {
     speed: number;
     health: number;
     collectedItemIds: string[];
+    appearance?: RobotAppearance;
 }
 
 export interface MazeConfig {
@@ -97,6 +104,7 @@ export interface Robot {
     openDoor(key?: string | Item | Item[]): Promise<OpenResult>;
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;
+    setAppearance(appearance: RobotAppearance): void;
 }
 
 export interface LogEntry {

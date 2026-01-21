@@ -253,31 +253,46 @@ export default function MazeDisplay() {
                 >
                     {/* Centered Group for Rotation */}
                     <g transform={`translate(-${cellSize / 2}, -${cellSize / 2})`}>
-                        {/* Drone Body */}
-                        <circle
-                            cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.35}
-                            fill="#0f172a" stroke="#38bdf8" strokeWidth="2"
-                        />
-                        {/* Center Eye/Core */}
-                        <circle
-                            cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.15}
-                            fill="#38bdf8"
-                            filter="url(#neon-glow)"
-                        />
-                        {/* Direction Indicator (Front Tick) */}
-                        <path
-                            d={`M ${cellSize / 2} ${cellSize * 0.15} L ${cellSize / 2} ${cellSize * 0.05}`}
-                            stroke="#38bdf8"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                        />
-                        {/* Rear Detail */}
-                        <path
-                            d={`M ${cellSize * 0.3} ${cellSize * 0.8} L ${cellSize * 0.7} ${cellSize * 0.8}`}
-                            stroke="#38bdf8"
-                            strokeWidth="2"
-                        />
+                        {robotState.appearance ? (
+                            // Custom Appearance
+                            <image
+                                href={robotState.appearance.url}
+                                x={robotState.appearance.width ? (cellSize - robotState.appearance.width) / 2 : 0}
+                                y={robotState.appearance.height ? (cellSize - robotState.appearance.height) / 2 : 0}
+                                width={robotState.appearance.width || cellSize}
+                                height={robotState.appearance.height || cellSize}
+                                preserveAspectRatio={robotState.appearance.width ? "none" : "xMidYMid meet"}
+                            />
+                        ) : (
+                            // Default Drone Body
+                            <>
+                                <circle
+                                    cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.35}
+                                    fill="#0f172a" stroke="#38bdf8" strokeWidth="2"
+                                />
+                                {/* Center Eye/Core */}
+                                <circle
+                                    cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.15}
+                                    fill="#38bdf8"
+                                    filter="url(#neon-glow)"
+                                />
+                                {/* Direction Indicator (Front Tick) */}
+                                <path
+                                    d={`M ${cellSize / 2} ${cellSize * 0.15} L ${cellSize / 2} ${cellSize * 0.05}`}
+                                    stroke="#38bdf8"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                />
+                                {/* Rear Detail */}
+                                <path
+                                    d={`M ${cellSize * 0.3} ${cellSize * 0.8} L ${cellSize * 0.7} ${cellSize * 0.8}`}
+                                    stroke="#38bdf8"
+                                    strokeWidth="2"
+                                />
+                            </>
+                        )}
                     </g>
+
                 </motion.g>
             </svg>
         </div>
