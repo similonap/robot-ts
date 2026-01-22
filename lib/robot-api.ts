@@ -31,6 +31,7 @@ export class RobotController {
     private items: Item[] = [];
     private doors: Door[] = [];
     private collectedItemIds: Set<string> = new Set();
+    private listeners: Record<string, ((payload?: any) => void)[]> = {};
 
     constructor(
         initialState: RunnerState,
@@ -138,6 +139,23 @@ export class RobotController {
 
 
 
+    private emit(event: string, payload?: any) {
+        if (this.listeners[event]) {
+            this.listeners[event].forEach(handler => handler(payload));
+        }
+    }
+
+    addEventListener(event: string, handler: (payload?: any) => void) {
+        if (!this.listeners[event]) {
+            this.listeners[event] = [];
+        }
+        this.listeners[event].push(handler);
+    }
+
+    get position(): Position {
+        return { ...this.state.position };
+    }
+
     get health(): number {
         return this.state.health;
     }
@@ -239,6 +257,8 @@ export class RobotController {
         if (this.state.health <= 0) {
             throw new HealthDepletedError(`Did not survive damage from ${damageItems.map(i => i.name).join(', ')}`);
         }
+
+        this.emit('move', { x: newX, y: newY });
         return true;
     }
 
@@ -263,6 +283,7 @@ export class RobotController {
             }
             this.state.inventory = [...this.state.inventory, itemAtPos];
             this.onUpdate({ ...this.state }, `Collected ${itemAtPos.icon} ${itemAtPos.name}!`);
+            this.emit('pickup', itemAtPos);
             await this.wait(this.delayMs);
             return itemAtPos;
         } else {

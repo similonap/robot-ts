@@ -128,23 +128,6 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
             (newState, logMsg) => {
                 setRobotState(newState);
                 addLog(logMsg, 'robot');
-
-                // Execute Level Logic
-                if (maze.stepCode) {
-                    try {
-                        if (!stepLogicFnRef.current) return;
-
-                        // Use the MAIN gameApi instance so it's consistent
-                        // Pass require and exports to support module transpilation
-                        const moduleExports = {};
-                        stepLogicFnRef.current(newState, maze, gameApi, customRequireRef.current, moduleExports);
-
-                    } catch (e: any) {
-                        if (e instanceof CrashError) throw e; // Propagate crash
-                        console.error("Level Logic Error:", e);
-                        addLog(`Level Logic Error: ${e.message}`, 'user');
-                    }
-                }
             },
             abortController.signal,
             maze.items,
@@ -177,6 +160,7 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
                     get direction() { return controller.direction; },
                     get inventory() { return controller.inventory; },
                     get health() { return controller.health; },
+                    get position() { return controller.position; },
                     moveForward: () => controller.moveForward(),
                     turnLeft: () => controller.turnLeft(),
                     turnRight: () => controller.turnRight(),
@@ -188,6 +172,7 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
                     closeDoor: () => controller.closeDoor(),
                     setSpeed: (delay: number) => controller.setSpeed(delay),
                     setAppearance: (appearance: RobotAppearance) => controller.setAppearance(appearance),
+                    addEventListener: (event: string, handler: (payload?: any) => void) => controller.addEventListener(event, handler),
                 },
                 game: gameApi,
                 readline: {
@@ -266,6 +251,17 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
             };
 
             customRequireRef.current = customRequire;
+
+            // Initialize Level Logic ONCE provided we have the API
+            if (stepLogicFnRef.current) {
+                try {
+                    const moduleExports = {};
+                    // Pass the robot API object, not the state!
+                    stepLogicFnRef.current(api.robot, maze, gameApi, customRequireRef.current, moduleExports);
+                } catch (e: any) {
+                    addLog(`Level Logic Init Error: ${e.message}`, 'user');
+                }
+            }
 
             // Execution Main
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;

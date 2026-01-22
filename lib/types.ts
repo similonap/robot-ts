@@ -95,6 +95,7 @@ export interface Robot {
     readonly direction: Direction;
     readonly inventory: Item[];
     readonly health: number;
+    readonly position: Position;
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
     turnLeft(): Promise<void>;
@@ -106,7 +107,10 @@ export interface Robot {
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;
     setAppearance(appearance: RobotAppearance): void;
+    addEventListener(event: RobotEvent, handler: (payload?: any) => void): void;
 }
+
+export type RobotEvent = 'move' | 'pickup';
 
 export interface LogEntry {
     id: string;
