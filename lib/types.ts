@@ -21,6 +21,12 @@ export interface RobotAppearance {
     height?: number;
 }
 
+export interface InitialRobotConfig {
+    name: string; // Unique identifier
+    position: Position;
+    direction: Direction;
+    color?: string;
+}
 
 export interface Position {
     x: number;
@@ -54,30 +60,52 @@ export interface Door {
     };
 }
 
-export interface RunnerState {
+export interface RobotState {
+    name: string; // Unique identifier
+    color?: string;
     position: Position;
     direction: Direction;
     inventory: Item[];
-    doorStates: Record<string, boolean>; // id -> isOpen
-    revealedItemIds: string[];
-    echoWave?: { x: number; y: number; direction: Direction; timestamp: number; distance: number };
-    echoHit?: { x: number; y: number; timestamp: number };
     speed: number;
     health: number;
-    collectedItemIds: string[];
     appearance?: RobotAppearance;
     isDestroyed?: boolean;
     explosion?: { x: number; y: number; timestamp: number };
+    echoWave?: { x: number; y: number; direction: Direction; timestamp: number; distance: number };
+    echoHit?: { x: number; y: number; timestamp: number };
 }
+
+// Deprecated: Alias for backward compatibility if needed, or remove.
+// For now, let's keep it but mapped to RobotState + some world props if we want to risk it?
+// Or just replace usages.
+// Let's replace RunnerState with RobotState in most places, but Context needs to track World too.
+export type RunnerState = RobotState;
+
 
 export interface MazeConfig {
     width: number;
     height: number;
-    start: Position;
     walls: boolean[][]; // true = wall, false = path
+    // Replaces start: Position
+    initialRobots?: InitialRobotConfig[];
+    // Legacy support? No, let's break it cleanly or mapped.
+    // If we want legacy support we keep start? 
+    // Plan says replace.
+    // start: Position; // REMOVED
     items: Item[];
     doors: Door[];
-    stepCode?: string;
+    globalModule?: string;
+}
+
+export interface SharedWorldState {
+    flushUpdates: () => void;
+    isItemCollected: (id: string) => boolean;
+    collectItem: (id: string) => void;
+    isDoorOpen: (id: string) => boolean;
+    openDoor: (id: string) => void;
+    closeDoor: (id: string) => void;
+    revealItem: (id: string) => void;
+    isItemRevealed: (id: string) => boolean;
 }
 
 
@@ -127,15 +155,12 @@ export interface Game {
     win(message: string): void;
     fail(message: string): void;
     items: Item[];
+    getRobot(name: string): Robot | undefined;
 }
 
-//@ts-ignore
-declare module "robot-maze" {
-    export const robot: Robot;
-    export const game: Game;
-}
 
-declare var robot: Robot;
+
+// declare var robot: Robot;
 declare var game: Game;
 declare var maze: MazeConfig;
 

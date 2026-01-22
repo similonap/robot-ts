@@ -7,7 +7,7 @@ interface HeaderProps {
 }
 
 const Header = () => {
-    const { onMazeLoaded, isRunning, stopExecution, robotState, resetGame, runCode } = useMazeGameContext();
+    const { onMazeLoaded, isRunning, stopExecution, robots, resetGame, runCode } = useMazeGameContext();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,7 +22,7 @@ const Header = () => {
                 const parsed = JSON.parse(json) as MazeConfig;
 
                 // Simple validation
-                if (!parsed.width || !parsed.height || !parsed.start || !parsed.walls) {
+                if (!parsed.width || !parsed.height || !parsed.walls) {
                     throw new Error("Invalid maze content");
                 }
 
@@ -49,23 +49,23 @@ const Header = () => {
                     </h1>
                 </div>
 
-                {robotState && (
+                {robots && Object.values(robots).length > 0 && (
                     <div className="flex items-center gap-3 text-sm px-4 py-1.5 bg-black/20 rounded-full border border-gray-800">
                         <span className="text-gray-400 font-mono text-xs uppercase tracking-wide">Sys.Health</span>
                         <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
                             <div
-                                className={`h-full transition-all duration-300 shadow-[0_0_8px_currentColor] ${robotState.health > 50 ? 'bg-emerald-500 text-emerald-500' :
-                                    robotState.health > 20 ? 'bg-yellow-500 text-yellow-500' :
+                                className={`h-full transition-all duration-300 shadow-[0_0_8px_currentColor] ${Object.values(robots)[0].health > 50 ? 'bg-emerald-500 text-emerald-500' :
+                                    Object.values(robots)[0].health > 20 ? 'bg-yellow-500 text-yellow-500' :
                                         'bg-red-500 text-red-500'
                                     }`}
-                                style={{ width: `${robotState.health}%` }}
+                                style={{ width: `${Object.values(robots)[0].health}%` }}
                             />
                         </div>
-                        <span className={`font-mono font-bold w-12 text-right ${robotState.health > 50 ? 'text-emerald-400' :
-                            robotState.health > 20 ? 'text-yellow-400' :
+                        <span className={`font-mono font-bold w-12 text-right ${Object.values(robots)[0].health > 50 ? 'text-emerald-400' :
+                            Object.values(robots)[0].health > 20 ? 'text-yellow-400' :
                                 'text-red-400'
                             }`}>
-                            {robotState.health}%
+                            {Object.values(robots)[0].health}%
                         </span>
                     </div>
                 )}

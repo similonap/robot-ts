@@ -1,24 +1,40 @@
-import { Item, LogEntry, MazeConfig, RunnerState } from "@/lib/types";
-import { createContext, RefObject, useContext } from "react";
+import { LogEntry, MazeConfig, RobotState, SharedWorldState } from "@/lib/types";
+import { createContext, RefObject, useContext, useEffect } from "react";
 import { useMaze } from "./hooks/useMaze";
-import { useRobot, INITIAL_ROBOT_STATE } from "./hooks/useRobot";
+import { useRobots } from "./hooks/useRobots";
+import { useWorld } from "./hooks/useWorld";
 import { useGameLogs } from "./hooks/useGameLogs";
 import { useFileManager } from "./hooks/useFileManager";
 import { useCodeRunner } from "./hooks/useCodeRunner";
 
 interface MazeGameContextType {
     maze: MazeConfig;
-    robotState: RunnerState;
+
+    // Multi-robot support
+    robots: Record<string, RobotState>;
+    updateRobotState: (id: string, state: RobotState) => void;
+    clearRobots: () => void;
+    initializeRobots: (initialConfigs: import("@/lib/types").InitialRobotConfig[]) => void;
+
+    // Shared World State
+    worldState: {
+        doorStates: Record<string, boolean>;
+        revealedItemIds: string[];
+        collectedItemIds: string[];
+    };
+    worldActions: SharedWorldState;
+
     isRunning: boolean;
     onMazeLoaded: (maze: MazeConfig) => void;
     resetGame: () => void;
     runCode: () => void;
     stopExecution: () => void;
-    setRobotState: (state: RunnerState) => void;
+
     setShowRobotLogs: (show: boolean) => void;
     showRobotLogs: boolean;
     logs: LogEntry[];
     addLog: (msg: string, type: 'robot' | 'user') => void;
+
     isWaitingForInput: boolean;
     files: Record<string, string>;
     handleAddFile: () => void;
@@ -36,13 +52,22 @@ interface MazeGameContextType {
 
 export const MazeGameContext = createContext<MazeGameContextType>({
     maze: {} as MazeConfig,
-    robotState: INITIAL_ROBOT_STATE,
+    robots: {},
+    updateRobotState: () => { },
+    clearRobots: () => { },
+    initializeRobots: () => { },
+    worldState: {
+        doorStates: {},
+        revealedItemIds: [],
+        collectedItemIds: []
+    },
+    worldActions: {} as SharedWorldState,
+
     isRunning: false,
     onMazeLoaded: () => { },
     resetGame: () => { },
     runCode: () => { },
     stopExecution: () => { },
-    setRobotState: () => { },
     setShowRobotLogs: () => { },
     showRobotLogs: false,
     logs: [],
@@ -71,34 +96,42 @@ interface MazeGameProviderProps {
 // Initial code template
 const INITIAL_CODE = `import { robot } from "robot-maze";
 
-async function main() {
-    // Keep running until the program is stopped or the maze is solved
+async function main() {    
     while (true) {
         // STRATEGY: RIGHT-HAND RULE
         
-        // 1. Always try to turn Right first. 
-        // We want to hug the right wall, so we assume the right path is the way to go.
+        // 1. Commit to the strategy: Turn Right to face the "ideal" path.
         await robot.turnRight();
 
-        // 2. Check if the path ahead is clear.
-        // If the path is blocked (wall), turn Left to check the next direction.
-        // - If we turned Right and it's blocked, turning Left faces us Forward again.
-        // - If Forward is blocked, turning Left faces us Left.
-        // - If Left is blocked, turning Left faces us Backward (dead end).
+        // 2. Scan for an opening. 
+        // Logic: Is Right blocked? If yes, Turn Left (to face Forward). 
+        // Is Forward blocked? If yes, Turn Left (to face Left).
+        // Is Left blocked? If yes, Turn Left (to face Back).
         while (!(await robot.canMoveForward())) {
             await robot.turnLeft();
         }
 
-        // 3. We found an opening! Move into it.
+        // 3. We found an open path (either Right, Forward, Left, or Back). Move!
         await robot.moveForward();
     }
 }`;
 
 export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
     const { maze, setMaze } = useMaze(initialMaze);
-    const { robotState, setRobotState, resetRobot } = useRobot(initialMaze.start);
+    const { robots, updateRobotState, clearRobots, removeRobot, initializeRobots } = useRobots();
+    const { doorStates, revealedItemIds, collectedItemIds, worldActions, resetWorld } = useWorld(initialMaze);
+
     const { logs, setLogs, addLog, showRobotLogs, setShowRobotLogs, clearLogs } = useGameLogs();
     const { files, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
+
+    // Initialize robots on mount
+    useEffect(() => {
+        if (initialMaze.initialRobots) {
+            initializeRobots(initialMaze.initialRobots);
+        } else {
+            initializeRobots([{ position: { x: 1, y: 1 }, direction: 'East', name: 'Robot 1' }]);
+        }
+    }, []);
 
     // Wire up code runner with dependencies
     const {
@@ -113,8 +146,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         stopExecution
     } = useCodeRunner({
         maze,
-        robotState,
-        setRobotState,
+        worldActions,
+        updateRobotState,
         addLog,
         files,
         setLogs
@@ -122,7 +155,15 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
 
     const onMazeLoaded = (newMaze: MazeConfig) => {
         setMaze(newMaze);
-        resetRobot(newMaze.start);
+        clearRobots();
+
+        if (newMaze.initialRobots) {
+            initializeRobots(newMaze.initialRobots);
+        } else {
+            initializeRobots([{ position: { x: 1, y: 1 }, direction: 'East', name: 'Robot 1' }]);
+        }
+
+        resetWorld();
         clearLogs();
         stopExecution(); // Ensure any previous run stops
         addLog("Maze imported successfully!", 'user');
@@ -134,7 +175,16 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         }
         if (!maze) return;
 
-        resetRobot(maze.start);
+        clearRobots();
+        // Re-initialize initial robots
+        if (maze.initialRobots) {
+            initializeRobots(maze.initialRobots);
+        } else {
+            // Should not happen for new mazes but safe fallback
+            initializeRobots([{ position: { x: 1, y: 1 }, direction: 'East', name: 'Robot 1' }]);
+        }
+
+        resetWorld();
         clearLogs();
         setInputValue('');
     };
@@ -142,13 +192,22 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
     return (
         <MazeGameContext.Provider value={{
             maze,
-            robotState,
+            robots,
+            updateRobotState,
+            clearRobots,
+            initializeRobots,
+            worldState: {
+                doorStates,
+                revealedItemIds,
+                collectedItemIds
+            },
+            worldActions,
+
             isRunning,
             onMazeLoaded,
             resetGame,
             runCode,
             stopExecution,
-            setRobotState,
             setShowRobotLogs,
             showRobotLogs,
             logs,

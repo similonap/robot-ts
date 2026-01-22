@@ -7,9 +7,10 @@ interface CodeEditorProps {
     activeFile: string;
     onChange: (value: string) => void;
     sharedTypes: string;
+    modules?: Record<string, string>;
 }
 
-export default function CodeEditor({ files, activeFile, onChange, sharedTypes }: CodeEditorProps) {
+export default function CodeEditor({ files, activeFile, onChange, sharedTypes, modules = {} }: CodeEditorProps) {
     const editorRef = useRef<any>(null);
     const monacoRef = useRef<any>(null);
 
@@ -28,6 +29,8 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes }:
             module: monaco.languages.typescript.ModuleKind.CommonJS,
             noLib: false,
             esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs
         });
 
         let libContent = sharedTypes.replace(/export /g, '');
@@ -60,7 +63,17 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes }:
                 }
             }
         });
-    }, [files, activeFile]);
+        // Sync Dynamic Modules (as node_modules)
+        Object.entries(modules).forEach(([moduleName, content]) => {
+            const uri = monaco.Uri.parse(`file:///node_modules/${moduleName}/index.ts`);
+            let model = monaco.editor.getModel(uri);
+            if (!model) {
+                model = monaco.editor.createModel(content, 'typescript', uri);
+            } else if (model.getValue() !== content) {
+                model.setValue(content);
+            }
+        });
+    }, [files, activeFile, modules]);
 
     return (
         <div className="h-full w-full border border-gray-700 overflow-hidden">

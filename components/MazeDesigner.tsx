@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { MazeConfig, Position, Item, Door } from '../lib/types';
+import { MazeConfig, Position, Item, Door, InitialRobotConfig } from '../lib/types';
 import CodeEditor from './CodeEditor';
 import MazeItemDisplay from './game/display/MazeItemDisplay';
 import ResizableSplit from './ResizableSplit';
@@ -9,10 +9,12 @@ import ResizableSplit from './ResizableSplit';
 const INITIAL_WIDTH = 15;
 const INITIAL_HEIGHT = 15;
 const DEFAULT_STEP_CODE = `// Check conditions every step
-// Available: robot (state), maze, game
+// Available: game
+export { robot, game, Robot };
+
 /*
-if (robot.position.x === 10 && robot.position.y === 10) {
-    game.win("You reached the goal!");
+if (game.items.length === 0) {
+    game.win("All items collected!");
 }
 */
 `;
@@ -27,7 +29,7 @@ const ITEM_TYPES = [
     { name: 'Map', icon: '🗺️', tags: ['Tool'] },
 ];
 
-type Tool = 'wall' | 'path' | 'start' | 'item' | 'door' | null;
+type Tool = 'wall' | 'path' | 'robot' | 'item' | 'door' | null;
 
 export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     const [width, setWidth] = useState(INITIAL_WIDTH);
@@ -35,10 +37,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     const [walls, setWalls] = useState<boolean[][]>(
         Array(INITIAL_HEIGHT).fill(null).map(() => Array(INITIAL_WIDTH).fill(false))
     );
-    const [start, setStart] = useState<Position>({ x: 1, y: 1 });
+    const [initialRobots, setInitialRobots] = useState<InitialRobotConfig[]>([]);
     const [items, setItems] = useState<Item[]>([]);
     const [doors, setDoors] = useState<Door[]>([]);
-    const [stepCode, setStepCode] = useState(DEFAULT_STEP_CODE);
+    const [globalModule, setGlobalModule] = useState(DEFAULT_STEP_CODE);
     const [zoom, setZoom] = useState(1);
 
     // UI State
@@ -66,10 +68,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
         setItems(prev => prev.filter(i => i.position.x < newW && i.position.y < newH));
         setDoors(prev => prev.filter(d => d.position.x < newW && d.position.y < newH));
 
-        // Reset start if OOB
-        if (start.x >= newW || start.y >= newH) {
-            setStart({ x: 1, y: 1 });
-        }
+        // Reset start if OOB - Removed
+        // if (start.x >= newW || start.y >= newH) {
+        //    setStart({ x: 1, y: 1 });
+        // }
     };
 
     const handleZoom = (delta: number) => {
@@ -84,13 +86,14 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     };
 
     const handleCellClick = (x: number, y: number) => {
-        // Priority: If item exists at this position, select it regardless of tool (unless we add specific override later)
+        // Priority: If item/door/robot exists at this position, select it regardless of tool
         const existingItem = items.find(i => i.position.x === x && i.position.y === y);
         const existingDoor = doors.find(d => d.position.x === x && d.position.y === y);
+        const existingRobot = initialRobots.find(r => r.position.x === x && r.position.y === y);
 
-        if (existingItem || existingDoor) {
+        if (existingItem || existingDoor || existingRobot) {
             // Implicit Selection Logic
-            setSelectedItemId(existingItem?.id || existingDoor?.id || null);
+            setSelectedItemId(existingItem?.id || existingDoor?.id || existingRobot?.name || null);
             // Do not paint
             return;
         }
@@ -110,20 +113,48 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             // Remove items at this pos
             setItems(prev => prev.filter(i => i.position.x !== x || i.position.y !== y));
             setDoors(prev => prev.filter(d => d.position.x !== x || d.position.y !== y));
+            setInitialRobots(prev => prev.filter(r => r.position.x !== x || r.position.y !== y));
         } else if (selectedTool === 'path') {
             const newWalls = [...walls];
             newWalls[y] = [...newWalls[y]];
             newWalls[y][x] = false;
             setWalls(newWalls);
-        } else if (selectedTool === 'start') {
-            setStart({ x, y });
-            // Ensure logic allows start here (e.g. not a wall)
+        } else if (selectedTool === 'robot') {
+            // Remove existing items at pos
+            const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
+            const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
+            const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
+
+            let baseName = `Robot ${filteredRobots.length + 1}`;
+            let name = baseName;
+            let counter = 1;
+            while (filteredRobots.some(r => r.name === name)) {
+                counter++;
+                name = `${baseName} (${counter})`;
+            }
+
+            const newRobot: InitialRobotConfig = {
+                position: { x, y },
+                direction: 'East',
+                name: name,
+                color: '#38bdf8'
+            };
+
+            setItems(filteredItems);
+            setDoors(filteredDoors);
+            setInitialRobots([...filteredRobots, newRobot]);
+            setSelectedItemId(newRobot.name);
+
+            // Ensure path
             const newWalls = [...walls];
             newWalls[y][x] = false;
             setWalls(newWalls);
+
         } else if (selectedTool === 'item') {
-            // Remove existing item at pos
-            const filtered = items.filter(i => i.position.x !== x || i.position.y !== y);
+            // Remove existing entities at pos
+            const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
+            const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
+
             const newItem: Item = {
                 id: `item-${Date.now()}`,
                 type: 'item',
@@ -132,7 +163,9 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                 tags: [...selectedItemTemplate.tags],
                 position: { x, y }
             };
-            setItems([...filtered, newItem]);
+
+            setItems([...filteredItems, newItem]);
+            setInitialRobots(filteredRobots);
             // Auto-select new item
             setSelectedItemId(newItem.id);
 
@@ -144,6 +177,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             // Remove existing item/door at pos
             const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
             const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
+            const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
 
             const newDoor: Door = {
                 id: `door-${Date.now()}`,
@@ -154,7 +188,8 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             setItems(filteredItems);
             setDoors([...filteredDoors, newDoor]);
-            setSelectedItemId(newDoor.id);
+            setInitialRobots(filteredRobots);
+            setSelectedItemId(newDoor.name);
 
             // Ensure path (doors are placed on paths, effectively)
             const newWalls = [...walls];
@@ -173,11 +208,11 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
         const config: MazeConfig = {
             width,
             height,
-            start,
+            initialRobots,
             walls,
             items,
             doors,
-            stepCode
+            globalModule
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
         const downloadAnchorNode = document.createElement('a');
@@ -202,10 +237,32 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                     setWidth(json.width);
                     setHeight(json.height);
                     setWalls(json.walls);
-                    setStart(json.start || { x: 1, y: 1 });
+
+                    if (json.initialRobots) {
+                        setInitialRobots(json.initialRobots);
+                    } else if ((json as any).start) {
+                        // Legacy support: Convert start to single robot
+                        // Legacy support: Convert start to single robot
+                        setInitialRobots([{
+                            position: (json as any).start,
+                            direction: 'East',
+                            color: '#38bdf8',
+                            name: 'Robot 1'
+                        }]);
+                    } else {
+                        // Default
+                        // Default
+                        setInitialRobots([{
+                            position: { x: 1, y: 1 },
+                            direction: 'East',
+                            name: 'Robot 1',
+                            color: '#38bdf8'
+                        }]);
+                    }
+
                     setItems(json.items || []);
                     setDoors(json.doors || []);
-                    setStepCode(json.stepCode || DEFAULT_STEP_CODE);
+                    setGlobalModule(json.globalModule || DEFAULT_STEP_CODE);
                 } else {
                     alert('Invalid maze file format');
                 }
@@ -296,10 +353,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                 <div className="w-4 h-4 bg-gray-800 border border-gray-700"></div> Path
                             </button>
                             <button
-                                onClick={() => setSelectedTool(prev => prev === 'start' ? null : 'start')}
-                                className={`px-4 py-2 rounded text-left flex items-center gap-2 ${selectedTool === 'start' ? 'bg-gray-700 border-l-4 border-blue-500' : 'hover:bg-gray-800'}`}
+                                onClick={() => setSelectedTool(prev => prev === 'robot' ? null : 'robot')}
+                                className={`px-4 py-2 rounded text-left flex items-center gap-2 ${selectedTool === 'robot' ? 'bg-gray-700 border-l-4 border-blue-500' : 'hover:bg-gray-800'}`}
                             >
-                                <div className="w-4 h-4 bg-blue-500 rounded-full"></div> Start
+                                <div className="w-4 h-4 bg-cyan-500 rounded-full border border-cyan-300"></div> Robot
                             </button>
                             <button
                                 onClick={() => setSelectedTool(prev => prev === 'door' ? null : 'door')}
@@ -361,10 +418,12 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                 >
                                     {walls.map((row, y) =>
                                         row.map((isWall, x) => {
-                                            const isStart = start.x === x && start.y === y;
+                                            const robotAtPos = initialRobots.find(r => r.position.x === x && r.position.y === y);
                                             const item = items.find(i => i.position.x === x && i.position.y === y);
                                             const door = doors.find(d => d.position.x === x && d.position.y === y);
-                                            const isSelected = (item && selectedItemId === item.id) || (door && selectedItemId === door.id);
+                                            const isSelected = (item && selectedItemId === item.id) ||
+                                                (door && selectedItemId === door.name) ||
+                                                (robotAtPos && selectedItemId === robotAtPos.name);
 
                                             return (
                                                 <div
@@ -373,13 +432,13 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     onMouseEnter={() => handleCellEnter(x, y)}
                                                     className={`w-8 h-8 flex items-center justify-center cursor-pointer
                                                 ${isWall ? 'bg-gray-600' : 'bg-gray-800 hover:bg-gray-750'}
-                                                ${isStart ? 'ring-2 ring-inset ring-blue-500' : ''}
+                                                ${robotAtPos ? 'ring-2 ring-inset ring-cyan-500' : ''}
                                                 ${isSelected ? 'ring-2 ring-yellow-400 bg-gray-700' : ''}
                                                 ${!selectedTool && !isSelected ? 'hover:ring-1 hover:ring-gray-400' : ''}
                                             `}
                                                 >
-                                                    {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
-                                                    {item && !isStart && (
+                                                    {robotAtPos && <div className="w-4 h-4 bg-cyan-500 rounded-full border border-cyan-300" title={robotAtPos.name} />}
+                                                    {item && !robotAtPos && (
                                                         <div className="w-full h-full flex items-center justify-center pointer-events-none">
                                                             <svg width="32" height="32" viewBox="0 0 32 32">
                                                                 <g transform={`translate(${-item.position.x * 32}, ${-item.position.y * 32})`}>
@@ -388,7 +447,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                             </svg>
                                                         </div>
                                                     )}
-                                                    {door && !isStart && (
+                                                    {door && !robotAtPos && (
                                                         <div className={`w-6 h-6 border-2 transition-colors ${door.isOpen ? 'border-yellow-500 border-dashed' : 'bg-yellow-900 border-yellow-700'}`}>
                                                         </div>
                                                     )}
@@ -405,9 +464,9 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                 <h3 className="text-sm font-bold text-gray-400 mb-2">Level Logic (Runs every step)</h3>
                                 <div className="flex-1 border border-gray-700">
                                     <CodeEditor
-                                        files={{ 'logic.ts': stepCode }}
+                                        files={{ 'logic.ts': globalModule }}
                                         activeFile="logic.ts"
-                                        onChange={(val) => setStepCode(val || '')}
+                                        onChange={(val) => setGlobalModule(val || '')}
                                         sharedTypes={sharedTypes}
                                     />
                                 </div>
@@ -420,11 +479,83 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                 <div className="w-64 bg-gray-900 p-4 rounded border border-gray-700 overflow-y-auto">
                     <h3 className="font-bold mb-4 text-gray-400 uppercase text-xs">Properties</h3>
 
-                    {selectedItemId && (items.find(i => i.id === selectedItemId) || doors.find(d => d.id === selectedItemId)) ? (
+                    {selectedItemId && (items.find(i => i.id === selectedItemId) || doors.find(d => d.id === selectedItemId) || initialRobots.find(r => r.name === selectedItemId)) ? (
                         <div className="flex flex-col gap-4">
                             {(() => {
                                 const item = items.find(i => i.id === selectedItemId);
                                 const door = doors.find(d => d.id === selectedItemId);
+                                const robot = initialRobots.find(r => r.name === selectedItemId);
+
+                                if (robot) {
+                                    return (
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex gap-2 items-center text-cyan-500 font-bold border-b border-gray-700 pb-2">
+                                                <span>🤖 Robot</span>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">Name (Unique)</label>
+                                                <input
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-white"
+                                                    value={robot.name || ''}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        // Update key and selection
+                                                        setInitialRobots(prev => prev.map(r => r.name === robot.name ? { ...r, name: val } : r));
+                                                        setSelectedItemId(val);
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">Direction</label>
+                                                <select
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-white"
+                                                    value={robot.direction}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value as any;
+                                                        setInitialRobots(prev => prev.map(r => r.name === robot.name ? { ...r, direction: val } : r));
+                                                    }}
+                                                >
+                                                    <option value="North">North</option>
+                                                    <option value="East">East</option>
+                                                    <option value="South">South</option>
+                                                    <option value="West">West</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">Color (Hex)</label>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="color"
+                                                        className="w-8 h-8 rounded cursor-pointer bg-transparent"
+                                                        value={robot.color || '#38bdf8'}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setInitialRobots(prev => prev.map(r => r.name === robot.name ? { ...r, color: val } : r));
+                                                        }}
+                                                    />
+                                                    <input
+                                                        className="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm font-mono text-white"
+                                                        value={robot.color || '#38bdf8'}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setInitialRobots(prev => prev.map(r => r.name === robot.name ? { ...r, color: val } : r));
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                onClick={() => {
+                                                    setInitialRobots(prev => prev.filter(r => r.name !== robot.name));
+                                                    setSelectedItemId(null);
+                                                }}
+                                                className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800 mt-4"
+                                            >
+                                                Remove Robot
+                                            </button>
+                                        </div>
+                                    );
+                                }
 
                                 if (door) {
                                     return (
@@ -436,7 +567,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 <label className="text-xs text-gray-400">ID</label>
                                                 <input
                                                     className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
-                                                    value={door.id}
+                                                    value={door.name}
                                                     readOnly
                                                 />
                                             </div>
@@ -444,13 +575,13 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 <label className="text-xs text-gray-400">State</label>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.id ? { ...d, isOpen: true } : d))}
+                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.name ? { ...d, isOpen: true } : d))}
                                                         className={`flex-1 px-2 py-1 rounded text-sm border ${door.isOpen ? 'bg-green-900 border-green-500 text-green-200' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
                                                     >
                                                         Open
                                                     </button>
                                                     <button
-                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.id ? { ...d, isOpen: false } : d))}
+                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.name ? { ...d, isOpen: false } : d))}
                                                         className={`flex-1 px-2 py-1 rounded text-sm border ${!door.isOpen ? 'bg-red-900 border-red-500 text-red-200' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
                                                     >
                                                         Closed
@@ -469,7 +600,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         onChange={(e) => {
                                                             const type = e.target.value;
                                                             setDoors(prev => prev.map(d => {
-                                                                if (d.id !== door.id) return d;
+                                                                if (d.id !== door.name) return d;
                                                                 if (type === 'none') {
                                                                     const { lock, ...rest } = d;
                                                                     return rest;
@@ -500,7 +631,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                             value={door.lock.value}
                                                             onChange={(e) => {
                                                                 const val = e.target.value;
-                                                                setDoors(prev => prev.map(d => d.id === door.id ? { ...d, lock: { type: 'password', value: val } } : d));
+                                                                setDoors(prev => prev.map(d => d.id === door.name ? { ...d, lock: { type: 'password', value: val } } : d));
                                                             }}
                                                         />
                                                     </div>
@@ -521,7 +652,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                                             onChange={(e) => {
                                                                                 const checked = e.target.checked;
                                                                                 setDoors(prev => prev.map(d => {
-                                                                                    if (d.id !== door.id || d.lock?.type !== 'item') return d;
+                                                                                    if (d.id !== door.name || d.lock?.type !== 'item') return d;
                                                                                     const currentIds = d.lock.itemIds;
                                                                                     const newIds = checked
                                                                                         ? [...currentIds, i.id]
@@ -543,7 +674,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
                                             <button
                                                 onClick={() => {
-                                                    setDoors(prev => prev.filter(d => d.id !== door.id));
+                                                    setDoors(prev => prev.filter(d => d.id !== door.name));
                                                     setSelectedItemId(null);
                                                 }}
                                                 className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800 mt-4"

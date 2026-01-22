@@ -278,5 +278,5 @@
     }
   ],
   "doors": [],
-  "stepCode": "const checkWin = () => {\n  if (game.items.length === 0) {\n    game.win(\"All items were collected\")\n  }\n};\n\nrobot.addEventListener('move', checkWin);\nrobot.addEventListener('pickup', checkWin);\ncheckWin();"
+  "globalModule": "export { robot, game, Robot };\n\nconst checkWin = () => {\n  if (game.items.length === 0) {\n    game.win(\"All items were collected\")\n  }\n};\n\nrobot.addEventListener('move', checkWin);\nrobot.addEventListener('pickup', checkWin);\ncheckWin();"
 }

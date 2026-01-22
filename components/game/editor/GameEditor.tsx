@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 
 const GameEditor = () => {
 
-    const { files, activeFile, setActiveFile, handleAddFile, handleDeleteFile, changeFile, sharedTypes } = useMazeGameContext();
+    const { files, activeFile, setActiveFile, handleAddFile, handleDeleteFile, changeFile, sharedTypes, maze } = useMazeGameContext();
 
     return (
         <div className="w-full h-full flex flex-col min-w-0 border border-gray-700 overflow-hidden bg-gray-900">
@@ -84,6 +84,7 @@ const GameEditor = () => {
                         activeFile={activeFile}
                         onChange={(val) => changeFile(activeFile, val)}
                         sharedTypes={sharedTypes}
+                        modules={{ 'robot-maze': maze.globalModule || '' }}
                     />
                 )}
             </div>

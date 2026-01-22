@@ -70,8 +70,14 @@ export function generateMaze(width: number, height: number): MazeConfig {
     width,
     height,
     doors: [],
-    start: { x: startX, y: startY },
+    initialRobots: [{
+      position: { x: startX, y: startY },
+      direction: 'East',
+      color: '#38bdf8',
+      name: 'robot'
+    }],
     walls,
-    items
+    items,
+    globalModule: `const robot = game.getRobot(\"robot\");\n\nexport { robot }`
   };
 }
