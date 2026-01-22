@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MazeConfig, Position, Item, Door } from '../lib/types';
 import CodeEditor from './CodeEditor';
 import MazeItemDisplay from './game/display/MazeItemDisplay';
+import ResizableSplit from './ResizableSplit';
 
 const INITIAL_WIDTH = 15;
 const INITIAL_HEIGHT = 15;
@@ -334,75 +335,85 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                     </div>
                 </div>
 
-                {/* Grid Editor */}
-                <div className="flex-1 flex flex-col gap-4">
-                    <div
-                        className="flex-1 bg-gray-900 border border-gray-700 rounded overflow-auto flex justify-center items-start pt-12 relative"
-                        onWheel={handleWheel}
-                    >
-                        <div
-                            className="bg-gray-700 select-none grid gap-px origin-top transition-transform duration-100 ease-out"
-                            style={{
-                                transform: `scale(${zoom})`,
-                                gridTemplateColumns: `repeat(${width}, 1fr)`,
-                                width: 'fit-content'
-                            }}
-                            onMouseDown={() => setIsDragging(true)}
-                            onMouseUp={() => setIsDragging(false)}
-                            onMouseLeave={() => setIsDragging(false)}
-                        >
-                            {walls.map((row, y) =>
-                                row.map((isWall, x) => {
-                                    const isStart = start.x === x && start.y === y;
-                                    const item = items.find(i => i.position.x === x && i.position.y === y);
-                                    const door = doors.find(d => d.position.x === x && d.position.y === y);
-                                    const isSelected = (item && selectedItemId === item.id) || (door && selectedItemId === door.id);
+                {/* Grid Editor & Code */}
+                <div className="flex-1 flex flex-col relative overflow-hidden">
+                    <ResizableSplit
+                        id="designer-split"
+                        isVertical={true}
+                        initialSplit={70}
+                        minSplit={20}
+                        maxSplit={90}
+                        first={
+                            <div
+                                className="w-full h-full bg-gray-900 border border-gray-700 rounded overflow-auto flex justify-center items-start pt-12 relative"
+                                onWheel={handleWheel}
+                            >
+                                <div
+                                    className="bg-gray-700 select-none grid gap-px origin-top transition-transform duration-100 ease-out"
+                                    style={{
+                                        transform: `scale(${zoom})`,
+                                        gridTemplateColumns: `repeat(${width}, 1fr)`,
+                                        width: 'fit-content'
+                                    }}
+                                    onMouseDown={() => setIsDragging(true)}
+                                    onMouseUp={() => setIsDragging(false)}
+                                    onMouseLeave={() => setIsDragging(false)}
+                                >
+                                    {walls.map((row, y) =>
+                                        row.map((isWall, x) => {
+                                            const isStart = start.x === x && start.y === y;
+                                            const item = items.find(i => i.position.x === x && i.position.y === y);
+                                            const door = doors.find(d => d.position.x === x && d.position.y === y);
+                                            const isSelected = (item && selectedItemId === item.id) || (door && selectedItemId === door.id);
 
-                                    return (
-                                        <div
-                                            key={`${x}-${y}`}
-                                            onMouseDown={() => handleCellClick(x, y)}
-                                            onMouseEnter={() => handleCellEnter(x, y)}
-                                            className={`w-8 h-8 flex items-center justify-center cursor-pointer
+                                            return (
+                                                <div
+                                                    key={`${x}-${y}`}
+                                                    onMouseDown={() => handleCellClick(x, y)}
+                                                    onMouseEnter={() => handleCellEnter(x, y)}
+                                                    className={`w-8 h-8 flex items-center justify-center cursor-pointer
                                                 ${isWall ? 'bg-gray-600' : 'bg-gray-800 hover:bg-gray-750'}
                                                 ${isStart ? 'ring-2 ring-inset ring-blue-500' : ''}
                                                 ${isSelected ? 'ring-2 ring-yellow-400 bg-gray-700' : ''}
                                                 ${!selectedTool && !isSelected ? 'hover:ring-1 hover:ring-gray-400' : ''}
                                             `}
-                                        >
-                                            {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
-                                            {item && !isStart && (
-                                                <div className="w-full h-full flex items-center justify-center pointer-events-none">
-                                                    <svg width="32" height="32" viewBox="0 0 32 32">
-                                                        <g transform={`translate(${-item.position.x * 32}, ${-item.position.y * 32})`}>
-                                                            <MazeItemDisplay item={item} cellSize={32} showAnimations={false} />
-                                                        </g>
-                                                    </svg>
+                                                >
+                                                    {isStart && <div className="w-4 h-4 bg-blue-500 rounded-full" />}
+                                                    {item && !isStart && (
+                                                        <div className="w-full h-full flex items-center justify-center pointer-events-none">
+                                                            <svg width="32" height="32" viewBox="0 0 32 32">
+                                                                <g transform={`translate(${-item.position.x * 32}, ${-item.position.y * 32})`}>
+                                                                    <MazeItemDisplay item={item} cellSize={32} showAnimations={false} />
+                                                                </g>
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                    {door && !isStart && (
+                                                        <div className={`w-6 h-6 border-2 transition-colors ${door.isOpen ? 'border-yellow-500 border-dashed' : 'bg-yellow-900 border-yellow-700'}`}>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                            {door && !isStart && (
-                                                <div className={`w-6 h-6 border-2 transition-colors ${door.isOpen ? 'border-yellow-500 border-dashed' : 'bg-yellow-900 border-yellow-700'}`}>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Level Logic Editor */}
-                    <div className="h-48 bg-gray-900 border border-gray-700 rounded p-2 flex flex-col">
-                        <h3 className="text-sm font-bold text-gray-400 mb-2">Level Logic (Runs every step)</h3>
-                        <div className="flex-1 border border-gray-700">
-                            <CodeEditor
-                                files={{ 'logic.ts': stepCode }}
-                                activeFile="logic.ts"
-                                onChange={(val) => setStepCode(val || '')}
-                                sharedTypes={sharedTypes}
-                            />
-                        </div>
-                    </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </div>
+                        }
+                        second={
+                            /* Level Logic Editor */
+                            <div className="w-full h-full bg-gray-900 border border-gray-700 rounded p-2 flex flex-col">
+                                <h3 className="text-sm font-bold text-gray-400 mb-2">Level Logic (Runs every step)</h3>
+                                <div className="flex-1 border border-gray-700">
+                                    <CodeEditor
+                                        files={{ 'logic.ts': stepCode }}
+                                        activeFile="logic.ts"
+                                        onChange={(val) => setStepCode(val || '')}
+                                        sharedTypes={sharedTypes}
+                                    />
+                                </div>
+                            </div>
+                        }
+                    />
                 </div>
 
                 {/* Right Sidebar: Properties */}
