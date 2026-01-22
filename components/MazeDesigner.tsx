@@ -636,32 +636,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 <div className="mt-2"></div>
                                             )}
                                             <div className="border-t border-gray-700 pt-3 mt-1 mb-3">
-                                                <label className="text-xs text-gray-400 font-bold block mb-2">Properties</label>
-                                                <div>
-                                                    <label className="text-xs text-gray-500">Damage Amount</label>
-                                                    <input
-                                                        type="number"
-                                                        className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-red-400"
-                                                        value={item.damageAmount || 0}
-                                                        onChange={e => {
-                                                            const val = parseInt(e.target.value) || 0;
-                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, damageAmount: val } : i));
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="mt-2">
-                                                    <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="rounded bg-gray-700 border-gray-600 text-red-500 focus:ring-0"
-                                                            checked={item.destroyOnContact === true}
-                                                            onChange={(e) => {
-                                                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, destroyOnContact: e.target.checked } : i));
-                                                            }}
-                                                        />
-                                                        Destroy on Contact?
-                                                    </label>
-                                                </div>
+                                                {/* Removed Damage Properties */}
                                             </div>
 
                                             <button

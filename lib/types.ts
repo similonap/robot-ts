@@ -35,8 +35,8 @@ export interface Item {
     tags: string[];
     position: Position;
     isRevealed?: boolean;
-    damageAmount?: number;
-    destroyOnContact?: boolean;
+    damageAmount?: never; // Removed
+    destroyOnContact?: never; // Removed
     imageUrl?: string;
 }
 
@@ -107,6 +107,7 @@ export interface Robot {
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;
     setAppearance(appearance: RobotAppearance): void;
+    damage(amount: number): Promise<void>;
     addEventListener(event: RobotEvent, handler: (payload?: any) => void): void;
 }
 

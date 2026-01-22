@@ -216,46 +216,8 @@ export class RobotController {
             this.onUpdate({ ...this.state }, `Moved to ${newX}, ${newY}`);
         }
 
-        // Check for DAMAGE items
-        const damageItems = this.items.filter(item =>
-            item.position.x === newX &&
-            item.position.y === newY &&
-            item.damageAmount && item.damageAmount > 0
-        );
-
-        if (damageItems.length > 0) {
-            let totalDamage = 0;
-            damageItems.forEach(item => totalDamage += (item.damageAmount || 0));
-
-            this.state.health = Math.max(0, this.state.health - totalDamage);
-            this.onUpdate({ ...this.state }, `Ouch! Took ${totalDamage} damage from ${damageItems.map(i => i.name).join(', ')}. Health: ${this.state.health}`);
-        }
-
-        // Check for DESTROY items
-        const destroyItems = this.items.filter(item =>
-            item.position.x === newX &&
-            item.position.y === newY &&
-            item.destroyOnContact === true &&
-            !this.collectedItemIds.has(item.id)
-        );
-
-        if (destroyItems.length > 0) {
-            destroyItems.forEach(item => {
-                this.collectedItemIds.add(item.id);
-                if (!this.state.collectedItemIds.includes(item.id)) {
-                    this.state.collectedItemIds.push(item.id);
-                }
-                // We add to collected so it's removed from board, but NOT to inventory unless picked up?
-                // Usually pickup() is separate. If it's "destroy on contact", it just disappears.
-                // We won't add to this.state.inventory.
-            });
-            this.onUpdate({ ...this.state }, `Destroyed ${destroyItems.map(i => i.name).join(', ')}!`);
-        }
-
-        await this.wait(this.delayMs);
-
         if (this.state.health <= 0) {
-            throw new HealthDepletedError(`Did not survive damage from ${damageItems.map(i => i.name).join(', ')}`);
+            throw new HealthDepletedError();
         }
 
         this.emit('move', { x: newX, y: newY });
@@ -609,5 +571,18 @@ export class RobotController {
     setAppearance(appearance: { url: string; width?: number; height?: number }) {
         this.state.appearance = appearance;
         this.onUpdate({ ...this.state }, `Appearance updated`);
+    }
+
+    async damage(amount: number) {
+        this.checkAborted();
+        if (amount <= 0) return;
+        this.state.health = Math.max(0, this.state.health - amount);
+        this.onUpdate({ ...this.state }, `Took ${amount} damage. Health: ${this.state.health}`);
+
+        await this.wait(this.delayMs);
+
+        if (this.state.health <= 0) {
+            throw new HealthDepletedError(`Did not survive damage.`);
+        }
     }
 }
