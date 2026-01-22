@@ -66,6 +66,8 @@ export interface RunnerState {
     health: number;
     collectedItemIds: string[];
     appearance?: RobotAppearance;
+    isDestroyed?: boolean;
+    explosion?: { x: number; y: number; timestamp: number };
 }
 
 export interface MazeConfig {
@@ -108,6 +110,7 @@ export interface Robot {
     setSpeed(delay: number): void;
     setAppearance(appearance: RobotAppearance): void;
     damage(amount: number): Promise<void>;
+    destroy(): Promise<void>;
     addEventListener(event: RobotEvent, handler: (payload?: any) => void): void;
 }
 

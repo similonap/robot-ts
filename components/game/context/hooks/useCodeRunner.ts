@@ -175,6 +175,7 @@ export const useCodeRunner = ({ maze, robotState, setRobotState, addLog, files, 
                     addEventListener: (event: string, handler: (payload?: any) => void) => controller.addEventListener(event, handler),
                     start: async () => { }, // No-op for now unless we want to trigger something
                     damage: (amount: number) => controller.damage(amount),
+                    destroy: () => controller.destroy(),
                 },
                 game: gameApi,
                 readline: {

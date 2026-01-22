@@ -582,7 +582,25 @@ export class RobotController {
         await this.wait(this.delayMs);
 
         if (this.state.health <= 0) {
-            throw new HealthDepletedError(`Did not survive damage.`);
+            await this.destroy();
         }
+    }
+
+    async destroy() {
+        this.checkAborted();
+        this.state.health = 0;
+        this.state.isDestroyed = true;
+        this.state.explosion = {
+            x: this.state.position.x,
+            y: this.state.position.y,
+            timestamp: Date.now()
+        };
+
+        this.onUpdate({ ...this.state }, "💥 ROBOT DESTROYED!");
+
+        // Wait for explosion animation
+        await this.wait(1000);
+
+        throw new HealthDepletedError("Robot was destroyed!");
     }
 }
