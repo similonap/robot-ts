@@ -170,3 +170,8 @@ declare module "readline-sync" {
     export function questionInt(prompt: string): number;
     export function questionFloat(prompt: string): number;
 }
+
+//@ts-ignore
+declare module "robot-maze" {
+    export var game: Game;
+}

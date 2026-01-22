@@ -78,6 +78,6 @@ export function generateMaze(width: number, height: number): MazeConfig {
     }],
     walls,
     items,
-    globalModule: `const robot = game.getRobot(\"robot\");\n\nexport { robot }`
+    globalModule: ``
   };
 }

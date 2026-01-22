@@ -94,9 +94,10 @@ interface MazeGameProviderProps {
 }
 
 // Initial code template
-const INITIAL_CODE = `import { robot } from "robot-maze";
+const INITIAL_CODE = `import { game } from "robot-maze";
 
 async function main() {    
+    const robot = game.getRobot("robot");
     while (true) {
         // STRATEGY: RIGHT-HAND RULE
         

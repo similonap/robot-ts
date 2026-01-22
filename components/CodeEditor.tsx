@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 
 interface CodeEditorProps {
@@ -74,6 +74,23 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             }
         });
     }, [files, activeFile, modules]);
+
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (!editorRef.current) {
+                console.log('Editor not ready');
+                return;
+            }
+
+            const editor = editorRef.current;
+            const model = editor.getModel();
+            if (model) {
+                model.setValue(files[activeFile]);
+            }
+            clearInterval(interval);
+        }, 100);
+    }, []);
 
     return (
         <div className="h-full w-full border border-gray-700 overflow-hidden">

@@ -147,25 +147,38 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
                 activeRobots.set(this.name, this);
             }
 
+            // Helper to safely execute async controller methods
+            private async safeExec<T>(fn: () => Promise<T>): Promise<T> {
+                try {
+                    return await fn();
+                } catch (e: any) {
+                    if (e instanceof CancelError || (e && e.name === 'CancelError')) {
+                        // Freeze execution on cancel
+                        return new Promise(() => { });
+                    }
+                    throw e;
+                }
+            }
+
             get direction() { return this.controller.direction; }
             get inventory() { return this.controller.inventory; }
             get health() { return this.controller.health; }
             get position() { return this.controller.position; }
 
-            moveForward() { return this.controller.moveForward(); }
-            turnLeft() { return this.controller.turnLeft(); }
-            turnRight() { return this.controller.turnRight(); }
-            canMoveForward() { return this.controller.canMoveForward(); }
-            pickup() { return this.controller.pickup(); }
-            scan() { return this.controller.scan(); }
-            echo() { return this.controller.echo(); }
-            openDoor(key?: any) { return this.controller.openDoor(key); }
-            closeDoor() { return this.controller.closeDoor(); }
+            moveForward() { return this.safeExec(() => this.controller.moveForward()); }
+            turnLeft() { return this.safeExec(() => this.controller.turnLeft()); }
+            turnRight() { return this.safeExec(() => this.controller.turnRight()); }
+            canMoveForward() { return this.safeExec(() => this.controller.canMoveForward()); }
+            pickup() { return this.safeExec(() => this.controller.pickup()); }
+            scan() { return this.safeExec(() => this.controller.scan()); }
+            echo() { return this.safeExec(() => this.controller.echo()); }
+            openDoor(key?: any) { return this.safeExec(() => this.controller.openDoor(key)); }
+            closeDoor() { return this.safeExec(() => this.controller.closeDoor()); }
             setSpeed(delay: number) { return this.controller.setSpeed(delay); }
             setAppearance(appearance: RobotAppearance) { return this.controller.setAppearance(appearance); }
             addEventListener(event: string, handler: any) { return this.controller.addEventListener(event, handler); }
-            damage(amount: number) { return this.controller.damage(amount); }
-            destroy() { return this.controller.destroy(); }
+            damage(amount: number) { return this.safeExec(() => this.controller.damage(amount)); }
+            destroy() { return this.safeExec(() => this.controller.destroy()); }
         }
 
         // Initialize robots from config
@@ -268,7 +281,12 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
             // Custom require implementation
             const customRequire = (path: string) => {
                 if (path === 'robot-maze') {
-                    return globalExports;
+                    // Support both default import `import game from ...`
+                    // AND named import `import { game } from ...` (legacy/user confusion compat)
+                    return {
+                        default: gameApi,
+                        game: gameApi
+                    };
                 }
                 if (path === 'readline-sync') {
                     return {
@@ -290,8 +308,6 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
                 modules[filename] = moduleExports;
 
                 // Execute module
-                // We pass Robot class instead of 'robot' instance?
-                // Or we pass everything.
                 const modFn = new Function('exports', 'require', 'Robot', 'readline', 'fetch', 'console', transpiledFiles[filename]);
                 modFn(moduleExports, customRequire, Robot, readlineApi, window.fetch, consoleApi);
 
@@ -306,12 +322,13 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
             // Allow top-level await only in main.ts
+            // Allow top-level await only in main.ts
             const finalCode = transpiledFiles['main.ts'] + '\n\nif (typeof main === "function") { await main(); }';
 
-            const runFn = new AsyncFunction('Robot', 'readline', 'fetch', 'console', 'require', 'exports', finalCode);
+            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', finalCode);
 
             const mainExports = {};
-            await runFn(Robot, readlineApi, window.fetch, consoleApi, customRequire, mainExports);
+            await runFn(gameApi, Robot, readlineApi, window.fetch, consoleApi, customRequire, mainExports);
 
             // Keep running until explicitly stopped (win/fail/stop button)
             await new Promise((_, reject) => {
