@@ -20,21 +20,6 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
     const abortControllerRef = useRef<AbortController | null>(null);
     const inputResolveRef = useRef<((value: string) => void) | null>(null);
 
-    // Suppress unhandled CancelErrors from detached promises (fire-and-forget robot moves)
-    useEffect(() => {
-        const handler = (event: PromiseRejectionEvent) => {
-            const reason = event.reason;
-            if (reason instanceof CancelError || (reason && reason.name === 'CancelError')) {
-                event.preventDefault();
-            }
-        };
-
-        window.addEventListener('unhandledrejection', handler);
-        return () => {
-            window.removeEventListener('unhandledrejection', handler);
-        };
-    }, []);
-
     const stopExecution = () => {
         if (inputResolveRef.current) {
             // Logic to handle pending input if necessary
@@ -46,6 +31,41 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
         }
         setIsWaitingForInput(false);
     };
+
+    // Suppress unhandled CancelErrors from detached promises (fire-and-forget robot moves)
+    // Also handle Game Over errors from detached robots
+    useEffect(() => {
+        const handler = (event: PromiseRejectionEvent) => {
+            const reason = event.reason;
+            if (reason instanceof CancelError || (reason && reason.name === 'CancelError')) {
+                event.preventDefault();
+                return;
+            }
+            if (reason instanceof HealthDepletedError || (reason && reason.name === 'HealthDepletedError')) {
+                event.preventDefault();
+                addLog(`💀 FAIL: ${reason.message}`, 'user');
+                stopExecution();
+                return;
+            }
+
+            // Handle generic errors (e.g. "Cannot read properties of null")
+            // This catches errors in unawaited async functions
+            event.preventDefault();
+            const msg = reason instanceof Error ? reason.message : String(reason);
+            addLog(`Runtime Error (Async): ${msg}`, 'user');
+            // Depending on preference, we might not want to stop execution for ALL background errors,
+            // but usually for a game like this, an error means something broke.
+            // Let's stop it to be safe and visible.
+            stopExecution();
+        };
+
+        window.addEventListener('unhandledrejection', handler);
+        return () => {
+            window.removeEventListener('unhandledrejection', handler);
+        };
+    }, [addLog]); // Ensure we have fresh addLog if it changes
+
+
 
     const transpileCode = (source: string) => {
         try {
@@ -141,7 +161,22 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
                     },
                     abortController.signal,
                     maze.items,
-                    maze.doors || []
+                    maze.doors || [],
+                    () => {
+                        // Check if ALL active robots are destroyed
+                        let aliveCount = 0;
+                        for (const r of activeRobots.values()) {
+                            if (!r.isDestroyed) aliveCount++;
+                        }
+
+                        if (aliveCount === 0) {
+                            addLog(`💀 FAIL: All robots destroyed!`, 'user');
+                            stopExecution();
+                            return true;
+                        }
+
+                        return aliveCount === 0;
+                    }
                 );
 
                 activeRobots.set(this.name, this);
@@ -156,7 +191,20 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
                         // Freeze execution on cancel
                         return new Promise(() => { });
                     }
-                    throw e;
+
+                    // Handle other runtime errors (crash, logic error, etc)
+                    // We catch them here to prevent unhandled rejections in floating promises
+                    const msg = e instanceof Error ? e.message : String(e);
+
+                    if (e instanceof HealthDepletedError || (e && e.name === 'HealthDepletedError')) {
+                        addLog(`💀 FAIL: ${msg}`, 'user');
+                    } else {
+                        addLog(`Runtime Error: ${msg}`, 'user');
+                        console.error(e); // Keep looking at console for debugging details if needed
+                    }
+
+                    stopExecution();
+                    return new Promise(() => { });
                 }
             }
 
@@ -164,6 +212,7 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
             get inventory() { return this.controller.inventory; }
             get health() { return this.controller.health; }
             get position() { return this.controller.position; }
+            get isDestroyed() { return this.controller.isDestroyed; }
 
             moveForward() { return this.safeExec(() => this.controller.moveForward()); }
             turnLeft() { return this.safeExec(() => this.controller.turnLeft()); }
@@ -196,7 +245,6 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
         const gameApi = {
             win: (msg: string) => {
                 addLog(`🏆 WIN: ${msg}`, 'user');
-                alert(`🏆 WIN: ${msg}`);
                 stopExecution();
             },
             fail: (msg: string) => {
@@ -328,18 +376,19 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
             const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', finalCode);
 
             const mainExports = {};
-            await runFn(gameApi, Robot, readlineApi, window.fetch, consoleApi, customRequire, mainExports);
+            // Race between execution and cancellation
+            const stopPromise = new Promise((_, reject) => {
+                if (abortController.signal.aborted) return reject(new CancelError());
+                abortController.signal.addEventListener('abort', () => reject(new CancelError()));
+            });
+
+            await Promise.race([
+                runFn(gameApi, Robot, readlineApi, window.fetch, consoleApi, customRequire, mainExports),
+                stopPromise
+            ]);
 
             // Keep running until explicitly stopped (win/fail/stop button)
-            await new Promise((_, reject) => {
-                if (abortController.signal.aborted) {
-                    reject(new CancelError());
-                } else {
-                    abortController.signal.addEventListener('abort', () => {
-                        reject(new CancelError());
-                    });
-                }
-            });
+            await stopPromise;
 
         } catch (e: any) {
             if (e instanceof CancelError || e.name === 'CancelError') {
@@ -347,7 +396,7 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
             } else if (e instanceof CrashError || e.name === 'CrashError') {
                 addLog(`💥 CRASH! ${e.message}`, 'user');
             } else if (e instanceof HealthDepletedError || e.name === 'HealthDepletedError') {
-                addLog(`💀 GAME OVER! ${e.message}`, 'user');
+                addLog(`💀 FAIL: ${e.message}`, 'user');
             } else {
                 addLog(`Runtime Error: ${e.message}`, 'user');
                 console.error(e);

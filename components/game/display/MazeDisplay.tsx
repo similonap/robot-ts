@@ -6,7 +6,7 @@ import { useMazeGameContext } from '../context/MazeGameContext';
 import MazeItemDisplay from './MazeItemDisplay';
 
 export default function MazeDisplay() {
-    const { maze, robots, worldState, showRobotNames, setShowRobotNames } = useMazeGameContext();
+    const { maze, robots, worldState, showRobotNames, setShowRobotNames, showRobotHealth, setShowRobotHealth } = useMazeGameContext();
 
     const cellSize = 30;
     const width = maze.width * cellSize;
@@ -314,6 +314,50 @@ export default function MazeDisplay() {
                         </motion.g>
                     )
                 ))}
+
+                {/* Robot Health Bars Layer */}
+                {showRobotHealth && Object.values(robots).map((robot) => (
+                    !robot.isDestroyed && (
+                        <motion.g
+                            key={`health-${robot.name}`}
+                            initial={false}
+                            animate={{
+                                x: robot.position.x * cellSize + cellSize / 2,
+                                y: robot.position.y * cellSize + cellSize / 2,
+                            }}
+                            transition={{
+                                type: robot.speed < 200 ? "tween" : "spring",
+                                duration: robot.speed < 200 ? robot.speed / 1000 : undefined,
+                                stiffness: robot.speed < 200 ? undefined : 200,
+                                damping: robot.speed < 200 ? undefined : 20,
+                            }}
+                        >
+                            {/* Background Bar */}
+                            <rect
+                                x={-cellSize / 2}
+                                y={-cellSize / 1.5 - (showRobotNames ? 10 : 0)} // If names are shown, push health bar higher? Or names below? Names are at -cellSize/1.5. Let's put health bar above names or swap.
+                                // Current Name Code: y={-cellSize / 1.5} which is above the robot.
+                                // Let's put Health Bar slightly above the name if both are present.
+                                // Using a fixed offset for now.
+                                width={cellSize}
+                                height={4}
+                                rx={2}
+                                fill="#1f2937"
+                                stroke="#374151"
+                                strokeWidth={0.5}
+                            />
+                            {/* Health Fill */}
+                            <rect
+                                x={-cellSize / 2}
+                                y={-cellSize / 1.5 - (showRobotNames ? 10 : 0)}
+                                width={(Math.max(0, Math.min(100, robot.health)) / 100) * cellSize}
+                                height={4}
+                                rx={2}
+                                fill={robot.health > 50 ? '#10b981' : robot.health > 20 ? '#fbbf24' : '#ef4444'}
+                            />
+                        </motion.g>
+                    )
+                ))}
             </svg>
 
             {/* Controls Overlay */}
@@ -326,6 +370,15 @@ export default function MazeDisplay() {
                         className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3 h-3"
                     />
                     Names
+                </label>
+                <label className="flex items-center gap-1 bg-black/60 backdrop-blur px-2 py-1 rounded border border-gray-700 text-xs text-gray-300 cursor-pointer hover:bg-black/80 hover:text-white transition-colors">
+                    <input
+                        type="checkbox"
+                        checked={showRobotHealth}
+                        onChange={(e) => setShowRobotHealth(e.target.checked)}
+                        className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3 h-3"
+                    />
+                    Health
                 </label>
             </div>
         </div>

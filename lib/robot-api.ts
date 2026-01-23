@@ -36,6 +36,7 @@ export class RobotController {
     private items: Item[] = [];
     private doors: Door[] = [];
     private listeners: Record<string, ((payload?: any) => void)[]> = {};
+    private checkGameOver: () => boolean;
 
     constructor(
         initialState: RobotState,
@@ -44,7 +45,8 @@ export class RobotController {
         onUpdate: (state: RobotState, log: string) => void,
         signal?: AbortSignal,
         items: Item[] = [],
-        doors: Door[] = []
+        doors: Door[] = [],
+        checkGameOver: () => boolean = () => true
     ) {
         this.robotState = { ...initialState };
         this.walls = walls;
@@ -53,6 +55,7 @@ export class RobotController {
         this.signal = signal;
         this.items = items;
         this.doors = doors;
+        this.checkGameOver = checkGameOver;
 
         // Ensure speed is set
         if (this.robotState.speed === undefined) {
@@ -129,6 +132,10 @@ export class RobotController {
 
     get direction(): Direction {
         return this.robotState.direction;
+    }
+
+    get isDestroyed(): boolean {
+        return !!this.robotState.isDestroyed;
     }
 
     get inventory(): Item[] {
@@ -548,6 +555,21 @@ export class RobotController {
 
         await this.wait(1000);
 
-        throw new HealthDepletedError("Robot was destroyed!");
+        this.onUpdate({ ...this.robotState }, "💥 ROBOT DESTROYED!");
+
+        // Check if game should end (all robots dead)
+        // If this returns true, it means it handled the Game Over (logged, alerted, stopped)
+        // So we just need to exit this thread.
+        if (this.checkGameOver()) {
+            await this.wait(1000); // Give a moment for effect, or until abort kills us
+            throw new CancelError();
+        } else {
+            // Logic to freeze this robot without stopping the game
+            // We return a promise that never resolves (unless aborted)
+            await new Promise<void>((_, reject) => {
+                if (this.signal?.aborted) return reject(new CancelError());
+                this.signal?.addEventListener('abort', () => reject(new CancelError()));
+            });
+        }
     }
 }

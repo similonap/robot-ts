@@ -19,6 +19,8 @@ interface MazeGameContextType {
     // Display Settings
     showRobotNames: boolean;
     setShowRobotNames: (show: boolean) => void;
+    showRobotHealth: boolean;
+    setShowRobotHealth: (show: boolean) => void;
 
     // Shared World State
     worldState: {
@@ -62,6 +64,8 @@ export const MazeGameContext = createContext<MazeGameContextType>({
     initializeRobots: () => { },
     showRobotNames: true,
     setShowRobotNames: () => { },
+    showRobotHealth: true,
+    setShowRobotHealth: () => { },
     worldState: {
         doorStates: {},
         revealedItemIds: [],
@@ -132,6 +136,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
     const { files, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
 
     const [showRobotNames, setShowRobotNames] = useState(true);
+    const [showRobotHealth, setShowRobotHealth] = useState(true);
 
     // Initialize robots on mount
     useEffect(() => {
@@ -207,6 +212,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
             initializeRobots,
             showRobotNames,
             setShowRobotNames,
+            showRobotHealth,
+            setShowRobotHealth,
             worldState: {
                 doorStates,
                 revealedItemIds,
