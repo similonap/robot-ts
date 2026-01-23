@@ -189,7 +189,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             setItems(filteredItems);
             setDoors([...filteredDoors, newDoor]);
             setInitialRobots(filteredRobots);
-            setSelectedItemId(newDoor.name);
+            setSelectedItemId(newDoor.id);
 
             // Ensure path (doors are placed on paths, effectively)
             const newWalls = [...walls];
@@ -422,7 +422,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             const item = items.find(i => i.position.x === x && i.position.y === y);
                                             const door = doors.find(d => d.position.x === x && d.position.y === y);
                                             const isSelected = (item && selectedItemId === item.id) ||
-                                                (door && selectedItemId === door.name) ||
+                                                (door && selectedItemId === door.id) ||
                                                 (robotAtPos && selectedItemId === robotAtPos.name);
 
                                             return (
@@ -567,7 +567,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 <label className="text-xs text-gray-400">ID</label>
                                                 <input
                                                     className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
-                                                    value={door.name}
+                                                    value={door.id}
                                                     readOnly
                                                 />
                                             </div>
@@ -575,13 +575,13 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 <label className="text-xs text-gray-400">State</label>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.name ? { ...d, isOpen: true } : d))}
+                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.id ? { ...d, isOpen: true } : d))}
                                                         className={`flex-1 px-2 py-1 rounded text-sm border ${door.isOpen ? 'bg-green-900 border-green-500 text-green-200' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
                                                     >
                                                         Open
                                                     </button>
                                                     <button
-                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.name ? { ...d, isOpen: false } : d))}
+                                                        onClick={() => setDoors(prev => prev.map(d => d.id === door.id ? { ...d, isOpen: false } : d))}
                                                         className={`flex-1 px-2 py-1 rounded text-sm border ${!door.isOpen ? 'bg-red-900 border-red-500 text-red-200' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
                                                     >
                                                         Closed
@@ -600,7 +600,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         onChange={(e) => {
                                                             const type = e.target.value;
                                                             setDoors(prev => prev.map(d => {
-                                                                if (d.id !== door.name) return d;
+                                                                if (d.id !== door.id) return d;
                                                                 if (type === 'none') {
                                                                     const { lock, ...rest } = d;
                                                                     return rest;
@@ -631,7 +631,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                             value={door.lock.value}
                                                             onChange={(e) => {
                                                                 const val = e.target.value;
-                                                                setDoors(prev => prev.map(d => d.id === door.name ? { ...d, lock: { type: 'password', value: val } } : d));
+                                                                setDoors(prev => prev.map(d => d.id === door.id ? { ...d, lock: { type: 'password', value: val } } : d));
                                                             }}
                                                         />
                                                     </div>
@@ -652,7 +652,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                                             onChange={(e) => {
                                                                                 const checked = e.target.checked;
                                                                                 setDoors(prev => prev.map(d => {
-                                                                                    if (d.id !== door.name || d.lock?.type !== 'item') return d;
+                                                                                    if (d.id !== door.id || d.lock?.type !== 'item') return d;
                                                                                     const currentIds = d.lock.itemIds;
                                                                                     const newIds = checked
                                                                                         ? [...currentIds, i.id]
@@ -674,7 +674,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
                                             <button
                                                 onClick={() => {
-                                                    setDoors(prev => prev.filter(d => d.id !== door.name));
+                                                    setDoors(prev => prev.filter(d => d.id !== door.id));
                                                     setSelectedItemId(null);
                                                 }}
                                                 className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800 mt-4"
