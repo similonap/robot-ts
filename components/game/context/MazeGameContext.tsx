@@ -1,5 +1,5 @@
 import { LogEntry, MazeConfig, RobotState, SharedWorldState } from "@/lib/types";
-import { createContext, RefObject, useContext, useEffect } from "react";
+import { createContext, RefObject, useContext, useEffect, useState } from "react";
 import { useMaze } from "./hooks/useMaze";
 import { useRobots } from "./hooks/useRobots";
 import { useWorld } from "./hooks/useWorld";
@@ -15,6 +15,10 @@ interface MazeGameContextType {
     updateRobotState: (id: string, state: RobotState) => void;
     clearRobots: () => void;
     initializeRobots: (initialConfigs: import("@/lib/types").InitialRobotConfig[]) => void;
+
+    // Display Settings
+    showRobotNames: boolean;
+    setShowRobotNames: (show: boolean) => void;
 
     // Shared World State
     worldState: {
@@ -56,6 +60,8 @@ export const MazeGameContext = createContext<MazeGameContextType>({
     updateRobotState: () => { },
     clearRobots: () => { },
     initializeRobots: () => { },
+    showRobotNames: true,
+    setShowRobotNames: () => { },
     worldState: {
         doorStates: {},
         revealedItemIds: [],
@@ -124,6 +130,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
 
     const { logs, setLogs, addLog, showRobotLogs, setShowRobotLogs, clearLogs } = useGameLogs();
     const { files, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
+
+    const [showRobotNames, setShowRobotNames] = useState(true);
 
     // Initialize robots on mount
     useEffect(() => {
@@ -197,6 +205,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
             updateRobotState,
             clearRobots,
             initializeRobots,
+            showRobotNames,
+            setShowRobotNames,
             worldState: {
                 doorStates,
                 revealedItemIds,

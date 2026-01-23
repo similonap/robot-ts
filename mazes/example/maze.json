@@ -1,10 +1,17 @@
 {
   "width": 15,
   "height": 15,
-  "start": {
-    "x": 4,
-    "y": 6
-  },
+  "initialRobots": [
+    {
+      "position": {
+        "x": 4,
+        "y": 6
+      },
+      "direction": "East",
+      "name": "robot",
+      "color": "#38bdf8"
+    }
+  ],
   "walls": [
     [
       false,
@@ -278,5 +285,5 @@
     }
   ],
   "doors": [],
-  "globalModule": "export { robot, game, Robot };\n\nconst checkWin = () => {\n  if (game.items.length === 0) {\n    game.win(\"All items were collected\")\n  }\n};\n\nrobot.addEventListener('move', checkWin);\nrobot.addEventListener('pickup', checkWin);\ncheckWin();"
+  "globalModule": "const robot = game.getRobot(\"robot\");\n\nconst checkWin = () => {\n  if (game.items.length === 0) {\n    game.win(\"All items were collected\")\n  }\n};\n\nrobot.addEventListener('move', checkWin);\nrobot.addEventListener('pickup', checkWin);\ncheckWin();"
 }

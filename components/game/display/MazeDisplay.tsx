@@ -6,7 +6,7 @@ import { useMazeGameContext } from '../context/MazeGameContext';
 import MazeItemDisplay from './MazeItemDisplay';
 
 export default function MazeDisplay() {
-    const { maze, robots, worldState } = useMazeGameContext();
+    const { maze, robots, worldState, showRobotNames, setShowRobotNames } = useMazeGameContext();
 
     const cellSize = 30;
     const width = maze.width * cellSize;
@@ -256,16 +256,16 @@ export default function MazeDisplay() {
                                         <>
                                             <circle
                                                 cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.35}
-                                                fill="#0f172a" stroke="#38bdf8" strokeWidth="2"
+                                                fill="#0f172a" stroke={robot.color || "#38bdf8"} strokeWidth="2"
                                             />
                                             <circle
                                                 cx={cellSize / 2} cy={cellSize / 2} r={cellSize * 0.15}
-                                                fill="#38bdf8"
+                                                fill={robot.color || "#38bdf8"}
                                                 filter="url(#neon-glow)"
                                             />
                                             <path
                                                 d={`M ${cellSize / 2} ${cellSize * 0.15} L ${cellSize / 2} ${cellSize * 0.05}`}
-                                                stroke="#38bdf8"
+                                                stroke={robot.color || "#38bdf8"}
                                                 strokeWidth="3"
                                                 strokeLinecap="round"
                                             />
@@ -276,7 +276,58 @@ export default function MazeDisplay() {
                         )}
                     </g>
                 ))}
+
+                {/* Robot Names Layer */}
+                {showRobotNames && Object.values(robots).map((robot) => (
+                    !robot.isDestroyed && (
+                        <motion.g
+                            key={`name-${robot.name}`}
+                            initial={false}
+                            animate={{
+                                x: robot.position.x * cellSize + cellSize / 2,
+                                y: robot.position.y * cellSize + cellSize / 2,
+                            }}
+                            transition={{
+                                type: robot.speed < 200 ? "tween" : "spring",
+                                duration: robot.speed < 200 ? robot.speed / 1000 : undefined,
+                                stiffness: robot.speed < 200 ? undefined : 200,
+                                damping: robot.speed < 200 ? undefined : 20,
+                            }}
+                        >
+                            <text
+                                y={-cellSize / 1.5}
+                                textAnchor="middle"
+                                fill="white"
+                                fontSize={cellSize / 2.5}
+                                fontWeight="bold"
+                                stroke="black"
+                                strokeWidth="3"
+                                paintOrder="stroke"
+                                style={{
+                                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                    pointerEvents: 'none',
+                                    userSelect: 'none'
+                                }}
+                            >
+                                {robot.name}
+                            </text>
+                        </motion.g>
+                    )
+                ))}
             </svg>
+
+            {/* Controls Overlay */}
+            <div className="absolute top-2 right-2 flex gap-2">
+                <label className="flex items-center gap-1 bg-black/60 backdrop-blur px-2 py-1 rounded border border-gray-700 text-xs text-gray-300 cursor-pointer hover:bg-black/80 hover:text-white transition-colors">
+                    <input
+                        type="checkbox"
+                        checked={showRobotNames}
+                        onChange={(e) => setShowRobotNames(e.target.checked)}
+                        className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3 h-3"
+                    />
+                    Names
+                </label>
+            </div>
         </div>
     );
 }
