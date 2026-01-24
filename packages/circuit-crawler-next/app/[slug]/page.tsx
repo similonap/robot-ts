@@ -10,7 +10,7 @@ interface Props {
 
 
 export async function generateStaticParams() {
-    const mazesDir = path.join(process.cwd(), '../circuit-crawler/mazes');
+    const mazesDir = path.join(process.cwd(), 'mazes');
     const entries = fs.readdirSync(mazesDir, { withFileTypes: true });
 
     return entries
@@ -22,7 +22,7 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: Props) {
     const { slug } = await params;
-    const filePath = path.join(process.cwd(), '../circuit-crawler/mazes', slug, 'maze.json');
+    const filePath = path.join(process.cwd(), 'mazes', slug, 'maze.json');
 
     if (!fs.existsSync(filePath)) {
         notFound();
@@ -42,7 +42,7 @@ export default async function Page({ params }: Props) {
     const typesPath = path.join(process.cwd(), '../circuit-crawler/src/types.ts');
     const typesContent = fs.readFileSync(typesPath, 'utf-8');
 
-    const mazeDir = path.join(process.cwd(), '../circuit-crawler/mazes', slug);
+    const mazeDir = path.join(process.cwd(), 'mazes', slug);
     let initialFiles: Record<string, string> | undefined;
 
     // Read all files in the directory
