@@ -139,7 +139,9 @@ export interface Robot {
     setAppearance(appearance: RobotAppearance): void;
     damage(amount: number): Promise<void>;
     destroy(): Promise<void>;
-    addEventListener(event: RobotEvent, handler: (payload?: any) => void): void;
+    addEventListener(event: 'pickup', handler: (item: Item) => void): void;
+    addEventListener(event: 'move', handler: (position: Position) => void): void;
+    addEventListener(event: string, handler: (payload?: any) => void): void;
 }
 
 export type RobotEvent = 'move' | 'pickup';
