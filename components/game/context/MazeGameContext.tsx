@@ -156,7 +156,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         setInputValue,
         inputPrompt,
         inputResolveRef,
-        runCode,
+        runCode: runnerRunCode,
         stopExecution
     } = useCodeRunner({
         maze,
@@ -166,6 +166,18 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
         files,
         setLogs
     });
+
+    const runCode = () => {
+        resetGame();
+        // Give React a tick to process the reset state updates before running?
+        // Since resetGame is synchronous state updates, it should be fine, 
+        // but runnerRunCode is async-ish in setup. 
+        // Actually, resetGame calls stopExecution which might be async if we wait for promises?
+        // But here resetGame is synchronous logic.
+        // However, useCodeRunner's runCode checks state. 
+        // Let's just call it.
+        runnerRunCode();
+    };
 
     const onMazeLoaded = (newMaze: MazeConfig) => {
         setMaze(newMaze);

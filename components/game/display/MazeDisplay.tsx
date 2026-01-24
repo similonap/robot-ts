@@ -6,7 +6,7 @@ import { useMazeGameContext } from '../context/MazeGameContext';
 import MazeItemDisplay from './MazeItemDisplay';
 
 export default function MazeDisplay() {
-    const { maze, robots, worldState, showRobotNames, setShowRobotNames, showRobotHealth, setShowRobotHealth } = useMazeGameContext();
+    const { maze, robots, worldState, showRobotHealth, setShowRobotHealth } = useMazeGameContext();
 
     const cellSize = 30;
     const width = maze.width * cellSize;
@@ -24,6 +24,7 @@ export default function MazeDisplay() {
     // Initialize with correct rotation for starting direction (default East if no robot)
     const [rotation, setRotation] = useState(0);
     const lastDirRef = useRef(primaryRobot?.direction || 'East');
+    const [hoveredRobotId, setHoveredRobotId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!primaryRobot) return;
@@ -132,8 +133,13 @@ export default function MazeDisplay() {
                 </AnimatePresence>
 
                 {/* Render ALL Robots */}
-                {Object.values(robots).map((robot) => (
-                    <g key={robot.name}>
+                {Object.entries(robots).map(([robotId, robot]) => (
+                    <g
+                        key={robotId}
+                        onMouseEnter={() => setHoveredRobotId(robotId)}
+                        onMouseLeave={() => setHoveredRobotId(null)}
+                        style={{ cursor: 'pointer' }}
+                    >
                         {/* Echo Wave */}
                         {robot.echoWave && (
                             <motion.g
@@ -226,13 +232,6 @@ export default function MazeDisplay() {
                                 animate={{
                                     x: robot.position.x * cellSize + cellSize / 2,
                                     y: robot.position.y * cellSize + cellSize / 2,
-                                    // If this is the primary robot, allow rotation animation?
-                                    // Actually we animate the ROBOT's rotation relative to the map?
-                                    // Or the map rotates? 
-                                    // The SVG viewbox is static. The robots move.
-                                    // Code below applies `rotate: rotation` which was tracking primary robot.
-                                    // The robot ITSELF rotates on its center.
-                                    // So each robot should rotate based on ITS direction.
                                     rotate: getDirIndex(robot.direction) * 90
                                 }}
                                 transition={{
@@ -274,45 +273,42 @@ export default function MazeDisplay() {
                                 </g>
                             </motion.g>
                         )}
-                    </g>
-                ))}
 
-                {/* Robot Names Layer */}
-                {showRobotNames && Object.values(robots).map((robot) => (
-                    !robot.isDestroyed && (
-                        <motion.g
-                            key={`name-${robot.name}`}
-                            initial={false}
-                            animate={{
-                                x: robot.position.x * cellSize + cellSize / 2,
-                                y: robot.position.y * cellSize + cellSize / 2,
-                            }}
-                            transition={{
-                                type: robot.speed < 200 ? "tween" : "spring",
-                                duration: robot.speed < 200 ? robot.speed / 1000 : undefined,
-                                stiffness: robot.speed < 200 ? undefined : 200,
-                                damping: robot.speed < 200 ? undefined : 20,
-                            }}
-                        >
-                            <text
-                                y={-cellSize / 1.5}
-                                textAnchor="middle"
-                                fill="white"
-                                fontSize={cellSize / 2.5}
-                                fontWeight="bold"
-                                stroke="black"
-                                strokeWidth="3"
-                                paintOrder="stroke"
-                                style={{
-                                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                    pointerEvents: 'none',
-                                    userSelect: 'none'
+                        {/* Robot Name (Hover only) */}
+                        {!robot.isDestroyed && hoveredRobotId === robotId && (
+                            <motion.g
+                                key={`name-${robot.name}`}
+                                animate={{
+                                    x: robot.position.x * cellSize + cellSize / 2,
+                                    y: robot.position.y * cellSize + cellSize / 2
+                                }}
+                                transition={{
+                                    type: robot.speed < 200 ? "tween" : "spring",
+                                    duration: robot.speed < 200 ? robot.speed / 1000 : undefined,
+                                    stiffness: robot.speed < 200 ? undefined : 200,
+                                    damping: robot.speed < 200 ? undefined : 20,
                                 }}
                             >
-                                {robot.name}
-                            </text>
-                        </motion.g>
-                    )
+                                <text
+                                    y={-cellSize}
+                                    textAnchor="middle"
+                                    fill="white"
+                                    fontSize={cellSize / 2.5}
+                                    fontWeight="bold"
+                                    stroke="black"
+                                    strokeWidth="3"
+                                    paintOrder="stroke"
+                                    style={{
+                                        textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                        pointerEvents: 'none',
+                                        userSelect: 'none'
+                                    }}
+                                >
+                                    {robot.name}
+                                </text>
+                            </motion.g>
+                        )}
+                    </g>
                 ))}
 
                 {/* Robot Health Bars Layer */}
@@ -335,10 +331,7 @@ export default function MazeDisplay() {
                             {/* Background Bar */}
                             <rect
                                 x={-cellSize / 2}
-                                y={-cellSize / 1.5 - (showRobotNames ? 10 : 0)} // If names are shown, push health bar higher? Or names below? Names are at -cellSize/1.5. Let's put health bar above names or swap.
-                                // Current Name Code: y={-cellSize / 1.5} which is above the robot.
-                                // Let's put Health Bar slightly above the name if both are present.
-                                // Using a fixed offset for now.
+                                y={-cellSize / 2 - 8}
                                 width={cellSize}
                                 height={4}
                                 rx={2}
@@ -349,11 +342,23 @@ export default function MazeDisplay() {
                             {/* Health Fill */}
                             <rect
                                 x={-cellSize / 2}
-                                y={-cellSize / 1.5 - (showRobotNames ? 10 : 0)}
+                                y={-cellSize / 2 - 8}
                                 width={(Math.max(0, Math.min(100, robot.health)) / 100) * cellSize}
                                 height={4}
                                 rx={2}
                                 fill={robot.health > 50 ? '#10b981' : robot.health > 20 ? '#fbbf24' : '#ef4444'}
+                            />
+                            {/* Border */}
+                            <rect
+                                x={-cellSize / 2}
+                                y={-cellSize / 2 - 8}
+                                width={cellSize}
+                                height={4}
+                                rx={2}
+                                fill="none"
+                                stroke="#000000"
+                                strokeWidth={1}
+                                strokeOpacity={0.8}
                             />
                         </motion.g>
                     )
@@ -362,15 +367,6 @@ export default function MazeDisplay() {
 
             {/* Controls Overlay */}
             <div className="absolute top-2 right-2 flex gap-2">
-                <label className="flex items-center gap-1 bg-black/60 backdrop-blur px-2 py-1 rounded border border-gray-700 text-xs text-gray-300 cursor-pointer hover:bg-black/80 hover:text-white transition-colors">
-                    <input
-                        type="checkbox"
-                        checked={showRobotNames}
-                        onChange={(e) => setShowRobotNames(e.target.checked)}
-                        className="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-0 focus:ring-offset-0 w-3 h-3"
-                    />
-                    Names
-                </label>
                 <label className="flex items-center gap-1 bg-black/60 backdrop-blur px-2 py-1 rounded border border-gray-700 text-xs text-gray-300 cursor-pointer hover:bg-black/80 hover:text-white transition-colors">
                     <input
                         type="checkbox"
