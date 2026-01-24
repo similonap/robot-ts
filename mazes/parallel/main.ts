@@ -1,4 +1,4 @@
-import { game } from "robot-maze";
+import { game } from "circuit-crawler";
 
 async function runRobot(robotName: string) {
     const robot = game.getRobot(robotName);

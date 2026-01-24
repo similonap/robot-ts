@@ -1,4 +1,4 @@
-import { game } from "robot-maze";
+import { game } from "circuit-crawler";
 import readline from "readline-sync";
 
 async function main() {

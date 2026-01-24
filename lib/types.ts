@@ -172,6 +172,6 @@ declare module "readline-sync" {
 }
 
 //@ts-ignore
-declare module "robot-maze" {
+declare module "circuit-crawler" {
     export var game: Game;
 }

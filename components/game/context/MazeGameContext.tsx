@@ -109,7 +109,7 @@ interface MazeGameProviderProps {
 }
 
 // Initial code template
-const INITIAL_CODE = `import { game } from "robot-maze";
+const INITIAL_CODE = `import { game } from "circuit-crawler";
 
 async function main() {    
     const robot = game.getRobot("robot");

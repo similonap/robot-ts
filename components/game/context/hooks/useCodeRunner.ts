@@ -328,7 +328,7 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
 
             // Custom require implementation
             const customRequire = (path: string) => {
-                if (path === 'robot-maze') {
+                if (path === 'circuit-crawler') {
                     // Support both default import `import game from ...`
                     // AND named import `import { game } from ...` (legacy/user confusion compat)
                     return {

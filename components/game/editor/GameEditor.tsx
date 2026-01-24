@@ -84,7 +84,7 @@ const GameEditor = () => {
                         activeFile={activeFile}
                         onChange={(val) => changeFile(activeFile, val)}
                         sharedTypes={sharedTypes}
-                        modules={{ 'robot-maze': maze.globalModule || '' }}
+                        modules={{ 'circuit-crawler': maze.globalModule || '' }}
                     />
                 )}
             </div>
