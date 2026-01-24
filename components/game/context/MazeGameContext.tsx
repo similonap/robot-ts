@@ -54,6 +54,8 @@ interface MazeGameContextType {
     setIsWaitingForInput: (value: boolean) => void;
     changeFile: (file: string, content: string) => void;
     sharedTypes: string;
+    loadSolution: () => void;
+    hasSolution: boolean;
 }
 
 export const MazeGameContext = createContext<MazeGameContextType>({
@@ -94,12 +96,15 @@ export const MazeGameContext = createContext<MazeGameContextType>({
     setInputValue: (value: string) => { },
     setIsWaitingForInput: (value: boolean) => { },
     changeFile: (file: string, content: string) => { },
-    sharedTypes: ''
+    sharedTypes: '',
+    loadSolution: () => { },
+    hasSolution: false
 });
 
 interface MazeGameProviderProps {
     initialMaze: MazeConfig;
     initialFiles?: Record<string, string>;
+    solutionFiles?: Record<string, string>;
     sharedTypes: string;
 }
 
@@ -127,13 +132,22 @@ async function main() {
     }
 }`;
 
-export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
+export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFiles, sharedTypes, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
     const { maze, setMaze } = useMaze(initialMaze);
     const { robots, updateRobotState, clearRobots, removeRobot, initializeRobots } = useRobots();
     const { doorStates, revealedItemIds, collectedItemIds, worldActions, resetWorld } = useWorld(initialMaze);
 
     const { logs, setLogs, addLog, showRobotLogs, setShowRobotLogs, clearLogs } = useGameLogs();
-    const { files, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
+    const { files, setFiles, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
+
+    const loadSolution = () => {
+        if (solutionFiles) {
+            if (isRunning) stopExecution();
+            setFiles(solutionFiles);
+            // Optionally set active file to main.ts or first file
+            if (solutionFiles['main.ts']) setActiveFile('main.ts');
+        }
+    };
 
     const [showRobotNames, setShowRobotNames] = useState(true);
     const [showRobotHealth, setShowRobotHealth] = useState(true);
@@ -254,7 +268,9 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, sharedTypes
             setInputValue,
             setIsWaitingForInput,
             changeFile,
-            sharedTypes
+            sharedTypes,
+            loadSolution,
+            hasSolution: !!solutionFiles
         }}>
             {children}
         </MazeGameContext.Provider>

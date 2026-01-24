@@ -56,7 +56,28 @@ export default async function Page({ params }: Props) {
         }
     }
 
+    // Read solution files if they exist
+    const solutionDir = path.join(mazeDir, 'solution');
+    let solutionFiles: Record<string, string> | undefined;
+
+    if (fs.existsSync(solutionDir)) {
+        const entries = fs.readdirSync(solutionDir, { withFileTypes: true });
+
+        solutionFiles = {};
+        for (const entry of entries) {
+            if (entry.isFile()) {
+                const content = fs.readFileSync(path.join(solutionDir, entry.name), 'utf-8');
+                solutionFiles[entry.name] = content;
+            }
+        }
+    }
+
     return (
-        <MazeGame sharedTypes={typesContent} initialMaze={mazeConfig} initialFiles={initialFiles} />
+        <MazeGame
+            sharedTypes={typesContent}
+            initialMaze={mazeConfig}
+            initialFiles={initialFiles}
+            solutionFiles={solutionFiles}
+        />
     );
 }

@@ -9,9 +9,9 @@ import { MazeGameContextProvider, useMazeGameContext } from './context/MazeGameC
 import GameEditor from './editor/GameEditor';
 import GameTerminal from './terminal/GameTerminal';
 
-export default function MazeGameWrapper({ sharedTypes, initialMaze, initialFiles }: { sharedTypes: string; initialMaze: MazeConfig; initialFiles?: Record<string, string> }) {
+export default function MazeGameWrapper({ sharedTypes, initialMaze, initialFiles, solutionFiles }: { sharedTypes: string; initialMaze: MazeConfig; initialFiles?: Record<string, string>; solutionFiles?: Record<string, string> }) {
     return (
-        <MazeGameContextProvider initialMaze={initialMaze} initialFiles={initialFiles} sharedTypes={sharedTypes}>
+        <MazeGameContextProvider initialMaze={initialMaze} initialFiles={initialFiles} solutionFiles={solutionFiles} sharedTypes={sharedTypes}>
             <MazeGame />
         </MazeGameContextProvider>
     )
