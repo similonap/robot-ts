@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MazeConfig, Position, Item, Door, InitialRobotConfig } from '../lib/types';
 import CodeEditor from './CodeEditor';
 import MazeItemDisplay from './game/display/MazeItemDisplay';
@@ -46,8 +46,20 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
     const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', tags: ['Food'] });
+    // ... (existing state)
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // Items or Doors
+    const [tempName, setTempName] = useState(''); // Temp state for name editing
     const [isDragging, setIsDragging] = useState(false);
+
+    // Sync tempName when selection changes
+    useEffect(() => {
+        if (selectedItemId) {
+            const robot = initialRobots.find(r => r.name === selectedItemId);
+            if (robot) setTempName(robot.name);
+        }
+    }, [selectedItemId, initialRobots]);
+
+
 
     const handleResize = (newW: number, newH: number) => {
         setWidth(newW);
@@ -493,15 +505,32 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 <span>🤖 Robot</span>
                                             </div>
                                             <div>
-                                                <label className="text-xs text-gray-400">Name (Unique)</label>
+                                                <label className="text-xs text-gray-400">Name (Unique, Enter to save)</label>
                                                 <input
                                                     className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-white"
-                                                    value={robot.name || ''}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value;
-                                                        // Update key and selection
-                                                        setInitialRobots(prev => prev.map(r => r.name === robot.name ? { ...r, name: val } : r));
-                                                        setSelectedItemId(val);
+                                                    value={tempName}
+                                                    onChange={(e) => setTempName(e.target.value)}
+                                                    onBlur={() => {
+                                                        const val = tempName.trim();
+                                                        if (!val) {
+                                                            setTempName(robot.name); // Revert
+                                                            return;
+                                                        }
+                                                        if (val !== robot.name) {
+                                                            // Check uniqueness?
+                                                            if (initialRobots.some(r => r.name === val)) {
+                                                                alert('Name already exists!');
+                                                                setTempName(robot.name);
+                                                                return;
+                                                            }
+                                                            setInitialRobots(prev => prev.map(r => r.name === robot.name ? { ...r, name: val } : r));
+                                                            setSelectedItemId(val);
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.currentTarget.blur();
+                                                        }
                                                     }}
                                                 />
                                             </div>
