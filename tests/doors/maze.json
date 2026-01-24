@@ -1,0 +1,116 @@
+{
+    "width": 10,
+    "height": 3,
+    "initialRobots": [
+        {
+            "position": {
+                "x": 1,
+                "y": 1
+            },
+            "direction": "East",
+            "name": "Tester",
+            "color": "#10b981"
+        }
+    ],
+    "walls": [
+        [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+        ],
+        [
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true
+        ],
+        [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+        ]
+    ],
+    "items": [
+        {
+            "id": "key-card",
+            "type": "item",
+            "name": "Key Card",
+            "icon": "💳",
+            "position": {
+                "x": 5,
+                "y": 1
+            }
+        }
+    ],
+    "doors": [
+        {
+            "id": "door-normal",
+            "type": "door",
+            "frames": {
+                "closed": "door_closed",
+                "open": "door_open"
+            },
+            "position": {
+                "x": 2,
+                "y": 1
+            },
+            "isOpen": false
+        },
+        {
+            "id": "door-pass",
+            "type": "door",
+            "frames": {
+                "closed": "door_closed",
+                "open": "door_open"
+            },
+            "position": {
+                "x": 4,
+                "y": 1
+            },
+            "isOpen": false,
+            "lock": {
+                "type": "password",
+                "value": "1234"
+            }
+        },
+        {
+            "id": "door-item",
+            "type": "door",
+            "frames": {
+                "closed": "door_closed",
+                "open": "door_open"
+            },
+            "position": {
+                "x": 6,
+                "y": 1
+            },
+            "isOpen": false,
+            "lock": {
+                "type": "item",
+                "itemIds": [
+                    "key-card"
+                ]
+            }
+        }
+    ]
+}
