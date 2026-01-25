@@ -296,38 +296,62 @@ export class RobotController {
             }
         }
 
-        // Animate Wave (This might need a callback to world to show effect?)
-        // The original code put echoWave in RunnerState. 
-        // We probably need a way to tell the world "Show Echo".
-        // For now, we unfortunately can't visualize echo easily if we stripped it from RobotState?
-        // Wait, RobotState does not have echoWave anymore?
-        // We need to decide where Visual Effects live. 
-        // If RobotState has it, MazeDisplay needs to read it from RobotState.
-        // Let's assume we can add it to RobotState or fire an event.
-        // I'll emit it via onUpdate for now if we can put it in RobotState?
-        // I define RobotState. let's add echoWave there?
-        // But RobotState in 'types.ts' isn't what I defined above. I defined a local RobotState interface.
-        // I should probably export RobotState from types.ts to share it.
-
-        // For now, let's just log it. Visuals might be broken for Echo temporarily until "Update MazeDisplay".
-
+        // Trigger Echo Wave Animation
+        this.robotState.echoWave = {
+            x: x,
+            y: y,
+            direction: this.robotState.direction,
+            distance: distance,
+            timestamp: Date.now()
+        };
         this.onUpdate({ ...this.robotState }, `Echo ping sent...`);
 
         await this.wait(this.delayMs);
 
-        // Log result
+        // Log result & Trigger Hit Animation
         let hitType = "Nothing";
-        if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) hitType = "World Boundary";
-        else {
+        let hitSomething = false;
+
+        if (cy < 0 || cy >= this.walls.length || cx < 0 || cx >= this.walls[0].length) {
+            hitType = "World Boundary";
+            hitSomething = true;
+        } else {
             const door = this.doors.find(d => d.position.x === cx && d.position.y === cy);
             const item = this.items.find(i => i.position.x === cx && i.position.y === cy && !this.world.isItemCollected(i.id));
 
-            if (door && !this.world.isDoorOpen(door.id)) hitType = "Closed Door";
-            else if (item) hitType = item.name;
-            else if (this.walls[cy][cx]) hitType = "Wall";
+            if (door && !this.world.isDoorOpen(door.id)) {
+                hitType = "Closed Door";
+                hitSomething = true;
+            } else if (item) {
+                hitType = item.name;
+                hitSomething = true;
+            } else if (this.walls[cy][cx]) {
+                hitType = "Wall";
+                hitSomething = true;
+            }
+        }
+
+        if (hitSomething) {
+            this.robotState.echoHit = {
+                x: cx,
+                y: cy,
+                timestamp: Date.now()
+            };
         }
 
         this.onUpdate({ ...this.robotState }, `Echo: ${hitType} at distance ${distance}`);
+
+        // Clean up animation state after a short delay (optional, but good for state cleanliness)
+        // We do this asynchronously so we don't block the return
+        setTimeout(() => {
+            // Only clear if timestamp matches to avoid clearing a generic new echo?
+            // Actually, for React state updates, it's safer to just leave it until next update or clear it.
+            // But we don't have a mechanism to push a background update effectively without causing re-renders.
+            // The timestamp key in MazeDisplay handles the re-triggering.
+            // We can leave it, or clear it. Clearing it might trigger a re-render.
+            // Let's leave it for now.
+        }, 1000);
+
         return distance;
     }
 

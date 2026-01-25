@@ -1,0 +1,75 @@
+{
+    "width": 5,
+    "height": 5,
+    "walls": [
+        [
+            true,
+            true,
+            true,
+            true,
+            true
+        ],
+        [
+            true,
+            false,
+            false,
+            false,
+            true
+        ],
+        [
+            true,
+            false,
+            false,
+            false,
+            true
+        ],
+        [
+            true,
+            false,
+            false,
+            false,
+            true
+        ],
+        [
+            true,
+            true,
+            true,
+            true,
+            true
+        ]
+    ],
+    "initialRobots": [
+        {
+            "name": "TestBot",
+            "position": {
+                "x": 1,
+                "y": 1
+            },
+            "direction": "North"
+        }
+    ],
+    "items": [
+        {
+            "id": "item1",
+            "type": "item",
+            "name": "TargetItem",
+            "icon": "💎",
+            "tags": [],
+            "position": {
+                "x": 3,
+                "y": 1
+            }
+        }
+    ],
+    "doors": [
+        {
+            "id": "door1",
+            "position": {
+                "x": 1,
+                "y": 3
+            },
+            "type": "door",
+            "isOpen": false
+        }
+    ]
+}

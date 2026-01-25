@@ -15,6 +15,20 @@ export interface PublicApi {
     }
 }
 
+export interface DoorControl {
+    open(): void;
+    close(): void;
+    readonly isOpen: boolean;
+}
+
+export interface ItemControl {
+    collect(): void;
+    reveal(): void;
+    readonly isCollected: boolean;
+    readonly isRevealed: boolean;
+    addEventListener(event: 'pickup' | 'move' | 'leave', handler: (payload?: any) => void): void;
+}
+
 export interface RobotAppearance {
     url: string;
     width?: number;
@@ -158,6 +172,9 @@ export interface Game {
     fail(message: string): void;
     items: Item[];
     getRobot(name: string): Robot | undefined;
+    getDoor(id: string): DoorControl | undefined;
+    getItem(id: string): ItemControl | undefined;
+    getItemOnPosition(x: number, y: number): ItemControl | undefined;
 }
 
 

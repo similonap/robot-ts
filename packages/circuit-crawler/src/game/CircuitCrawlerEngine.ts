@@ -166,6 +166,9 @@ export class CircuitCrawlerEngine {
         this.isRunning = true;
         this.handleStateChange(); // Notify run start
 
+        // Reset item listeners on run
+        const itemListeners: Record<string, Record<string, ((payload?: any) => void)[]>> = {};
+
         this.log("Compiling...", 'user');
 
         this.abortController = new AbortController();
@@ -181,14 +184,14 @@ export class CircuitCrawlerEngine {
             private controller: RobotController;
             public name: string;
 
-            constructor(config: { x: number, y: number, name?: string, color?: string }) {
+            constructor(config: { x: number, y: number, name?: string, color?: string, direction?: import('../types').Direction }) {
                 this.name = config.name || `Robot ${engine.activeControllers.size + 1}`;
 
                 const startState: RobotState = {
                     name: this.name,
                     color: config.color,
                     position: { x: config.x, y: config.y },
-                    direction: 'East',
+                    direction: config.direction || 'East',
                     inventory: [],
                     speed: 500,
                     health: 100,
@@ -227,6 +230,46 @@ export class CircuitCrawlerEngine {
                         return false;
                     }
                 );
+
+                // Attach listeners for Item Events
+                let lastPos = { ...startState.position };
+
+                this.controller.addEventListener('move', (pos: { x: number, y: number }) => {
+                    // Handle 'leave' events for items at previous position
+                    const itemsAtLastPos = engine.maze.items.filter(i =>
+                        i.position.x === lastPos.x &&
+                        i.position.y === lastPos.y &&
+                        !engine.worldActions.isItemCollected(i.id)
+                    );
+
+                    itemsAtLastPos.forEach(item => {
+                        if (itemListeners[item.id] && itemListeners[item.id]['leave']) {
+                            itemListeners[item.id]['leave'].forEach(h => h(lastPos));
+                        }
+                    });
+
+                    // Handle 'move' (enter) events for items at new position
+                    const itemsAtPos = engine.maze.items.filter(i =>
+                        i.position.x === pos.x &&
+                        i.position.y === pos.y &&
+                        !engine.worldActions.isItemCollected(i.id)
+                    );
+
+                    itemsAtPos.forEach(item => {
+                        if (itemListeners[item.id] && itemListeners[item.id]['move']) {
+                            itemListeners[item.id]['move'].forEach(h => h(pos));
+                        }
+                    });
+
+                    // Update last position
+                    lastPos = { ...pos };
+                });
+
+                this.controller.addEventListener('pickup', (item: Item) => {
+                    if (itemListeners[item.id] && itemListeners[item.id]['pickup']) {
+                        itemListeners[item.id]['pickup'].forEach(h => h(item));
+                    }
+                });
 
                 engine.activeControllers.set(this.name, this.controller);
                 wrapperRobots.set(this.name, this);
@@ -285,7 +328,8 @@ export class CircuitCrawlerEngine {
                     x: initial.position.x,
                     y: initial.position.y,
                     name: initial.name,
-                    color: initial.color
+                    color: initial.color,
+                    direction: initial.direction
                 });
             }
         }
@@ -312,6 +356,88 @@ export class CircuitCrawlerEngine {
             },
             get items() {
                 return engine.maze.items.filter(item => !engine.worldActions.isItemCollected(item.id));
+            },
+            getDoor: (id: string) => {
+                const door = engine.maze.doors?.find(d => d.id === id);
+                if (!door) return undefined;
+
+                return {
+                    open: () => {
+                        if (!engine.worldActions.isDoorOpen(id)) {
+                            engine.worldActions.openDoor(id);
+                            engine.log(`Door ${id} opened via script`, 'user');
+                        }
+                    },
+                    close: () => {
+                        if (engine.worldActions.isDoorOpen(id)) {
+                            engine.worldActions.closeDoor(id);
+                            engine.log(`Door ${id} closed via script`, 'user');
+                        }
+                    },
+                    get isOpen() {
+                        return engine.worldActions.isDoorOpen(id);
+                    }
+                };
+            },
+            getItem: (id: string) => {
+                const item = engine.maze.items?.find(i => i.id === id);
+                if (!item) return undefined;
+
+                return {
+                    collect: () => {
+                        if (!engine.worldActions.isItemCollected(id)) {
+                            engine.worldActions.collectItem(id);
+                            engine.log(`Item ${id} collected via script`, 'user');
+                        }
+                    },
+                    reveal: () => {
+                        if (item.isRevealed === false && !engine.worldActions.isItemRevealed(id)) {
+                            engine.worldActions.revealItem(id);
+                            engine.log(`Item ${id} revealed via script`, 'user');
+                        }
+                    },
+                    get isCollected() {
+                        return engine.worldActions.isItemCollected(id);
+                    },
+                    get isRevealed() {
+                        return item.isRevealed !== false || engine.worldActions.isItemRevealed(id);
+                    },
+                    addEventListener: (event: 'pickup' | 'move' | 'leave', handler: (payload?: any) => void) => {
+                        if (!itemListeners[id]) itemListeners[id] = {};
+                        if (!itemListeners[id][event]) itemListeners[id][event] = [];
+                        itemListeners[id][event].push(handler);
+                    }
+                };
+            },
+            getItemOnPosition: (x: number, y: number) => {
+                const item = engine.maze.items?.find(i => i.position.x === x && i.position.y === y && !engine.worldActions.isItemCollected(i.id));
+                if (!item) return undefined;
+
+                return {
+                    collect: () => {
+                        if (!engine.worldActions.isItemCollected(item.id)) {
+                            engine.worldActions.collectItem(item.id);
+                            engine.log(`Item ${item.id} (at ${x},${y}) collected via script`, 'user');
+                        }
+                    },
+                    reveal: () => {
+                        if (item.isRevealed === false && !engine.worldActions.isItemRevealed(item.id)) {
+                            engine.worldActions.revealItem(item.id);
+                            engine.log(`Item ${item.id} (at ${x},${y}) revealed via script`, 'user');
+                        }
+                    },
+                    get isCollected() {
+                        return engine.worldActions.isItemCollected(item.id);
+                    },
+                    get isRevealed() {
+                        return item.isRevealed !== false || engine.worldActions.isItemRevealed(item.id);
+                    },
+                    addEventListener: (event: 'pickup' | 'move' | 'leave', handler: (payload?: any) => void) => {
+                        if (!itemListeners[item.id]) itemListeners[item.id] = {};
+                        if (!itemListeners[item.id][event]) itemListeners[item.id][event] = [];
+                        itemListeners[item.id][event].push(handler);
+                    }
+                };
             }
         };
 
