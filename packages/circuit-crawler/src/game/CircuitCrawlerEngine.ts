@@ -365,12 +365,14 @@ export class CircuitCrawlerEngine {
                     open: () => {
                         if (!engine.worldActions.isDoorOpen(id)) {
                             engine.worldActions.openDoor(id);
+                            engine.worldActions.flushUpdates();
                             engine.log(`Door ${id} opened via script`, 'user');
                         }
                     },
                     close: () => {
                         if (engine.worldActions.isDoorOpen(id)) {
                             engine.worldActions.closeDoor(id);
+                            engine.worldActions.flushUpdates();
                             engine.log(`Door ${id} closed via script`, 'user');
                         }
                     },
@@ -387,12 +389,14 @@ export class CircuitCrawlerEngine {
                     collect: () => {
                         if (!engine.worldActions.isItemCollected(id)) {
                             engine.worldActions.collectItem(id);
+                            engine.worldActions.flushUpdates();
                             engine.log(`Item ${id} collected via script`, 'user');
                         }
                     },
                     reveal: () => {
                         if (item.isRevealed === false && !engine.worldActions.isItemRevealed(id)) {
                             engine.worldActions.revealItem(id);
+                            engine.worldActions.flushUpdates();
                             engine.log(`Item ${id} revealed via script`, 'user');
                         }
                     },
@@ -417,12 +421,14 @@ export class CircuitCrawlerEngine {
                     collect: () => {
                         if (!engine.worldActions.isItemCollected(item.id)) {
                             engine.worldActions.collectItem(item.id);
+                            engine.worldActions.flushUpdates();
                             engine.log(`Item ${item.id} (at ${x},${y}) collected via script`, 'user');
                         }
                     },
                     reveal: () => {
                         if (item.isRevealed === false && !engine.worldActions.isItemRevealed(item.id)) {
                             engine.worldActions.revealItem(item.id);
+                            engine.worldActions.flushUpdates();
                             engine.log(`Item ${item.id} (at ${x},${y}) revealed via script`, 'user');
                         }
                     },
