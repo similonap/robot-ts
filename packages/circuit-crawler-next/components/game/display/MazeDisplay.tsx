@@ -11,39 +11,58 @@ export default function MazeDisplay() {
     const cellSize = 30;
     const width = maze.width * cellSize;
     const height = maze.height * cellSize;
+    const [hoveredRobotId, setHoveredRobotId] = useState<string | null>(null);
 
-    // Pick a primary robot to follow (e.g., the first one created/active)
-    const robotIds = Object.keys(robots);
-    const primaryRobotId = robotIds.length > 0 ? robotIds[0] : null;
-    const primaryRobot = primaryRobotId ? robots[primaryRobotId] : null;
+    // Maintain continuous rotation state for ALL robots to avoid wrapping issues
+    const [visualRotations, setVisualRotations] = useState<Record<string, number>>({});
+    const lastRobotDirections = useRef<Record<string, string>>({});
 
-    // Maintain continuous rotation state to avoid wrapping issues (0->270 etc)
     const dirs = ['North', 'East', 'South', 'West'];
     const getDirIndex = (d: string) => dirs.indexOf(d);
 
-    // Initialize with correct rotation for starting direction (default East if no robot)
-    const [rotation, setRotation] = useState(0);
-    const lastDirRef = useRef(primaryRobot?.direction || 'East');
-    const [hoveredRobotId, setHoveredRobotId] = useState<string | null>(null);
-
     useEffect(() => {
-        if (!primaryRobot) return;
+        const newRotations = { ...visualRotations };
+        let changed = false;
 
-        const currentDir = primaryRobot.direction;
-        if (currentDir === lastDirRef.current) return;
+        Object.entries(robots).forEach(([id, robot]) => {
+            const currentDir = robot.direction;
+            const lastDir = lastRobotDirections.current[id];
 
-        const oldIdx = getDirIndex(lastDirRef.current);
-        const newIdx = getDirIndex(currentDir);
+            if (!lastDir) {
+                // First time seeing this robot, initialize rotation based on direction
+                // We default to 0 for East, 90 for South etc if we assume East start
+                // But actually we just want to match the current direction index * 90 typically
+                // UNLESS we want to start at 0 and rotate to it?
+                // Let's initialize it to the absolute direction to start correct
+                lastRobotDirections.current[id] = currentDir;
+                // If we don't have a record yet, set it
+                if (newRotations[id] === undefined) {
+                    newRotations[id] = getDirIndex(currentDir) * 90;
+                    changed = true;
+                }
+                return;
+            }
 
-        let diff = newIdx - oldIdx;
+            if (currentDir === lastDir) return;
 
-        // Handle wrapping for shortest path
-        if (diff === -3) diff = 1;
-        if (diff === 3) diff = -1;
+            const oldIdx = getDirIndex(lastDir);
+            const newIdx = getDirIndex(currentDir);
+            let diff = newIdx - oldIdx;
 
-        setRotation(prev => prev + (diff * 90));
-        lastDirRef.current = currentDir;
-    }, [primaryRobot?.direction]);
+            // Handle wrapping for shortest path
+            if (diff === -3) diff = 1; // West -> North (3 -> 0) should be +1 (90deg)
+            if (diff === 3) diff = -1; // North -> West (0 -> 3) should be -1 (-90deg)
+
+            const currentRotation = newRotations[id] ?? (oldIdx * 90);
+            newRotations[id] = currentRotation + (diff * 90);
+            lastRobotDirections.current[id] = currentDir;
+            changed = true;
+        });
+
+        if (changed) {
+            setVisualRotations(newRotations);
+        }
+    }, [robots]);
 
     return (
         <div className="w-full h-full flex items-center justify-center overflow-hidden bg-black/50 border-2 border-cyan-900/50 backdrop-blur-sm shadow-[0_0_15px_rgba(14,165,233,0.1)]">
@@ -261,7 +280,8 @@ export default function MazeDisplay() {
                                 animate={{
                                     x: robot.position.x * cellSize + cellSize / 2,
                                     y: robot.position.y * cellSize + cellSize / 2,
-                                    rotate: getDirIndex(robot.direction) * 90
+                                    // Use the cumulative visual rotation if available, otherwise fallback to absolute
+                                    rotate: visualRotations[robotId] ?? (getDirIndex(robot.direction) * 90)
                                 }}
                                 transition={{
                                     type: robot.speed < 200 ? "tween" : "spring",
