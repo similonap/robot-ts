@@ -508,14 +508,9 @@ export class CircuitCrawlerEngine {
 
             // Global Module
             const globalExports = {};
-            if (this.maze.globalModule && this.maze.globalModule.trim()) {
-                const transpiledGlobal = this.transpileCode(this.maze.globalModule);
-                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', transpiledGlobal);
-                // We need a dummy require or the real one? 
-                // useCodeRunner passes `customRequireRef.current` which is null at start?
-                // No, it creats customRequire later.
-                // let's create customRequire first.
-            }
+
+            // Preload external dependencies
+            const externalModules = await this.preloadDependencies(files);
 
             // We need `customRequire` defined before global module if global module uses it.
             // But customRequire needs to access `transpiledFiles` which we just made.
@@ -523,6 +518,11 @@ export class CircuitCrawlerEngine {
             const customRequire = (path: string) => {
                 if (path === 'circuit-crawler') return { default: gameApi, game: gameApi };
                 if (path === 'readline-sync') return { default: readlineApi, ...readlineApi };
+
+                // check if it is an external module
+                if (externalModules[path]) {
+                    return externalModules[path];
+                }
 
                 let filename = path.replace(/^\.\//, '');
                 if (!filename.endsWith('.ts')) filename += '.ts';
@@ -581,5 +581,51 @@ export class CircuitCrawlerEngine {
         } finally {
             this.stop();
         }
+    }
+
+    private async preloadDependencies(files: Record<string, string>): Promise<Record<string, any>> {
+        const imports = new Set<string>();
+        // Scan all files for imports
+        for (const content of Object.values(files)) {
+            try {
+                const info = ts.preProcessFile(content);
+                info.importedFiles.forEach(imp => {
+                    const lib = imp.fileName;
+                    // Filter out local relative imports and known internal modules
+                    if (lib.startsWith('.')) return;
+                    if (lib === 'circuit-crawler') return;
+                    if (lib === 'readline-sync') return;
+
+                    imports.add(lib);
+                });
+            } catch (e) {
+                // Ignore parse errors here, execution will catch them later
+            }
+        }
+
+        const modules: Record<string, any> = {};
+        const libs = Array.from(imports);
+
+        if (libs.length > 0) {
+            this.log(`Installing libraries: ${libs.join(', ')}...`, 'user');
+        }
+
+        // Use new Function to bypass webpack/ts transformations of import()
+        const dynamicImport = new Function('url', 'return import(url)');
+
+        await Promise.all(libs.map(async (lib) => {
+            try {
+                // Use esm.sh for easy access. 
+                // We default to @latest if not specified.
+                // ESM.sh returns ES modules, which works with import()
+                const url = `https://esm.sh/${lib}`;
+                const mod = await dynamicImport(url);
+                modules[lib] = mod;
+            } catch (e: any) {
+                this.log(`Failed to install ${lib}: ${e.message}`, 'user');
+            }
+        }));
+
+        return modules;
     }
 }
