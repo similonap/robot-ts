@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { MazeConfig, Position, Item, Door, InitialRobotConfig } from '../lib/types';
+import { MazeConfig, Position, Item, Door, InitialRobotConfig } from 'circuit-crawler';
 import CodeEditor from './CodeEditor';
 import MazeItemDisplay from './game/display/MazeItemDisplay';
 import ResizableSplit from './ResizableSplit';
