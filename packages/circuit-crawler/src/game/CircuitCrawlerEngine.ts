@@ -445,7 +445,8 @@ export class CircuitCrawlerEngine {
                         itemListeners[item.id][event].push(handler);
                     }
                 };
-            }
+            },
+            isRunning: () => this.isRunning,
         };
 
         const RobotProxy = new Proxy(Robot, {

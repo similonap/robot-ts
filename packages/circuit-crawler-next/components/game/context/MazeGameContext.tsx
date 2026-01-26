@@ -113,7 +113,7 @@ const INITIAL_CODE = `import { game } from "circuit-crawler";
 
 async function main() {    
     const robot = game.getRobot("robot");
-    while (true) {
+    while (game.isRunning()) {
         // STRATEGY: RIGHT-HAND RULE
         
         // 1. Commit to the strategy: Turn Right to face the "ideal" path.

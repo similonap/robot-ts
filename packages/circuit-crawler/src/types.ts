@@ -178,6 +178,7 @@ export interface Game {
     getDoor(id: string): DoorControl | undefined;
     getItem(id: string): ItemControl | undefined;
     getItemOnPosition(x: number, y: number): ItemControl | undefined;
+    isRunning(): boolean;
 }
 
 
