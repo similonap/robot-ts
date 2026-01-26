@@ -112,6 +112,35 @@ export default function MazeDisplay() {
                     );
                 })}
 
+                {/* Robot Trails */}
+                {Object.values(robots).map((robot) => (
+                    robot.trail && robot.trail.map((segment, i) => (
+                        <motion.line
+                            key={`trail-${robot.name}-${i}`}
+                            initial={{
+                                x2: segment.x1 * cellSize + cellSize / 2,
+                                y2: segment.y1 * cellSize + cellSize / 2
+                            }}
+                            animate={{
+                                x2: segment.x2 * cellSize + cellSize / 2,
+                                y2: segment.y2 * cellSize + cellSize / 2
+                            }}
+                            transition={{
+                                type: robot.speed < 200 ? "tween" : "spring",
+                                duration: robot.speed < 200 ? robot.speed / 1000 : undefined,
+                                stiffness: robot.speed < 200 ? undefined : 200,
+                                damping: robot.speed < 200 ? undefined : 20,
+                            }}
+                            x1={segment.x1 * cellSize + cellSize / 2}
+                            y1={segment.y1 * cellSize + cellSize / 2}
+                            stroke={segment.color}
+                            strokeWidth={segment.size}
+                            strokeLinecap="round"
+                            opacity={segment.opacity ?? 0.6}
+                        />
+                    ))
+                ))}
+
                 {/* Items */}
                 <AnimatePresence>
                     {maze.items?.map((item) => {
@@ -131,23 +160,6 @@ export default function MazeDisplay() {
                         );
                     })}
                 </AnimatePresence>
-
-                {/* Robot Trails */}
-                {Object.values(robots).map((robot) => (
-                    robot.trail && robot.trail.map((segment, i) => (
-                        <line
-                            key={`trail-${robot.name}-${i}`}
-                            x1={segment.x1 * cellSize + cellSize / 2}
-                            y1={segment.y1 * cellSize + cellSize / 2}
-                            x2={segment.x2 * cellSize + cellSize / 2}
-                            y2={segment.y2 * cellSize + cellSize / 2}
-                            stroke={segment.color}
-                            strokeWidth={segment.size}
-                            strokeLinecap="round"
-                            opacity={segment.opacity ?? 0.6}
-                        />
-                    ))
-                ))}
 
                 {/* Render ALL Robots */}
                 {Object.entries(robots).map(([robotId, robot]) => (
