@@ -1,11 +1,14 @@
 import CodeEditor from "@/components/CodeEditor";
 import { useMazeGameContext } from "../context/MazeGameContext";
+import { useExternalTypes } from "./hooks/useExternalTypes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm';
 
 const GameEditor = () => {
 
     const { files, activeFile, setActiveFile, handleAddFile, handleDeleteFile, changeFile, sharedTypes, maze } = useMazeGameContext();
+
+    const externalModules = useExternalTypes(files);
 
     return (
         <div className="w-full h-full flex flex-col min-w-0 border border-gray-700 overflow-hidden bg-gray-900">
@@ -84,7 +87,10 @@ const GameEditor = () => {
                         activeFile={activeFile}
                         onChange={(val) => changeFile(activeFile, val)}
                         sharedTypes={sharedTypes}
-                        modules={{ 'circuit-crawler': maze.globalModule || '' }}
+                        modules={{
+                            'circuit-crawler': maze.globalModule || '',
+                            ...externalModules
+                        }}
                     />
                 )}
             </div>
