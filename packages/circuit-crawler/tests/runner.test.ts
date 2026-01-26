@@ -55,6 +55,7 @@ async function runMazeTest(dir: string) {
             reject(new Error(`Runtime Error: ${err.message}\nLogs:\n${logs.join('\n')}`));
         }).finally(() => {
             clearTimeout(timeout);
+            fs.writeFileSync(path.join(dir, 'test_result.log'), logs.join('\n'));
         });
     });
 }

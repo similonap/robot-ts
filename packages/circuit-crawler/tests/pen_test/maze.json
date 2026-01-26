@@ -1,0 +1,151 @@
+{
+    "width": 10,
+    "height": 10,
+    "rows": [
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        ".........."
+    ],
+    "walls": [
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ]
+    ],
+    "initialRobots": [
+        {
+            "name": "Painter",
+            "position": {
+                "x": 1,
+                "y": 1
+            },
+            "direction": "East",
+            "color": "#ff00ff"
+        }
+    ],
+    "items": [],
+    "doors": []
+}

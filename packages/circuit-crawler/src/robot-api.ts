@@ -68,6 +68,11 @@ export class RobotController {
         if (this.robotState.health === undefined) {
             this.robotState.health = 100;
         }
+
+        // Initialize trail
+        if (!this.robotState.trail) {
+            this.robotState.trail = [];
+        }
     }
 
     private checkAborted() {
@@ -197,6 +202,21 @@ export class RobotController {
             item.isRevealed === false &&
             !this.world.isItemRevealed(item.id)
         );
+
+        if (this.robotState.pen) {
+            this.robotState.trail = [
+                ...(this.robotState.trail || []),
+                {
+                    x1: x,
+                    y1: y,
+                    x2: newX,
+                    y2: newY,
+                    color: this.robotState.pen.color,
+                    size: this.robotState.pen.size,
+                    opacity: this.robotState.pen.opacity
+                }
+            ];
+        }
 
         if (hiddenItemsHere.length > 0) {
             hiddenItemsHere.forEach(item => this.world.revealItem(item.id));
@@ -550,6 +570,21 @@ export class RobotController {
     setAppearance(appearance: { url: string; width?: number; height?: number }) {
         this.robotState.appearance = appearance;
         this.onUpdate({ ...this.robotState }, `Appearance updated`);
+    }
+
+    setPen(pen: { color?: string; size?: number; opacity?: number } | null) {
+        if (pen === null) {
+            this.robotState.pen = null;
+            this.onUpdate({ ...this.robotState }, `Pen lifted`);
+        } else {
+            const currentPen = this.robotState.pen || { color: 'red', size: 1, opacity: 1 };
+            this.robotState.pen = {
+                color: pen.color ?? currentPen.color,
+                size: pen.size ?? currentPen.size,
+                opacity: pen.opacity ?? currentPen.opacity
+            };
+            this.onUpdate({ ...this.robotState }, `Pen set to ${this.robotState.pen.color} (size: ${this.robotState.pen.size}, opacity: ${this.robotState.pen.opacity})`);
+        }
     }
 
     async damage(amount: number) {

@@ -132,6 +132,23 @@ export default function MazeDisplay() {
                     })}
                 </AnimatePresence>
 
+                {/* Robot Trails */}
+                {Object.values(robots).map((robot) => (
+                    robot.trail && robot.trail.map((segment, i) => (
+                        <line
+                            key={`trail-${robot.name}-${i}`}
+                            x1={segment.x1 * cellSize + cellSize / 2}
+                            y1={segment.y1 * cellSize + cellSize / 2}
+                            x2={segment.x2 * cellSize + cellSize / 2}
+                            y2={segment.y2 * cellSize + cellSize / 2}
+                            stroke={segment.color}
+                            strokeWidth={segment.size}
+                            strokeLinecap="round"
+                            opacity={segment.opacity ?? 0.6}
+                        />
+                    ))
+                ))}
+
                 {/* Render ALL Robots */}
                 {Object.entries(robots).map(([robotId, robot]) => (
                     <g

@@ -87,6 +87,8 @@ export interface RobotState {
     explosion?: { x: number; y: number; timestamp: number };
     echoWave?: { x: number; y: number; direction: Direction; timestamp: number; distance: number };
     echoHit?: { x: number; y: number; timestamp: number };
+    pen?: { color: string; size: number; opacity: number } | null;
+    trail?: Array<{ x1: number, y1: number, x2: number, y2: number, color: string, size: number, opacity: number }>;
 }
 
 // Deprecated: Alias for backward compatibility if needed, or remove.
@@ -151,6 +153,7 @@ export interface Robot {
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;
     setAppearance(appearance: RobotAppearance): void;
+    setPen(pen: { color?: string; size?: number; opacity?: number } | null): void;
     damage(amount: number): Promise<void>;
     destroy(): Promise<void>;
     addEventListener(event: 'pickup', handler: (item: Item) => void): void;

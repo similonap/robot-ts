@@ -312,6 +312,7 @@ export class CircuitCrawlerEngine {
             closeDoor() { return this.safeExec(() => this.controller.closeDoor()); }
             setSpeed(delay: number) { return this.controller.setSpeed(delay); }
             setAppearance(appearance: RobotAppearance) { return this.controller.setAppearance(appearance); }
+            setPen(pen: { color?: string; size?: number; opacity?: number } | null) { return this.controller.setPen(pen); }
             addEventListener(event: string, handler: any) { return this.controller.addEventListener(event, handler); }
             damage(amount: number) { return this.safeExec(() => this.controller.damage(amount)); }
             destroy() { return this.safeExec(() => this.controller.destroy()); }
