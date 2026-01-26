@@ -291,7 +291,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     return (
         <div className="flex flex-col h-screen bg-black text-white p-4 gap-4">
             <header className="flex justify-between items-center border-b border-gray-700 pb-4">
-                <h1 className="text-2xl font-bold">🏗️ Maze Designer</h1>
+                <div className="flex items-center gap-3">
+                    <img src="/robot-icon.svg" alt="Robot Icon" className="w-8 h-8" />
+                    <h1 className="text-2xl font-bold">🏗️ Maze Designer</h1>
+                </div>
                 <div className="flex gap-4">
                     <label className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 cursor-pointer">
                         Import JSON

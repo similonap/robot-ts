@@ -43,7 +43,7 @@ const Header = () => {
         <header className="flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-3 border-b border-cyan-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)] sticky top-0 z-50">
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3">
-                    <span className="text-2xl">🤖</span>
+                    <img src="/robot-icon.svg" alt="Robot Icon" className="w-8 h-8" />
                     <h1 className="text-xl font-bold font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 uppercase">
                         Circuit Crawler
                     </h1>
