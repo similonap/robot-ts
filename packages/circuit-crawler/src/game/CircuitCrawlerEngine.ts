@@ -451,6 +451,9 @@ export class CircuitCrawlerEngine {
                 // @ts-ignore
                 const robot = new RobotProxy(config);
                 return robot;
+            },
+            get robots() {
+                return Array.from(wrapperRobots.values());
             }
         };
 

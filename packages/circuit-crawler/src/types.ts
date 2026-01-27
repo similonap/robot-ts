@@ -179,6 +179,8 @@ export interface Game {
     getItem(id: string): ItemControl | undefined;
     getItemOnPosition(x: number, y: number): ItemControl | undefined;
     isRunning(): boolean;
+    createRobot(config: { x: number, y: number, name?: string, color?: string, direction?: Direction }): Robot;
+    readonly robots: Robot[];
 }
 
 
