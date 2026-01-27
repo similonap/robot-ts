@@ -1,5 +1,5 @@
 import { CancelError, CrashError, HealthDepletedError, RobotController } from "../robot-api";
-import { MazeConfig, RobotState, RobotAppearance, Item } from "../types";
+import { MazeConfig, RobotState, RobotAppearance, Item, RobotConfig } from "../types";
 import { WorldManager } from "./WorldManager";
 import * as ts from "typescript";
 
@@ -42,6 +42,21 @@ export class CircuitCrawlerEngine {
     private onRobotUpdate?: RobotUpdateCallback;
     private onCompletion?: CompletionCallback;
     private fetchImpl: typeof fetch;
+
+    private listeners: Record<string, ((payload?: any) => void)[]> = {};
+
+    private emit(event: string, payload?: any) {
+        if (this.listeners[event]) {
+            this.listeners[event].forEach(handler => handler(payload));
+        }
+    }
+
+    public addEventListener(event: string, handler: (payload?: any) => void) {
+        if (!this.listeners[event]) {
+            this.listeners[event] = [];
+        }
+        this.listeners[event].push(handler);
+    }
 
     private abortController: AbortController | null = null;
     private inputResolve: ((value: string) => void) | null = null;
@@ -195,7 +210,7 @@ export class CircuitCrawlerEngine {
             private controller: RobotController;
             public name: string;
 
-            constructor(config: { x: number, y: number, name?: string, color?: string, direction?: import('../types').Direction }) {
+            constructor(config: RobotConfig) {
                 this.name = config.name || `Robot ${engine.activeControllers.size + 1}`;
 
                 const startState: RobotState = {
@@ -469,13 +484,16 @@ export class CircuitCrawlerEngine {
                 };
             },
             isRunning: () => this.isRunning,
-            createRobot: (config: { x: number, y: number, name?: string, color?: string, direction?: import('../types').Direction }) => {
+            createRobot: (config: RobotConfig) => {
                 // @ts-ignore
                 const robot = new RobotProxy(config);
                 return robot;
             },
             get robots() {
                 return Array.from(wrapperRobots.values());
+            },
+            addEventListener: (event: string, handler: (payload?: any) => void) => {
+                this.addEventListener(event, handler);
             }
         };
 
@@ -483,6 +501,7 @@ export class CircuitCrawlerEngine {
             construct(target, args: any[]) {
                 const instance = new target(args[0]);
                 wrapperRobots.set(instance.name, instance);
+                engine.emit('robot_created', instance);
                 return instance;
             }
         });

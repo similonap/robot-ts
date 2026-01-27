@@ -1,6 +1,5 @@
 async function main() {
     console.log("Creating new robot R2...");
-    // @ts-ignore
     const r2 = game.createRobot({
         x: 2,
         y: 2,

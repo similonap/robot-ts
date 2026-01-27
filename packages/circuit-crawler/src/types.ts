@@ -171,6 +171,14 @@ export interface LogEntry {
     type: 'robot' | 'user';
 }
 
+export interface RobotConfig {
+    x: number;
+    y: number;
+    name?: string;
+    color?: string;
+    direction?: Direction;
+}
+
 export interface Game {
     win(message: string): void;
     fail(message: string): void;
@@ -180,8 +188,10 @@ export interface Game {
     getItem(id: string): ItemControl | undefined;
     getItemOnPosition(x: number, y: number): ItemControl | undefined;
     isRunning(): boolean;
-    createRobot(config: { x: number, y: number, name?: string, color?: string, direction?: Direction }): Robot;
+    createRobot(config: RobotConfig): Robot;
     readonly robots: Robot[];
+    addEventListener(event: 'robot_created', handler: (robot: Robot) => void): void;
+    addEventListener(event: string, handler: (payload?: any) => void): void;
 }
 
 
