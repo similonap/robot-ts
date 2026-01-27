@@ -18,11 +18,22 @@ Your goal is to open all doors in the maze and collect the gem.
 - Methods you can use:
 
 ```ts
+import readline from "readline-sync";
+
+// Movement
+await robot.moveForward();
+await robot.turnLeft();
+await robot.turnRight();
+
+// Interaction
 const result = await robot.openDoor(); // Try to open without anything
 await robot.openDoor("password");      // Open with password
 await robot.openDoor(item);            // Open with an item
 await robot.pickup();                  // Pick up items (like keys)
-const item = robot.inventory[0];       // Access inventory items
+const item = robot.inventory[0];       // Access inventory items (0 is the first item)
+
+// Input
+const password = readline.question("Enter password: ");
 ```
 
 - Use loops and custom functions as much as possible to avoid code duplication.
