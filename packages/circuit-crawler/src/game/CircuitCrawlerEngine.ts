@@ -447,6 +447,11 @@ export class CircuitCrawlerEngine {
                 };
             },
             isRunning: () => this.isRunning,
+            createRobot: (config: { x: number, y: number, name?: string, color?: string, direction?: import('../types').Direction }) => {
+                // @ts-ignore
+                const robot = new RobotProxy(config);
+                return robot;
+            }
         };
 
         const RobotProxy = new Proxy(Robot, {
