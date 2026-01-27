@@ -12,6 +12,10 @@ export default function MazeDisplay() {
     const width = maze.width * cellSize;
     const height = maze.height * cellSize;
     const [hoveredRobotId, setHoveredRobotId] = useState<string | null>(null);
+    const [zoom, setZoom] = useState(1);
+
+    const handleZoomIn = () => setZoom(z => Math.min(z + 0.2, 3));
+    const handleZoomOut = () => setZoom(z => Math.max(z - 0.2, 0.5));
 
     // Maintain continuous rotation state for ALL robots to avoid wrapping issues
     const [visualRotations, setVisualRotations] = useState<Record<string, number>>({});
@@ -69,6 +73,7 @@ export default function MazeDisplay() {
             <svg
                 viewBox={`0 0 ${width} ${height}`}
                 preserveAspectRatio="xMidYMid meet"
+                style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s ease-out', overflow: 'visible' }}
                 className="max-w-full max-h-full"
             >
                 {/* Background Grid */}
@@ -327,6 +332,10 @@ export default function MazeDisplay() {
                         {!robot.isDestroyed && hoveredRobotId === robotId && (
                             <motion.g
                                 key={`name-${robot.name}`}
+                                initial={{
+                                    x: robot.position.x * cellSize + cellSize / 2,
+                                    y: robot.position.y * cellSize + cellSize / 2
+                                }}
                                 animate={{
                                     x: robot.position.x * cellSize + cellSize / 2,
                                     y: robot.position.y * cellSize + cellSize / 2
@@ -415,7 +424,27 @@ export default function MazeDisplay() {
             </svg>
 
             {/* Controls Overlay */}
-            <div className="absolute top-2 right-2 flex gap-2">
+            <div className="absolute top-2 right-2 flex gap-2 flex-col items-end">
+                <div className="flex gap-1 bg-black/60 backdrop-blur rounded border border-gray-700 p-1">
+                    <button
+                        onClick={handleZoomIn}
+                        className="w-6 h-6 flex items-center justify-center text-cyan-500 hover:text-white hover:bg-white/10 rounded transition-colors"
+                        title="Zoom In"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={handleZoomOut}
+                        className="w-6 h-6 flex items-center justify-center text-cyan-500 hover:text-white hover:bg-white/10 rounded transition-colors"
+                        title="Zoom Out"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                            <path fillRule="evenodd" d="M4 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clipRule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
                 <label className="flex items-center gap-1 bg-black/60 backdrop-blur px-2 py-1 rounded border border-gray-700 text-xs text-gray-300 cursor-pointer hover:bg-black/80 hover:text-white transition-colors">
                     <input
                         type="checkbox"
