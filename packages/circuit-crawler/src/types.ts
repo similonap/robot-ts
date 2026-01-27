@@ -142,6 +142,7 @@ export interface Robot {
     readonly inventory: Item[];
     readonly health: number;
     readonly position: Position;
+    readonly name: string;
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
     turnLeft(): Promise<void>;

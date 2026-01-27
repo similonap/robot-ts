@@ -126,6 +126,17 @@ export class CircuitCrawlerEngine {
 
     // --- Execution Logic ---
 
+    private formatLogArg(arg: any): string {
+        if (typeof arg === 'object' && arg !== null) {
+            try {
+                return JSON.stringify(arg, null, 2);
+            } catch (e) {
+                return '[Circular Object]';
+            }
+        }
+        return String(arg);
+    }
+
     private transpileCode(source: string) {
         try {
             const autoAwaitTransformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
@@ -316,6 +327,17 @@ export class CircuitCrawlerEngine {
             addEventListener(event: string, handler: any) { return this.controller.addEventListener(event, handler); }
             damage(amount: number) { return this.safeExec(() => this.controller.damage(amount)); }
             destroy() { return this.safeExec(() => this.controller.destroy()); }
+
+            toJSON() {
+                return {
+                    name: this.name,
+                    position: this.position,
+                    direction: this.direction,
+                    health: this.health,
+                    inventory: this.inventory,
+                    isDestroyed: this.isDestroyed
+                };
+            }
         }
 
         // Initialize from existing logic (if any pre-registered robots need controllers? 
@@ -466,8 +488,8 @@ export class CircuitCrawlerEngine {
         });
 
         const consoleApi = {
-            log: (...args: any[]) => this.log(`LOG: ${args.join(' ')}`, 'user'),
-            error: (...args: any[]) => this.log(`ERR: ${args.join(' ')}`, 'user'),
+            log: (...args: any[]) => this.log(`LOG: ${args.map(a => this.formatLogArg(a)).join(' ')}`, 'user'),
+            error: (...args: any[]) => this.log(`ERR: ${args.map(a => this.formatLogArg(a)).join(' ')}`, 'user'),
         };
 
         const readlineApi = {
