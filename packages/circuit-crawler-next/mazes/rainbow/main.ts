@@ -9,12 +9,12 @@ async function main() {
         return;
     }
 
-    const colors = rainbow("hex", 15);
+    const colors = rainbow(15, "hex");
 
 
     for (let i = 0; i < 15; i++) {
         robot.setPen({
-            color: colors[i],
+            color: colors[i].hex,
             size: 10
         });
         await robot.moveForward();
