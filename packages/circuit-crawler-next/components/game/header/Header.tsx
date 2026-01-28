@@ -4,10 +4,10 @@ import { useMazeGameContext } from "../context/MazeGameContext";
 import JSZip from "jszip";
 
 interface HeaderProps {
-
+    headerAction?: React.ReactNode;
 }
 
-const Header = () => {
+const Header = ({ headerAction }: HeaderProps) => {
     const { onMazeLoaded, loadProject, isRunning, stopExecution, resetGame, runCode, loadSolution, hasSolution } = useMazeGameContext();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +109,7 @@ const Header = () => {
 
             </div>
             <div className="flex items-center gap-3">
+                {headerAction}
                 <input
                     type="file"
                     ref={fileInputRef}

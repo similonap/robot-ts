@@ -9,18 +9,18 @@ import { MazeGameContextProvider, useMazeGameContext } from './context/MazeGameC
 import GameEditor from './editor/GameEditor';
 import GameTerminal from './terminal/GameTerminal';
 
-export default function MazeGameWrapper({ sharedTypes, initialMaze, initialFiles, solutionFiles }: { sharedTypes: string; initialMaze: MazeConfig; initialFiles?: Record<string, string>; solutionFiles?: Record<string, string> }) {
+export default function MazeGameWrapper({ sharedTypes, initialMaze, initialFiles, solutionFiles, headerAction }: { sharedTypes: string; initialMaze: MazeConfig; initialFiles?: Record<string, string>; solutionFiles?: Record<string, string>; headerAction?: React.ReactNode }) {
     return (
         <MazeGameContextProvider initialMaze={initialMaze} initialFiles={initialFiles} solutionFiles={solutionFiles} sharedTypes={sharedTypes}>
-            <MazeGame />
+            <MazeGame headerAction={headerAction} />
         </MazeGameContextProvider>
     )
 }
 
-function MazeGame() {
+function MazeGame({ headerAction }: { headerAction?: React.ReactNode }) {
     return (
         <div className="flex flex-col h-screen bg-black text-white p-4 gap-4">
-            <Header />
+            <Header headerAction={headerAction} />
 
             <div className="flex-1 overflow-hidden relative">
                 <ResizableSplit

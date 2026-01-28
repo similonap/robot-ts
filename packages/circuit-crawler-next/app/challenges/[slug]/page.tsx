@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { notFound } from 'next/navigation';
 import MazeGame from '@/components/game/MazeGame';
+import AuthButton from '@/components/auth/AuthButton';
 import { MazeConfig } from 'circuit-crawler';
 
 interface Props {
@@ -80,6 +81,7 @@ export default async function Page({ params }: Props) {
             initialMaze={mazeConfig}
             initialFiles={initialFiles}
             solutionFiles={solutionFiles}
+            headerAction={<AuthButton />}
         />
     );
 }

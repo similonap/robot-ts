@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.93.2",
     "circuit-crawler": "*",
     "framer-motion": "^12.26.2",
     "jszip": "^3.10.1",

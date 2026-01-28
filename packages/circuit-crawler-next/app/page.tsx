@@ -1,4 +1,5 @@
 import MazeGame from '../components/game/MazeGame';
+import AuthButton from '@/components/auth/AuthButton';
 import fs from 'fs';
 import path from 'path';
 import { generateMaze } from 'circuit-crawler';
@@ -16,5 +17,5 @@ export default function Home() {
   // We can force dynamic if needed, but let's just generate it.
   const maze = generateMaze(15, 15);
 
-  return <MazeGame sharedTypes={typesContent} initialMaze={maze} />;
+  return <MazeGame sharedTypes={typesContent} initialMaze={maze} headerAction={<AuthButton />} />;
 }
