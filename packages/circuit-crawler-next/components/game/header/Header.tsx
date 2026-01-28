@@ -1,40 +1,97 @@
 import { MazeConfig } from "circuit-crawler";
 import { useRef } from "react";
 import { useMazeGameContext } from "../context/MazeGameContext";
+import JSZip from "jszip";
 
 interface HeaderProps {
 
 }
 
 const Header = () => {
-    const { onMazeLoaded, isRunning, stopExecution, resetGame, runCode, loadSolution, hasSolution } = useMazeGameContext();
+    const { onMazeLoaded, loadProject, isRunning, stopExecution, resetGame, runCode, loadSolution, hasSolution } = useMazeGameContext();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const json = event.target?.result as string;
-                const parsed = JSON.parse(json) as MazeConfig;
+        try {
+            if (file.name.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const json = event.target?.result as string;
+                        const parsed = JSON.parse(json) as MazeConfig;
 
-                // Simple validation
-                if (!parsed.width || !parsed.height || !parsed.walls) {
-                    throw new Error("Invalid maze content");
+                        // Simple validation
+                        if (!parsed.width || !parsed.height || !parsed.walls) {
+                            throw new Error("Invalid maze content");
+                        }
+
+                        if (isRunning) stopExecution();
+
+                        onMazeLoaded(parsed);
+
+                    } catch (err) {
+                        alert("Failed to import maze: " + (err as any).message);
+                    }
+                };
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.zip')) {
+                const zip = await JSZip.loadAsync(file);
+
+                // Find root based on maze.json
+                const allPaths = Object.keys(zip.files);
+                const mazePath = allPaths.find(p => p.endsWith('maze.json') && !p.startsWith('__MACOSX') && !p.includes('/.'));
+
+                if (!mazePath) {
+                    throw new Error("maze.json not found in the zip file");
                 }
 
+                // Determine root directory (if any)
+                const rootDir = mazePath.substring(0, mazePath.lastIndexOf('maze.json'));
+
+                // Read maze.json
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const mazeContent = await zip.file(mazePath)!.async("string");
+                const maze = JSON.parse(mazeContent) as MazeConfig;
+
+                // Simple validation
+                if (!maze.width || !maze.height || !maze.walls) {
+                    throw new Error("Invalid maze content in maze.json");
+                }
+
+                const files: Record<string, string> = {};
+                const solutionFiles: Record<string, string> = {};
+
+                await Promise.all(allPaths.map(async (path) => {
+                    if (zip.files[path].dir) return;
+                    if (path.startsWith('__MACOSX') || path.includes('/.')) return;
+                    if (path === mazePath) return;
+                    if (!path.startsWith(rootDir)) return;
+
+                    const relativePath = path.substring(rootDir.length);
+                    const content = await zip.files[path].async("string");
+
+                    if (relativePath.startsWith('solution/')) {
+                        const solName = relativePath.replace('solution/', '');
+                        if (solName) solutionFiles[solName] = content;
+                    } else {
+                        files[relativePath] = content;
+                    }
+                }));
+
                 if (isRunning) stopExecution();
-
-                onMazeLoaded(parsed);
-
-            } catch (err) {
-                alert("Failed to import maze: " + (err as any).message);
+                loadProject(maze, files, Object.keys(solutionFiles).length > 0 ? solutionFiles : undefined);
+            } else {
+                alert("Unsupported file type. Please upload a .json or .zip file.");
             }
-        };
-        reader.readAsText(file);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to import file: " + (err as any).message);
+        }
+
         // Reset input
         e.target.value = '';
     };
@@ -57,7 +114,7 @@ const Header = () => {
                     ref={fileInputRef}
                     onChange={handleFileImport}
                     className="hidden"
-                    accept=".json"
+                    accept=".json,.zip"
                 />
 
                 <div className="h-8 w-px bg-gray-800 mx-1"></div>

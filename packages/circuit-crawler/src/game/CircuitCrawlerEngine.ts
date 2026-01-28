@@ -156,19 +156,155 @@ export class CircuitCrawlerEngine {
         try {
             const autoAwaitTransformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
                 return (sourceFile) => {
-                    const visitor: ts.Visitor = (node) => {
-                        if (ts.isCallExpression(node)) {
-                            const expr = node.expression;
-                            if (ts.isPropertyAccessExpression(expr) &&
-                                ts.isIdentifier(expr.expression) &&
-                                expr.expression.text === 'readline' &&
-                                ts.isIdentifier(expr.name) &&
-                                (expr.name.text === 'question' ||
-                                    expr.name.text === 'questionInt' ||
-                                    expr.name.text === 'questionFloat')) {
-                                return context.factory.createAwaitExpression(node);
+                    const asyncNodes = new Set<ts.Node>();
+                    const functionNameMap = new Map<string, ts.Node>();
+                    const callGraph = new Map<ts.Node, Set<string>>();
+
+                    // Helpers
+                    const isReadlineCall = (node: ts.CallExpression): boolean => {
+                        const expr = node.expression;
+                        return (ts.isPropertyAccessExpression(expr) &&
+                            ts.isIdentifier(expr.expression) &&
+                            expr.expression.text === 'readline' &&
+                            ts.isIdentifier(expr.name) &&
+                            (expr.name.text === 'question' ||
+                                expr.name.text === 'questionInt' ||
+                                expr.name.text === 'questionFloat'));
+                    };
+
+                    const getFunctionName = (node: ts.Node): string | undefined => {
+                        if (ts.isFunctionDeclaration(node)) {
+                            return node.name?.text;
+                        }
+                        if (ts.isMethodDeclaration(node)) {
+                            if (ts.isIdentifier(node.name)) return node.name.text;
+                        }
+                        if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+                            // Variable declaration: const foo = ...
+                            if (ts.isVariableDeclaration(node.parent) && ts.isIdentifier(node.parent.name)) {
+                                return node.parent.name.text;
+                            }
+                            // Assignment: foo = ...
+                            if (ts.isBinaryExpression(node.parent) &&
+                                node.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+                                ts.isIdentifier(node.parent.left)) {
+                                return node.parent.left.text;
                             }
                         }
+                        return undefined;
+                    };
+
+                    const isFunctionLike = (node: ts.Node): boolean => {
+                        return ts.isFunctionDeclaration(node) || ts.isArrowFunction(node) || ts.isFunctionExpression(node) || ts.isMethodDeclaration(node);
+                    }
+
+                    // Analysis Pass
+                    const visitAnalysis = (node: ts.Node, currentFn: ts.Node | null) => {
+                        let nextFn = currentFn;
+
+                        if (isFunctionLike(node)) {
+                            nextFn = node;
+                            const name = getFunctionName(node);
+                            if (name) functionNameMap.set(name, node);
+                        }
+
+                        if (ts.isCallExpression(node)) {
+                            if (isReadlineCall(node)) {
+                                if (nextFn) asyncNodes.add(nextFn);
+                            } else if (ts.isIdentifier(node.expression)) {
+                                const callee = node.expression.text;
+                                if (nextFn) {
+                                    if (!callGraph.has(nextFn)) callGraph.set(nextFn, new Set());
+                                    callGraph.get(nextFn)!.add(callee);
+                                }
+                            }
+                        }
+
+                        ts.forEachChild(node, child => visitAnalysis(child, nextFn));
+                    }
+
+                    visitAnalysis(sourceFile, null);
+
+                    // Propagation
+                    let changed = true;
+                    while (changed) {
+                        changed = false;
+                        for (const [callerNode, callees] of callGraph) {
+                            if (asyncNodes.has(callerNode)) continue;
+
+                            for (const calleeName of callees) {
+                                const calleeNode = functionNameMap.get(calleeName);
+                                // If callee is known and async -> caller becomes async
+                                if (calleeNode && asyncNodes.has(calleeNode)) {
+                                    asyncNodes.add(callerNode);
+                                    changed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Transformation Pass
+                    const visitor: ts.Visitor = (node) => {
+                        // 1. Mark Async
+                        if (isFunctionLike(node)) {
+                            if (asyncNodes.has(node)) {
+                                // Clone modifiers
+                                // @ts-ignore
+                                const modifiers = (ts.getModifiers ? ts.getModifiers(node) : node.modifiers) || [];
+                                const hasAsync = modifiers.some((m: any) => m.kind === ts.SyntaxKind.AsyncKeyword);
+
+                                if (!hasAsync) {
+                                    const newModifiers = [...modifiers, context.factory.createModifier(ts.SyntaxKind.AsyncKeyword)];
+
+                                    if (ts.isFunctionDeclaration(node)) {
+                                        return context.factory.updateFunctionDeclaration(
+                                            node, newModifiers, node.asteriskToken, node.name, node.typeParameters, node.parameters, node.type,
+                                            ts.visitEachChild(node.body, visitor, context)
+                                        );
+                                    }
+                                    if (ts.isArrowFunction(node)) {
+                                        return context.factory.updateArrowFunction(
+                                            node, newModifiers, node.typeParameters, node.parameters, node.type, node.equalsGreaterThanToken,
+                                            ts.visitEachChild(node.body, visitor, context)
+                                        );
+                                    }
+                                    if (ts.isMethodDeclaration(node)) {
+                                        return context.factory.updateMethodDeclaration(
+                                            node, newModifiers, node.asteriskToken, node.name, node.questionToken, node.typeParameters, node.parameters, node.type,
+                                            ts.visitEachChild(node.body, visitor, context)
+                                        );
+                                    }
+                                    if (ts.isFunctionExpression(node)) {
+                                        return context.factory.updateFunctionExpression(
+                                            node, newModifiers, node.asteriskToken, node.name, node.typeParameters, node.parameters, node.type,
+                                            ts.visitEachChild(node.body, visitor, context)
+                                        );
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Add Await
+                        if (ts.isCallExpression(node)) {
+                            let needsAwait = false;
+                            if (isReadlineCall(node)) needsAwait = true;
+                            else if (ts.isIdentifier(node.expression)) {
+                                const calleeName = node.expression.text;
+                                const calleeNode = functionNameMap.get(calleeName);
+                                if (calleeNode && asyncNodes.has(calleeNode)) {
+                                    needsAwait = true;
+                                }
+                            }
+
+                            if (needsAwait) {
+                                if (!ts.isAwaitExpression(node.parent)) {
+                                    const visitedCall = ts.visitEachChild(node, visitor, context) as ts.CallExpression;
+                                    return context.factory.createAwaitExpression(visitedCall);
+                                }
+                            }
+                        }
+
                         return ts.visitEachChild(node, visitor, context);
                     };
                     return ts.visitNode(sourceFile, visitor) as ts.SourceFile;
@@ -211,6 +347,10 @@ export class CircuitCrawlerEngine {
             public name: string;
 
             constructor(config: RobotConfig) {
+                if (config.x < 0 || config.y < 0 || config.x >= engine.maze.width || config.y >= engine.maze.height) {
+                    throw new Error(`Cannot create robot at (${config.x}, ${config.y}) - outside of bounds [${engine.maze.width}x${engine.maze.height}]`);
+                }
+
                 this.name = config.name || `Robot ${engine.activeControllers.size + 1}`;
 
                 const startState: RobotState = {

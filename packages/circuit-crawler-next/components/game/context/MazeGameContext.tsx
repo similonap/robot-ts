@@ -32,6 +32,7 @@ interface MazeGameContextType {
 
     isRunning: boolean;
     onMazeLoaded: (maze: MazeConfig) => void;
+    loadProject: (maze: MazeConfig, files: Record<string, string>, solutionFiles?: Record<string, string>) => void;
     resetGame: () => void;
     runCode: () => void;
     stopExecution: () => void;
@@ -77,6 +78,7 @@ export const MazeGameContext = createContext<MazeGameContextType>({
 
     isRunning: false,
     onMazeLoaded: () => { },
+    loadProject: () => { },
     resetGame: () => { },
     runCode: () => { },
     stopExecution: () => { },
@@ -140,13 +142,42 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     const { logs, setLogs, addLog, showRobotLogs, setShowRobotLogs, clearLogs } = useGameLogs();
     const { files, setFiles, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
 
+    const [currentSolutionFiles, setCurrentSolutionFiles] = useState(solutionFiles);
+
     const loadSolution = () => {
-        if (solutionFiles) {
+        if (currentSolutionFiles) {
             if (isRunning) stopExecution();
-            setFiles(solutionFiles);
+            setFiles(currentSolutionFiles);
             // Optionally set active file to main.ts or first file
-            if (solutionFiles['main.ts']) setActiveFile('main.ts');
+            if (currentSolutionFiles['main.ts']) setActiveFile('main.ts');
         }
+    };
+
+    const loadProject = (newMaze: MazeConfig, newFiles: Record<string, string>, newSolutionFiles?: Record<string, string>) => {
+        setMaze(newMaze);
+        setFiles(newFiles);
+        setCurrentSolutionFiles(newSolutionFiles);
+
+        // Reset everything
+        clearRobots();
+        if (newMaze.initialRobots) {
+            initializeRobots(newMaze.initialRobots);
+        } else {
+            initializeRobots([{ position: { x: 1, y: 1 }, direction: 'East', name: 'Robot 1' }]);
+        }
+        resetWorld();
+        clearLogs();
+        stopExecution();
+
+        // Pick active file
+        if (newFiles['main.ts']) {
+            setActiveFile('main.ts');
+        } else {
+            const first = Object.keys(newFiles)[0];
+            if (first) setActiveFile(first);
+        }
+
+        addLog("Project imported successfully!", 'user');
     };
 
     const [showRobotNames, setShowRobotNames] = useState(true);
@@ -249,6 +280,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
 
             isRunning,
             onMazeLoaded,
+            loadProject,
             resetGame,
             runCode,
             stopExecution,
@@ -270,7 +302,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
             changeFile,
             sharedTypes,
             loadSolution,
-            hasSolution: !!solutionFiles
+            hasSolution: !!currentSolutionFiles
         }}>
             {children}
         </MazeGameContext.Provider>

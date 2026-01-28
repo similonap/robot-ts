@@ -9,9 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "circuit-crawler": "*",
     "@monaco-editor/react": "^4.7.0",
+    "circuit-crawler": "*",
     "framer-motion": "^12.26.2",
+    "jszip": "^3.10.1",
     "next": "16.1.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
