@@ -261,5 +261,5 @@
   ],
   "items": [],
   "doors": [],
-  "globalModule": "setInterval(() => {\n    game.robots\n}, 1000);"
+  "globalModule": ""
 }
