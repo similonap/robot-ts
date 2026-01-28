@@ -87,3 +87,8 @@ Enter robot X: 5
 Enter robot Y: 5
 Enter robot color: #ff0000
 ```
+
+### Suggested extra challenges
+
+- Use functions to validate the input
+- Ask the user if he wants to create another robot and create them in a loop
