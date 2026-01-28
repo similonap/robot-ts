@@ -78,3 +78,12 @@ game.createRobot({
     color: robotColor,
 });
 ```
+
+### Example interaction
+
+```bash
+Enter robot name: MyRobot
+Enter robot X: 5
+Enter robot Y: 5
+Enter robot color: #ff0000
+```
