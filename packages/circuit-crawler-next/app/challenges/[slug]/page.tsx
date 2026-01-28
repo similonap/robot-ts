@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { notFound } from 'next/navigation';
-import MazeGame from '../../components/game/MazeGame';
+import MazeGame from '@/components/game/MazeGame';
 import { MazeConfig } from 'circuit-crawler';
 
 interface Props {
