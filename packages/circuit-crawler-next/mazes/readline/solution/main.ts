@@ -68,5 +68,3 @@ async function main() {
         color: robotColor,
     });
 }
-
-main();
