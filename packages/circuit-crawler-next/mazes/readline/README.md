@@ -82,11 +82,13 @@ game.createRobot({
 ### Example interaction
 
 ```bash
-Enter robot name: MyRobot
-Enter robot X: 5
-Enter robot Y: 5
+Enter robot name: Robot
+Enter robot X: 7
+Enter robot Y: 7
 Enter robot color: #ff0000
 ```
+
+To win this game you need to create a robot named `Robot` at position `7, 7` and color `#ff0000`.
 
 ### Suggested extra challenges
 
