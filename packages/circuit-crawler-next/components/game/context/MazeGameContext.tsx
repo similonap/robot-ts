@@ -6,6 +6,7 @@ import { useWorld } from "./hooks/useWorld";
 import { useGameLogs } from "./hooks/useGameLogs";
 import { useFileManager } from "./hooks/useFileManager";
 import { useCodeRunner } from "./hooks/useCodeRunner";
+import { awardBadge } from "@/app/actions/badges";
 
 interface MazeGameContextType {
     maze: MazeConfig;
@@ -57,6 +58,12 @@ interface MazeGameContextType {
     sharedTypes: string;
     loadSolution: () => void;
     hasSolution: boolean;
+
+    // Badge System
+    slug?: string;
+    showBadgeModal: boolean;
+    setShowBadgeModal: (show: boolean) => void;
+    newBadgeSlug: string | null;
 }
 
 export const MazeGameContext = createContext<MazeGameContextType>({
@@ -100,7 +107,11 @@ export const MazeGameContext = createContext<MazeGameContextType>({
     changeFile: (file: string, content: string) => { },
     sharedTypes: '',
     loadSolution: () => { },
-    hasSolution: false
+    hasSolution: false,
+    slug: undefined,
+    showBadgeModal: false,
+    setShowBadgeModal: () => { },
+    newBadgeSlug: null
 });
 
 interface MazeGameProviderProps {
@@ -108,6 +119,7 @@ interface MazeGameProviderProps {
     initialFiles?: Record<string, string>;
     solutionFiles?: Record<string, string>;
     sharedTypes: string;
+    slug?: string;
 }
 
 // Initial code template
@@ -134,7 +146,7 @@ async function main() {
     }
 }`;
 
-export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFiles, sharedTypes, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
+export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFiles, sharedTypes, slug, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
     const { maze, setMaze } = useMaze(initialMaze);
     const { robots, updateRobotState, clearRobots, removeRobot, initializeRobots } = useRobots();
     const { doorStates, revealedItemIds, collectedItemIds, worldActions, resetWorld } = useWorld(initialMaze);
@@ -147,7 +159,18 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     const loadSolution = () => {
         if (currentSolutionFiles) {
             if (isRunning) stopExecution();
-            setFiles(currentSolutionFiles);
+
+            const newFiles = { ...currentSolutionFiles };
+
+            // Preserve README if it exists
+            if (files['README.md']) {
+                newFiles['README.md'] = files['README.md'];
+            }
+            if (files['README']) {
+                newFiles['README'] = files['README'];
+            }
+
+            setFiles(newFiles);
             // Optionally set active file to main.ts or first file
             if (currentSolutionFiles['main.ts']) setActiveFile('main.ts');
         }
@@ -192,6 +215,24 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
         }
     }, []);
 
+    const [showBadgeModal, setShowBadgeModal] = useState(false);
+    const [newBadgeSlug, setNewBadgeSlug] = useState<string | null>(null);
+
+    const handleGameCompletion = async (success: boolean, msg: string) => {
+        if (success && slug) {
+            // Award badge
+            try {
+                const result = await awardBadge(slug);
+                if (result.success && result.new) {
+                    setNewBadgeSlug(slug);
+                    setShowBadgeModal(true);
+                }
+            } catch (e) {
+                console.error("Failed to award badge", e);
+            }
+        }
+    };
+
     // Wire up code runner with dependencies
     const {
         isRunning,
@@ -209,7 +250,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
         updateRobotState,
         addLog,
         files,
-        setLogs
+        setLogs,
+        onCompletion: handleGameCompletion
     });
 
     const runCode = () => {
@@ -302,7 +344,11 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
             changeFile,
             sharedTypes,
             loadSolution,
-            hasSolution: !!currentSolutionFiles
+            hasSolution: !!currentSolutionFiles,
+            slug,
+            showBadgeModal,
+            setShowBadgeModal,
+            newBadgeSlug
         }}>
             {children}
         </MazeGameContext.Provider>

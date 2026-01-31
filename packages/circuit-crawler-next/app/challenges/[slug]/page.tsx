@@ -87,6 +87,7 @@ export default async function Page({ params }: Props) {
             initialFiles={initialFiles}
             solutionFiles={solutionFiles}
             headerAction={<AuthButton />}
+            slug={slug}
         />
     );
 }

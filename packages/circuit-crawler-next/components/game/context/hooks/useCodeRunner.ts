@@ -9,9 +9,10 @@ interface UseCodeRunnerProps {
     addLog: (msg: string, type: 'robot' | 'user') => void;
     files: Record<string, string>;
     setLogs: (logs: any[]) => void;
+    onCompletion: (success: boolean, msg: string) => void;
 }
 
-export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, files, setLogs }: UseCodeRunnerProps) => {
+export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, files, setLogs, onCompletion }: UseCodeRunnerProps) => {
     const engineRef = useRef<CircuitCrawlerEngine | null>(null);
 
     const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -21,10 +22,10 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
     const inputResolveRef = useRef<((value: string) => void) | null>(null);
 
     // Refs for stable callbacks
-    const callbacksRef = useRef({ addLog, updateRobotState, setLogs, worldActions });
+    const callbacksRef = useRef({ addLog, updateRobotState, setLogs, worldActions, onCompletion });
     useEffect(() => {
-        callbacksRef.current = { addLog, updateRobotState, setLogs, worldActions };
-    }, [addLog, updateRobotState, setLogs, worldActions]);
+        callbacksRef.current = { addLog, updateRobotState, setLogs, worldActions, onCompletion };
+    }, [addLog, updateRobotState, setLogs, worldActions, onCompletion]);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -69,7 +70,8 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
                     } else {
                         inputResolveRef.current = null;
                     }
-                }
+                },
+                onCompletion: (success, msg) => callbacksRef.current.onCompletion(success, msg)
             });
         }
 
@@ -99,7 +101,7 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
             setIsRunning(false);
             setIsWaitingForInput(false);
         }
-    }, [maze, worldActions, files, setLogs]);
+    }, [maze, worldActions, files, setLogs, onCompletion]);
 
     return {
         isRunning,
