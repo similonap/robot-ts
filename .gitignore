@@ -6,4 +6,5 @@ node_modules
 test_result.log
 dist
 package-lock.json
+packages/circuit-crawler-next/public/challenges
 packages/circuit-crawler-next/public/mazes

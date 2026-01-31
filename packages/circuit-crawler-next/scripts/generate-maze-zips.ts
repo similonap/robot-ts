@@ -3,7 +3,7 @@ import path from 'path';
 import JSZip from 'jszip';
 
 const MAZES_DIR = path.join(process.cwd(), 'mazes');
-const PUBLIC_MAZES_DIR = path.join(process.cwd(), 'public', 'mazes');
+const PUBLIC_MAZES_DIR = path.join(process.cwd(), 'public', 'challenges');
 
 async function generateMazeZips() {
     if (!fs.existsSync(PUBLIC_MAZES_DIR)) {
