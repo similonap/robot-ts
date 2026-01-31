@@ -1,340 +1,339 @@
 {
-    "width": 15,
-    "height": 15,
-    "initialRobots": [
-        {
-            "position": {
-                "x": 2,
-                "y": 3
-            },
-            "direction": "East",
-            "name": "robot",
-            "color": "#38bdf8"
-        }
+  "width": 15,
+  "height": 15,
+  "initialRobots": [
+    {
+      "position": {
+        "x": 2,
+        "y": 3
+      },
+      "direction": "East",
+      "name": "robot",
+      "color": "#38bdf8"
+    }
+  ],
+  "walls": [
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ],
-    "walls": [
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true
-        ],
-        [
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true
-        ],
-        [
-            false,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            true,
-            false,
-            false,
-            true
-        ],
-        [
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            false,
-            false,
-            true
-        ],
-        [
-            false,
-            true,
-            false,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true
-        ],
-        [
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  ],
+  "items": [
+    {
+      "id": "item-1769266174098",
+      "type": "item",
+      "name": "Key",
+      "icon": "🗝️",
+      "tags": [
+        "Tool"
+      ],
+      "position": {
+        "x": 13,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-1769266196107",
+      "type": "item",
+      "name": "Gem",
+      "icon": "💎",
+      "tags": [
+        "Treasure"
+      ],
+      "position": {
+        "x": 10,
+        "y": 7
+      }
+    }
+  ],
+  "doors": [
+    {
+      "id": "door-1769266104141",
+      "type": "door",
+      "isOpen": false,
+      "position": {
+        "x": 10,
+        "y": 4
+      },
+      "lock": {
+        "type": "password",
+        "value": "password"
+      }
+    },
+    {
+      "id": "door-1769266129748",
+      "type": "door",
+      "isOpen": false,
+      "position": {
+        "x": 2,
+        "y": 6
+      },
+      "lock": {
+        "type": "item",
+        "itemIds": [
+          "item-1769266174098"
         ]
-    ],
-    "items": [
-        {
-            "id": "item-1769266174098",
-            "type": "item",
-            "name": "Key",
-            "icon": "🗝️",
-            "tags": [
-                "Tool"
-            ],
-            "position": {
-                "x": 13,
-                "y": 5
-            }
-        },
-        {
-            "id": "item-1769266196107",
-            "type": "item",
-            "name": "Gem",
-            "icon": "💎",
-            "tags": [
-                "Treasure"
-            ],
-            "position": {
-                "x": 10,
-                "y": 7
-            }
-        }
-    ],
-    "doors": [
-        {
-            "id": "door-1769266104141",
-            "type": "door",
-            "isOpen": false,
-            "position": {
-                "x": 10,
-                "y": 4
-            },
-            "lock": {
-                "type": "password",
-                "value": "password"
-            }
-        },
-        {
-            "id": "door-1769266129748",
-            "type": "door",
-            "isOpen": false,
-            "position": {
-                "x": 2,
-                "y": 6
-            },
-            "lock": {
-                "type": "item",
-                "itemIds": [
-                    "item-1769266174098"
-                ]
-            }
-        },
-        {
-            "id": "door-1769266188653",
-            "type": "door",
-            "isOpen": false,
-            "position": {
-                "x": 11,
-                "y": 3
-            }
-        }
-    ],
-    "globalModule": "\nconst robot = game.getRobot(\"robot\");\n\nrobot.addEventListener(\"pickup\", () => {\n    if (game.items.length === 0) {\n        game.win(\"All items collected!\");\n    }\n});\n"
+      }
+    },
+    {
+      "id": "door-1769266188653",
+      "type": "door",
+      "isOpen": false,
+      "position": {
+        "x": 11,
+        "y": 3
+      }
+    }
+  ]
 }

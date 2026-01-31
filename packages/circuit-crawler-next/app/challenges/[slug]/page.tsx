@@ -52,9 +52,14 @@ export default async function Page({ params }: Props) {
 
         initialFiles = {};
         for (const entry of entries) {
-            if (entry.isFile() && entry.name !== 'maze.json') {
-                const content = fs.readFileSync(path.join(mazeDir, entry.name), 'utf-8');
-                initialFiles[entry.name] = content;
+            if (entry.isFile()) {
+                if (entry.name === 'globalModule.ts') {
+                    const content = fs.readFileSync(path.join(mazeDir, entry.name), 'utf-8');
+                    mazeConfig.globalModule = content;
+                } else if (entry.name !== 'maze.json') {
+                    const content = fs.readFileSync(path.join(mazeDir, entry.name), 'utf-8');
+                    initialFiles[entry.name] = content;
+                }
             }
         }
     }

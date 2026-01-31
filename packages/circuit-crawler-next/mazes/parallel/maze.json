@@ -306,6 +306,5 @@
       }
     }
   ],
-  "doors": [],
-  "globalModule": "const robot1 = game.getRobot(\"Robot 1\");\nconst robot2 = game.getRobot(\"Robot 2\");\n\nrobot1.addEventListener(\"pickup\", () => {\n    if (game.items.length === 0) {\n        game.win(\"Game has been won\")\n    }\n})\n\nrobot2.addEventListener(\"pickup\", () => {\n    if (game.items.length === 0) {\n        game.win(\"Game has been won\")\n    }\n})\n\n\n\nexport { robot1, robot2 }"
+  "doors": []
 }

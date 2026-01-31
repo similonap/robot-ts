@@ -143,6 +143,7 @@ export interface Robot {
     readonly health: number;
     readonly position: Position;
     readonly name: string;
+    readonly color: string;
     moveForward(): Promise<boolean>;
     canMoveForward(): Promise<boolean>;
     turnLeft(): Promise<void>;

@@ -1,4 +1,4 @@
-async function main() {
+export async function main() {
     console.log("Creating new robot R2...");
     const r2 = game.createRobot({
         x: 2,

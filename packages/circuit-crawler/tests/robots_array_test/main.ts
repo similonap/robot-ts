@@ -1,4 +1,4 @@
-async function main() {
+export async function main() {
     // @ts-ignore
     if (!Array.isArray(game.robots)) {
         throw new Error("game.robots is not an array");

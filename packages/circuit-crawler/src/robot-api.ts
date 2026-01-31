@@ -139,6 +139,10 @@ export class RobotController {
         return this.robotState.direction;
     }
 
+    get color(): string {
+        return this.robotState.color || '#38bdf8';
+    }
+
     get isDestroyed(): boolean {
         return !!this.robotState.isDestroyed;
     }

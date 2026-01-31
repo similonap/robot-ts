@@ -466,6 +466,7 @@ export class CircuitCrawlerEngine {
             get health() { return this.controller.health; }
             get position() { return this.controller.position; }
             get isDestroyed() { return this.controller.isDestroyed; }
+            get color() { return this.controller.color; }
 
             moveForward() { return this.safeExec(() => this.controller.moveForward()); }
             turnLeft() { return this.safeExec(() => this.controller.turnLeft()); }

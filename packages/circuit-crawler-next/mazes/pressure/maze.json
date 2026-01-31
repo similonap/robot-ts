@@ -316,6 +316,5 @@
         "y": 6
       }
     }
-  ],
-  "globalModule": "game.getItem(\"item-1769366223774\").addEventListener(\"move\", () => {\n    game.getDoor(\"door-1769366150309\").open();\n});\n\ngame.getItem(\"item-1769366777036\").addEventListener(\"pickup\", () => {\n    game.win(\"You collected the treasure!\");\n})"
+  ]
 }
