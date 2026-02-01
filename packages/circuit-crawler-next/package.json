@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run generate-zips && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "generate-zips": "ts-node scripts/generate-maze-zips.ts"
+    "lint": "eslint"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
