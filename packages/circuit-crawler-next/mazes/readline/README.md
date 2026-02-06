@@ -6,6 +6,10 @@ Welcome to the **Robot Configuration Wizard**! In this challenge, you will build
 
 Your goal is to write a program that asks the user for specific details about a robot (name, position, and color) and then creates that robot in the game. You must ensure the user enters valid information!
 
+**how to win?** 
+
+Create a robot named `Robot` at position `7, 7` with color `#ff0000`.
+
 ### Instructions
 
 1.  **Ask for the Robot's Name**: It can be any string.
@@ -19,6 +23,17 @@ Your goal is to write a program that asks the user for specific details about a 
     *   It must only contain valid hexadecimal characters (`0-9`, `a-f`, `A-F`).
     *   If the input is invalid, keep asking until it is valid.
 5.  **Create the Robot**: Once you have all the valid inputs, use `game.createRobot()` to spawn the robot at the specified location with the given name and color.
+
+### Example interaction
+
+```bash
+Enter robot name: Robot
+Enter robot X: 7
+Enter robot Y: 7
+Enter robot color: #ff0000
+```
+
+To win this game you need to create a robot named `Robot` at position `7, 7` and color `#ff0000`.
 
 ## Hints
 
@@ -78,17 +93,6 @@ game.createRobot({
     color: robotColor,
 });
 ```
-
-### Example interaction
-
-```bash
-Enter robot name: Robot
-Enter robot X: 7
-Enter robot Y: 7
-Enter robot color: #ff0000
-```
-
-To win this game you need to create a robot named `Robot` at position `7, 7` and color `#ff0000`.
 
 ### Suggested extra challenges
 
