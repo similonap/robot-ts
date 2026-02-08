@@ -483,6 +483,7 @@ export class CircuitCrawlerEngine {
             addEventListener(event: string, handler: any) { return this.controller.addEventListener(event, handler); }
             damage(amount: number) { return this.safeExec(() => this.controller.damage(amount)); }
             destroy() { return this.safeExec(() => this.controller.destroy()); }
+            executePath(path: any[]) { return this.safeExec(() => this.controller.executePath(path)); }
 
             toJSON() {
                 return {
@@ -724,23 +725,23 @@ export class CircuitCrawlerEngine {
                 const moduleExports = {};
                 modules[filename] = moduleExports;
 
-                const modFn = new Function('exports', 'require', 'Robot', 'readline', 'fetch', 'console', transpiledFiles[filename]);
-                modFn(moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi);
+                const modFn = new Function('exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', transpiledFiles[filename]);
+                modFn(moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT');
                 return moduleExports;
             };
 
             // Now run Global Module
             if (this.maze.globalModule && this.maze.globalModule.trim()) {
                 const transpiledGlobal = this.transpileCode(this.maze.globalModule);
-                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', transpiledGlobal);
-                globalFn(globalExports, customRequire, RobotProxy, gameApi, consoleApi, this.fetchImpl);
+                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', 'FORWARD', 'LEFT', 'RIGHT', transpiledGlobal);
+                globalFn(globalExports, customRequire, RobotProxy, gameApi, consoleApi, this.fetchImpl, 'FORWARD', 'LEFT', 'RIGHT');
             }
 
             this.log("Running...", 'user');
 
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
             const finalCode = transpiledFiles['main.ts'] + '\n\nif (typeof main === "function") { await main(); }';
-            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', finalCode);
+            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', 'FORWARD', 'LEFT', 'RIGHT', finalCode);
 
             const stopPromise = new Promise((_, reject) => {
                 if (signal.aborted) return reject(new CancelError());
@@ -748,7 +749,7 @@ export class CircuitCrawlerEngine {
             });
 
             await Promise.race([
-                runFn(gameApi, RobotProxy, readlineApi, this.fetchImpl, consoleApi, customRequire, {}),
+                runFn(gameApi, RobotProxy, readlineApi, this.fetchImpl, consoleApi, customRequire, {}, 'FORWARD', 'LEFT', 'RIGHT'),
                 stopPromise
             ]);
 

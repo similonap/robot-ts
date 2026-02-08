@@ -137,6 +137,8 @@ export interface OpenResult {
     missingItems?: string[];
 }
 
+export type RobotCommand = 'FORWARD' | 'LEFT' | 'RIGHT';
+
 export interface Robot {
     readonly direction: Direction;
     readonly inventory: Item[];
@@ -158,6 +160,7 @@ export interface Robot {
     setPen(pen: { color?: string; size?: number; opacity?: number } | null): void;
     damage(amount: number): Promise<void>;
     destroy(): Promise<void>;
+    executePath(path: (RobotCommand | string)[]): Promise<void>;
     addEventListener(event: 'pickup', handler: (item: Item) => void): void;
     addEventListener(event: 'move', handler: (position: Position) => void): void;
     addEventListener(event: string, handler: (payload?: any) => void): void;
@@ -200,6 +203,9 @@ export interface Game {
 // declare var robot: Robot;
 declare var game: Game;
 declare var maze: MazeConfig;
+declare var FORWARD: RobotCommand;
+declare var LEFT: RobotCommand;
+declare var RIGHT: RobotCommand;
 
 //@ts-ignore
 declare module "readline-sync" {

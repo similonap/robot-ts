@@ -1,4 +1,4 @@
-import { Direction, Position, RunnerState, Item, Door, OpenResult, SharedWorldState, RobotAppearance, RobotState } from './types';
+import { Direction, Position, RunnerState, Item, Door, OpenResult, SharedWorldState, RobotAppearance, RobotState, RobotCommand } from './types';
 
 export class CancelError extends Error {
     constructor(message: string = 'Execution cancelled') {
@@ -633,6 +633,21 @@ export class RobotController {
                 if (this.signal?.aborted) return reject(new CancelError());
                 this.signal?.addEventListener('abort', () => reject(new CancelError()));
             });
+        }
+    }
+
+    async executePath(path: (RobotCommand | string)[]) {
+        this.checkAborted();
+        for (const command of path) {
+            if (command === 'FORWARD') {
+                await this.moveForward();
+            } else if (command === 'LEFT') {
+                await this.turnLeft();
+            } else if (command === 'RIGHT') {
+                await this.turnRight();
+            } else {
+                throw new Error(`Invalid command: ${command}`);
+            }
         }
     }
 }
