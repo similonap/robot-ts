@@ -1,6 +1,6 @@
 # Caesar Cipher Challenge
 
-Welcome to the **Caesar Cipher Challenge**! In this mission, your robot's navigation system has been encrypted. You need to decode the commands to get the robot to the target.
+Welcome to the **Caesar Cipher Challenge**! In this mission, your robot's navigation system has been encrypted. You need to decode the commands to get the robot to the target. The target however has been hidden, so you can't see it yet.
 
 ## Your Mission
 
