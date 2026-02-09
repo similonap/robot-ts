@@ -64,6 +64,7 @@ interface MazeGameContextType {
     showBadgeModal: boolean;
     setShowBadgeModal: (show: boolean) => void;
     newBadgeSlug: string | null;
+    hasUsedSolution: boolean;
 }
 
 export const MazeGameContext = createContext<MazeGameContextType>({
@@ -111,7 +112,8 @@ export const MazeGameContext = createContext<MazeGameContextType>({
     slug: undefined,
     showBadgeModal: false,
     setShowBadgeModal: () => { },
-    newBadgeSlug: null
+    newBadgeSlug: null,
+    hasUsedSolution: false
 });
 
 interface MazeGameProviderProps {
@@ -155,6 +157,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     const { files, setFiles, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
 
     const [currentSolutionFiles, setCurrentSolutionFiles] = useState(solutionFiles);
+    const [hasUsedSolution, setHasUsedSolution] = useState(false);
 
     const loadSolution = () => {
         if (currentSolutionFiles) {
@@ -173,6 +176,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
             setFiles(newFiles);
             // Optionally set active file to main.ts or first file
             if (currentSolutionFiles['main.ts']) setActiveFile('main.ts');
+            setHasUsedSolution(true);
         }
     };
 
@@ -180,6 +184,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
         setMaze(newMaze);
         setFiles(newFiles);
         setCurrentSolutionFiles(newSolutionFiles);
+        setHasUsedSolution(false);
 
         // Reset everything
         clearRobots();
@@ -219,7 +224,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     const [newBadgeSlug, setNewBadgeSlug] = useState<string | null>(null);
 
     const handleGameCompletion = async (success: boolean, msg: string) => {
-        if (success && slug) {
+        if (success && slug && !hasUsedSolution) {
             // Award badge
             try {
                 const result = await awardBadge(slug);
@@ -348,7 +353,8 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
             slug,
             showBadgeModal,
             setShowBadgeModal,
-            newBadgeSlug
+            newBadgeSlug,
+            hasUsedSolution
         }}>
             {children}
         </MazeGameContext.Provider>
