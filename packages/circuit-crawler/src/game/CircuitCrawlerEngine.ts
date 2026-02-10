@@ -449,15 +449,9 @@ export class CircuitCrawlerEngine {
                     if (e instanceof CancelError || (e && e.name === 'CancelError')) {
                         return new Promise(() => { }); // Dead promise
                     }
-                    const msg = e instanceof Error ? e.message : String(e);
-                    if (e instanceof HealthDepletedError || (e && e.name === 'HealthDepletedError')) {
-                        engine.log(`💀 FAIL: ${msg}`, 'user');
-                    } else {
-                        engine.log(`Runtime Error: ${msg}`, 'user');
-                    }
-                    engine.stop();
-                    if (engine.onCompletion) engine.onCompletion(false, msg);
-                    return new Promise(() => { });
+
+                    // RETHROW other errors so user code can catch them
+                    throw e;
                 }
             }
 
@@ -760,13 +754,16 @@ export class CircuitCrawlerEngine {
                 this.log(`🛑 Execution Stopped.`, 'user');
             } else if (e instanceof CrashError || e.name === 'CrashError') {
                 this.log(`💥 CRASH! ${e.message}`, 'user');
+                this.log(`🛑 Execution Stopped.`, 'user');
                 if (this.onCompletion) this.onCompletion(false, e.message);
             } else if (e instanceof HealthDepletedError || e.name === 'HealthDepletedError') {
                 // Handled by Robot controller mostly, but if it bubbles up
                 this.log(`💀 FAIL: ${e.message}`, 'user');
+                this.log(`🛑 Execution Stopped.`, 'user');
                 if (this.onCompletion) this.onCompletion(false, e.message);
             } else {
                 this.log(`Runtime Error: ${e.message}`, 'user');
+                this.log(`🛑 Execution Stopped.`, 'user');
                 console.error(e);
                 if (this.onCompletion) this.onCompletion(false, e.message);
             }
