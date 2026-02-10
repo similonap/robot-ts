@@ -17,16 +17,25 @@ export const metadata: Metadata = {
   description: "Circuit Crawler",
 };
 
-export default function RootLayout({
+import NavBar from "@/components/navigation/NavBar";
+import { createClient } from "@/utils/supabase/server";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NavBar user={user} />
         {children}
       </body>
     </html>

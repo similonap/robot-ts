@@ -2,12 +2,9 @@ import { MazeConfig } from "circuit-crawler";
 import { useRef } from "react";
 import { useMazeGameContext } from "../context/MazeGameContext";
 import JSZip from "jszip";
+import { Upload, Lightbulb, RotateCcw, Play, Square } from "lucide-react";
 
-interface HeaderProps {
-    headerAction?: React.ReactNode;
-}
-
-const Header = ({ headerAction }: HeaderProps) => {
+const GameToolbar = () => {
     const { onMazeLoaded, loadProject, isRunning, stopExecution, resetGame, runCode, loadSolution, hasSolution } = useMazeGameContext();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,19 +94,8 @@ const Header = ({ headerAction }: HeaderProps) => {
     };
 
     return (
-        <header className="flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-3 border-b border-cyan-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)] sticky top-0 z-50">
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
-                    <img src="/robot-icon.svg" alt="Robot Icon" className="w-8 h-8" />
-                    <h1 className="text-xl font-bold font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 uppercase">
-                        Circuit Crawler
-                    </h1>
-                </div>
-
-
-            </div>
+        <div className="flex justify-end items-center bg-slate-900/50 p-2 border-b border-cyan-500/20">
             <div className="flex items-center gap-3">
-                {headerAction}
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -118,14 +104,13 @@ const Header = ({ headerAction }: HeaderProps) => {
                     accept=".json,.zip"
                 />
 
-                <div className="h-8 w-px bg-gray-800 mx-1"></div>
-
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isRunning}
-                    className="px-4 py-1.5 text-sm font-mono text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Import Maze"
+                    className="p-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    IMPORT_MAZE
+                    <Upload size={18} />
                 </button>
                 <button
                     onClick={() => {
@@ -134,29 +119,32 @@ const Header = ({ headerAction }: HeaderProps) => {
                         }
                     }}
                     disabled={isRunning || !hasSolution}
-                    className="px-4 py-1.5 text-sm font-mono text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 border border-yellow-500/30 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Load Solution"
+                    className="p-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 border border-yellow-500/30 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    SOLUTION
+                    <Lightbulb size={18} />
                 </button>
                 <button
                     onClick={resetGame}
                     disabled={isRunning}
-                    className="px-4 py-1.5 text-sm font-mono text-gray-400 hover:text-white hover:bg-white/5 border border-gray-700 hover:border-gray-500 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Reset Game"
+                    className="p-2 text-gray-400 hover:text-white hover:bg-white/5 border border-gray-700 hover:border-gray-500 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    RESET
+                    <RotateCcw size={18} />
                 </button>
                 <button
                     onClick={isRunning ? stopExecution : runCode}
-                    className={`px-6 py-1.5 text-sm font-mono font-bold rounded shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all ${isRunning
+                    title={isRunning ? "Stop Execution" : "Run Code"}
+                    className={`p-2 font-bold rounded shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all ${isRunning
                         ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]'
                         : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)]'
                         }`}
                 >
-                    {isRunning ? '[ STOP_EXECUTION ]' : '[ RUN_CODE ]'}
+                    {isRunning ? <Square size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
                 </button>
             </div>
-        </header>
+        </div>
     )
 }
 
-export default Header;
+export default GameToolbar;
