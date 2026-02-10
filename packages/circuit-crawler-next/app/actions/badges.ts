@@ -32,12 +32,13 @@ export async function awardBadge(slug: string) {
     return { success: true, new: true, slug };
 }
 
-export async function getUserBadges() {
+// Update return type to include null
+export async function getUserBadges(): Promise<({ badge_slug: string, created_at: string }[]) | null> {
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        return [];
+        return null;
     }
 
     const { data, error } = await supabase

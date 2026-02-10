@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getUserBadges } from '@/app/actions/badges';
 import Link from 'next/link';
+import LoginButton from '@/components/auth/LoginButton';
 
 interface Badge {
     badge_slug: string;
@@ -11,7 +12,7 @@ interface Badge {
 }
 
 export default function BadgesPage() {
-    const [badges, setBadges] = useState<Badge[]>([]);
+    const [badges, setBadges] = useState<Badge[] | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -19,7 +20,7 @@ export default function BadgesPage() {
             setLoading(true);
             try {
                 const userBadges = await getUserBadges();
-                setBadges(userBadges || []);
+                setBadges(userBadges);
             } catch (error) {
                 console.error("Failed to load badges", error);
             } finally {
@@ -56,6 +57,25 @@ export default function BadgesPage() {
                     <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
                     <p className="mt-4 text-slate-500 font-mono text-sm animate-pulse">LOADING_DATA...</p>
                 </div>
+            ) : badges === null ? (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center text-center max-w-md mt-20 p-8 border border-slate-800 bg-slate-900/50 rounded-2xl backdrop-blur-sm"
+                >
+                    <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mb-6 text-slate-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                            <polyline points="10 17 15 12 10 7" />
+                            <line x1="15" x2="3" y1="12" y2="12" />
+                        </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-300 mb-2">Access Restricted</h3>
+                    <p className="text-slate-500 mb-6">Log in with GitHub to view your earned badges.</p>
+                    <div className="scale-125">
+                        <LoginButton />
+                    </div>
+                </motion.div>
             ) : badges.length === 0 ? (
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
