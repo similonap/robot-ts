@@ -9,5 +9,15 @@ export default async function AuthButton() {
         data: { user },
     } = await supabase.auth.getUser()
 
-    return user ? <UserMenu user={user} /> : <LoginButton />
+    let profile = null
+    if (user) {
+        const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+        profile = data
+    }
+
+    return user ? <UserMenu user={user} profile={profile} /> : <LoginButton />
 }

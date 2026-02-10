@@ -2,7 +2,12 @@ import Link from 'next/link';
 import UserMenu from '../auth/UserMenu';
 import LoginButton from '../auth/LoginButton';
 
-export default function NavBar({ user }: { user: any }) {
+import { User } from '@supabase/supabase-js';
+import { Database } from '@/utils/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row']
+
+export default function NavBar({ user, profile }: { user: User | null, profile: Profile | null }) {
     return (
         <nav className="flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-3 border-b border-cyan-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)] sticky top-0 z-50">
             <div className="flex items-center gap-6">
@@ -21,7 +26,7 @@ export default function NavBar({ user }: { user: any }) {
             </div>
 
             <div className="flex items-center gap-4">
-                {user ? <UserMenu user={user} /> : <LoginButton />}
+                {user ? <UserMenu user={user} profile={profile} /> : <LoginButton />}
             </div>
         </nav>
     );

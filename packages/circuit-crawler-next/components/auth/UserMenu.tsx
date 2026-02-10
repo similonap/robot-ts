@@ -4,8 +4,12 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import { User } from '@supabase/supabase-js'
+import { Database } from '@/utils/supabase/types'
 
-export default function UserMenu({ user }: { user: any }) {
+type Profile = Database['public']['Tables']['profiles']['Row']
+
+export default function UserMenu({ user, profile }: { user: User, profile: Profile | null }) {
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -29,12 +33,15 @@ export default function UserMenu({ user }: { user: any }) {
         };
     }, []);
 
+    const displayName = profile?.full_name || profile?.username || user.email;
+    const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
+
     return (
         <div className="flex items-center gap-3 relative" ref={menuRef}>
             <div className="flex flex-col items-end hidden md:flex">
                 <span className="text-xs text-slate-400">Logged in as</span>
                 <span className="text-sm font-mono text-cyan-400">
-                    {user.user_metadata?.name || user.email}
+                    {displayName}
                 </span>
             </div>
 
@@ -42,16 +49,16 @@ export default function UserMenu({ user }: { user: any }) {
                 onClick={() => setIsOpen(!isOpen)}
                 className="relative group focus:outline-none"
             >
-                {user.user_metadata?.avatar_url ? (
+                {avatarUrl ? (
                     <img
-                        src={user.user_metadata.avatar_url}
-                        alt={user.user_metadata.full_name || user.email}
+                        src={avatarUrl}
+                        alt={displayName}
                         className={`w-9 h-9 rounded-full border-2 transition-all ${isOpen ? 'border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'border-slate-600 hover:border-slate-400'}`}
                     />
                 ) : (
                     <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center bg-slate-800 ${isOpen ? 'border-cyan-400' : 'border-slate-600'}`}>
                         <span className="text-xs font-mono text-slate-300">
-                            {(user.user_metadata?.name || user.email || '?').charAt(0).toUpperCase()}
+                            {(displayName || '?').charAt(0).toUpperCase()}
                         </span>
                     </div>
                 )}
@@ -62,7 +69,7 @@ export default function UserMenu({ user }: { user: any }) {
                 <div className="p-3 border-b border-slate-800 md:hidden">
                     <p className="text-xs text-slate-400">Logged in as</p>
                     <p className="text-sm font-mono text-cyan-400 truncate">
-                        {user.user_metadata?.name || user.email}
+                        {displayName}
                     </p>
                 </div>
 
@@ -78,6 +85,18 @@ export default function UserMenu({ user }: { user: any }) {
                             <path d="m9 9 6 6" />
                         </svg>
                         My Badges
+                    </Link>
+
+                    <Link
+                        href="/profile"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-800 hover:text-cyan-400 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        Profile
                     </Link>
 
                     <Link
