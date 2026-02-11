@@ -1,6 +1,6 @@
-# JSON Read Challenge
+# Password JSON Read Challenge
 
-Welcome to the **JSON Read Maze**!
+Welcome to the **Password JSON Read Maze**!
 
 ## Your Mission
 
