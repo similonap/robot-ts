@@ -410,6 +410,7 @@ export class RobotController {
             return {
                 id: doorAtPos.id,
                 type: 'door',
+                name: doorAtPos.name || 'Door',
                 position: doorAtPos.position,
                 isOpen
             };

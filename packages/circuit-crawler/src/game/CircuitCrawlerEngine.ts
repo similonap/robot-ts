@@ -313,7 +313,12 @@ export class CircuitCrawlerEngine {
             };
 
             const result = ts.transpileModule(source, {
-                compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017 },
+                compilerOptions: {
+                    module: ts.ModuleKind.CommonJS,
+                    target: ts.ScriptTarget.ES2017,
+                    resolveJsonModule: true,
+                    esModuleInterop: true
+                },
                 transformers: { before: [autoAwaitTransformer] }
             });
             return result.outputText;

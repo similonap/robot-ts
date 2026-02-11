@@ -195,6 +195,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                 id: `door-${Date.now()}`,
                 type: 'door',
                 isOpen: false, // Default closed
+                name: 'Door',
                 position: { x, y }
             };
 
@@ -601,6 +602,17 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
                                                     value={door.id}
                                                     readOnly
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">Name</label>
+                                                <input
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-white"
+                                                    value={door.name || 'Door'}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setDoors(prev => prev.map(d => d.id === door.id ? { ...d, name: val } : d));
+                                                    }}
                                                 />
                                             </div>
                                             <div>

@@ -41,6 +41,14 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             libContent,
             'ts:filename/globals.d.ts'
         );
+
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            `declare module "*.json" {
+    const value: any;
+    export default value;
+}`,
+            'ts:filename/json-module.d.ts'
+        );
     };
 
     // Sync files to Monaco models
@@ -52,7 +60,8 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             const uri = monaco.Uri.parse(`file:///${filename}`);
             let model = monaco.editor.getModel(uri);
             if (!model) {
-                model = monaco.editor.createModel(content, 'typescript', uri);
+                const language = filename.endsWith('.json') ? 'json' : 'typescript';
+                model = monaco.editor.createModel(content, language, uri);
             } else if (model.getValue() !== content) {
                 // Avoid cursor jumping by only updating if content is different (e.g. external change)
                 // But for active file, the Editor component handles it. 
@@ -98,7 +107,7 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             <Editor
                 path={`file:///${activeFile}`}
                 height="100%"
-                defaultLanguage="typescript"
+                defaultLanguage={activeFile.endsWith('.json') ? 'json' : 'typescript'}
                 theme="vs-dark"
                 value={files[activeFile]}
                 onChange={(value) => {

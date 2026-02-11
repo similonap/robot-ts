@@ -65,6 +65,7 @@ export interface Door {
     position: Position;
     type: 'door';
     isOpen: boolean;
+    name?: string;
     lock?: {
         type: 'password';
         value: string;
