@@ -406,7 +406,13 @@ export class RobotController {
             const isOpen = this.world.isDoorOpen(doorAtPos.id);
             const state = isOpen ? 'Open' : 'Closed';
             this.onUpdate(this.robotState, `Scanned ahead: Door (${state})`);
-            return { ...doorAtPos, isOpen };
+            // Sanitize door object to avoid leaking lock
+            return {
+                id: doorAtPos.id,
+                type: 'door',
+                position: doorAtPos.position,
+                isOpen
+            };
         }
 
         if (itemAtPos) {

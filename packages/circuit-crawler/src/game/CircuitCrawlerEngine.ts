@@ -93,6 +93,7 @@ export class CircuitCrawlerEngine {
 
     public reset() {
         this.stop();
+        this.listeners = {};
         this.robots.clear();
         this.activeControllers.clear();
         this.worldReset();
@@ -689,7 +690,11 @@ export class CircuitCrawlerEngine {
             const transpiledFiles: Record<string, string> = {};
 
             for (const [filename, content] of Object.entries(files)) {
-                transpiledFiles[filename] = this.transpileCode(content);
+                if (filename.endsWith('.json')) {
+                    transpiledFiles[filename] = `module.exports = ${content.trim() || '{}'};`;
+                } else {
+                    transpiledFiles[filename] = this.transpileCode(content);
+                }
             }
 
             // Global Module
@@ -711,7 +716,18 @@ export class CircuitCrawlerEngine {
                 }
 
                 let filename = path.replace(/^\.\//, '');
-                if (!filename.endsWith('.ts')) filename += '.ts';
+
+                // Try to find the file
+                if (!transpiledFiles[filename]) {
+                    if (transpiledFiles[`${filename}.ts`]) {
+                        filename += '.ts';
+                    } else if (transpiledFiles[`${filename}.json`]) {
+                        filename += '.json';
+                    } else if (!filename.endsWith('.ts') && !filename.endsWith('.json')) {
+                        // default to .ts if no extension
+                        filename += '.ts';
+                    }
+                }
 
                 if (modules[filename]) return modules[filename];
                 if (!transpiledFiles[filename]) throw new Error(`Module not found: ${path}`);
@@ -719,9 +735,14 @@ export class CircuitCrawlerEngine {
                 const moduleExports = {};
                 modules[filename] = moduleExports;
 
-                const modFn = new Function('exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', transpiledFiles[filename]);
-                modFn(moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT');
-                return moduleExports;
+                const module = { exports: moduleExports };
+
+                const modFn = new Function('module', 'exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', transpiledFiles[filename]);
+                modFn(module, moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT');
+
+                // Update exports if module.exports was reassigned
+                modules[filename] = module.exports;
+                return module.exports;
             };
 
             // Now run Global Module

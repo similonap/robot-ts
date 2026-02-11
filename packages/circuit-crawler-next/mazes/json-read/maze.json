@@ -1,0 +1,329 @@
+{
+    "width": 15,
+    "height": 15,
+    "initialRobots": [
+        {
+            "position": {
+                "x": 2,
+                "y": 2
+            },
+            "direction": "East",
+            "name": "robot",
+            "color": "#38bdf8"
+        }
+    ],
+    "walls": [
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+        ],
+        [
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false
+        ],
+        [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ]
+    ],
+    "items": [
+        {
+            "id": "item-1770843925676",
+            "type": "item",
+            "name": "Gem",
+            "icon": "💎",
+            "tags": [
+                "Treasure"
+            ],
+            "position": {
+                "x": 12,
+                "y": 2
+            }
+        }
+    ],
+    "doors": [
+        {
+            "id": "door-1770843940787",
+            "type": "door",
+            "isOpen": false,
+            "position": {
+                "x": 4,
+                "y": 2
+            },
+            "lock": {
+                "type": "password",
+                "value": "hunter2"
+            }
+        },
+        {
+            "id": "door-1770843973516",
+            "type": "door",
+            "isOpen": false,
+            "position": {
+                "x": 7,
+                "y": 2
+            },
+            "lock": {
+                "type": "password",
+                "value": "admin123"
+            }
+        },
+        {
+            "id": "door-1770843974918",
+            "type": "door",
+            "isOpen": false,
+            "position": {
+                "x": 10,
+                "y": 2
+            },
+            "lock": {
+                "type": "password",
+                "value": "goodbusy"
+            }
+        }
+    ],
+    "globalModule": "// Check conditions every step\n// Available: game\nexport { robot, game, Robot };\n\n/*\nif (game.items.length === 0) {\n    game.win(\"All items collected!\");\n}\n*/\n"
+}

@@ -30,7 +30,8 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             noLib: false,
             esModuleInterop: true,
             allowSyntheticDefaultImports: true,
-            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs
+            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+            resolveJsonModule: true
         });
 
         let libContent = sharedTypes.replace(/export /g, '');
