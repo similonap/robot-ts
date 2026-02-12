@@ -53,7 +53,7 @@ export interface Item {
     name: string;
     icon: string;
     tags: string[];
-    position: Position;
+    position?: Position;
     isRevealed?: boolean;
     damageAmount?: never; // Removed
     destroyOnContact?: never; // Removed

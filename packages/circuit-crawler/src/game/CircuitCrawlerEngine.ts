@@ -409,8 +409,8 @@ export class CircuitCrawlerEngine {
                 this.controller.addEventListener('move', (pos: { x: number, y: number }) => {
                     // Handle 'leave' events for items at previous position
                     const itemsAtLastPos = engine.maze.items.filter(i =>
-                        i.position.x === lastPos.x &&
-                        i.position.y === lastPos.y &&
+                        i.position?.x === lastPos.x &&
+                        i.position?.y === lastPos.y &&
                         !engine.worldActions.isItemCollected(i.id)
                     );
 
@@ -422,8 +422,8 @@ export class CircuitCrawlerEngine {
 
                     // Handle 'move' (enter) events for items at new position
                     const itemsAtPos = engine.maze.items.filter(i =>
-                        i.position.x === pos.x &&
-                        i.position.y === pos.y &&
+                        i.position?.x === pos.x &&
+                        i.position?.y === pos.y &&
                         !engine.worldActions.isItemCollected(i.id)
                     );
 
@@ -594,7 +594,7 @@ export class CircuitCrawlerEngine {
                 };
             },
             getItemOnPosition: (x: number, y: number) => {
-                const item = engine.maze.items?.find(i => i.position.x === x && i.position.y === y && !engine.worldActions.isItemCollected(i.id));
+                const item = engine.maze.items?.find(i => i.position?.x === x && i.position?.y === y && !engine.worldActions.isItemCollected(i.id));
                 if (!item) return undefined;
 
                 return {

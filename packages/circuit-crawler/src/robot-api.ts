@@ -201,8 +201,8 @@ export class RobotController {
 
         // Check for hidden items at new position to reveal them
         const hiddenItemsHere = this.items.filter(item =>
-            item.position.x === newX &&
-            item.position.y === newY &&
+            item.position?.x === newX &&
+            item.position?.y === newY &&
             item.isRevealed === false &&
             !this.world.isItemRevealed(item.id)
         );
@@ -245,21 +245,23 @@ export class RobotController {
 
         // Check for items
         const itemAtPos = this.items.find(item =>
-            item.position.x === x &&
-            item.position.y === y &&
+            item.position?.x === x &&
+            item.position?.y === y &&
             !this.world.isItemCollected(item.id)
         );
 
         if (itemAtPos) {
             this.world.collectItem(itemAtPos.id);
-            // Add to local inventory
-            this.robotState.inventory = [...this.robotState.inventory, itemAtPos];
+            // Add to local inventory without position (item is no longer on the map)
+            const { position, ...itemWithoutPosition } = itemAtPos;
+            const inventoryItem: Item = { ...itemWithoutPosition };
+            this.robotState.inventory = [...this.robotState.inventory, inventoryItem];
 
             this.world.flushUpdates();
             this.onUpdate({ ...this.robotState }, `Collected ${itemAtPos.icon} ${itemAtPos.name}!`);
-            this.emit('pickup', itemAtPos);
+            this.emit('pickup', inventoryItem);
             await this.wait(this.delayMs);
-            return itemAtPos;
+            return inventoryItem;
         } else {
             this.onUpdate({ ...this.robotState }, `Nothing to pick up here.`);
             await this.wait(this.delayMs / 2);
@@ -307,8 +309,8 @@ export class RobotController {
             }
 
             const item = this.items.find(i =>
-                i.position.x === cx &&
-                i.position.y === cy &&
+                i.position?.x === cx &&
+                i.position?.y === cy &&
                 !this.world.isItemCollected(i.id)
             );
             if (item) {
@@ -341,7 +343,7 @@ export class RobotController {
             hitSomething = true;
         } else {
             const door = this.doors.find(d => d.position.x === cx && d.position.y === cy);
-            const item = this.items.find(i => i.position.x === cx && i.position.y === cy && !this.world.isItemCollected(i.id));
+            const item = this.items.find(i => i.position?.x === cx && i.position?.y === cy && !this.world.isItemCollected(i.id));
 
             if (door && !this.world.isDoorOpen(door.id)) {
                 hitType = "Closed Door";
@@ -393,8 +395,8 @@ export class RobotController {
         }
 
         const itemAtPos = this.items.find(item =>
-            item.position.x === scanX &&
-            item.position.y === scanY &&
+            item.position?.x === scanX &&
+            item.position?.y === scanY &&
             !this.world.isItemCollected(item.id)
         );
 

@@ -121,6 +121,8 @@ export default function MazeItemDisplay({ item, cellSize, showAnimations = true 
         }
     };
 
+    if (!item.position) return null;
+
     if (showAnimations) {
         return (
             <motion.g
