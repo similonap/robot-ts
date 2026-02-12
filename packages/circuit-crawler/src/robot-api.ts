@@ -193,7 +193,15 @@ export class RobotController {
         }
 
         if (this.isWall(newX, newY)) {
-            this.onUpdate(this.robotState, `Bump! Wall at ${newX}, ${newY}`);
+            // Destroy the robot on wall collision
+            this.robotState.health = 0;
+            this.robotState.isDestroyed = true;
+            this.robotState.explosion = {
+                x: this.robotState.position.x,
+                y: this.robotState.position.y,
+                timestamp: Date.now()
+            };
+            this.onUpdate({ ...this.robotState }, `💥 Crashed into wall at ${newX}, ${newY}!`);
             throw new CrashError(`Crashed at ${newX}, ${newY}`);
         }
 

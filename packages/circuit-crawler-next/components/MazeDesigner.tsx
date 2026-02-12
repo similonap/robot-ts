@@ -458,7 +458,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         <div className="w-full h-full flex items-center justify-center pointer-events-none">
                                                             <svg width="32" height="32" viewBox="0 0 32 32">
                                                                 <g transform={`translate(${-item.position.x * 32}, ${-item.position.y * 32})`}>
-                                                                    <MazeItemDisplay item={item} cellSize={32} showAnimations={false} />
+                                                                    <MazeItemDisplay item={item} cellSize={32} />
                                                                 </g>
                                                             </svg>
                                                         </div>

@@ -1,15 +1,13 @@
 import { Item } from "circuit-crawler";
 import { useEffect, useState } from "react";
 import { analyzeImageContent, BoundingBox } from "@/lib/imageUtils";
-import { motion } from "framer-motion";
 
 interface MazeItemDisplayProps {
     item: Item;
     cellSize: number;
-    showAnimations?: boolean;
 }
 
-export default function MazeItemDisplay({ item, cellSize, showAnimations = true }: MazeItemDisplayProps) {
+export default function MazeItemDisplay({ item, cellSize }: MazeItemDisplayProps) {
     const [bbox, setBbox] = useState<BoundingBox | null>(null);
 
     useEffect(() => {
@@ -123,23 +121,9 @@ export default function MazeItemDisplay({ item, cellSize, showAnimations = true 
 
     if (!item.position) return null;
 
-    if (showAnimations) {
-        return (
-            <motion.g
-                initial={{ scale: 0, opacity: 0, x: item.position.x * cellSize + cellSize / 2, y: item.position.y * cellSize + cellSize / 2 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ duration: 0.5, ease: "backOut" }}
-            >
-
-                {renderContent()}
-            </motion.g>
-        );
-    } else {
-        return (
-            <g transform={`translate(${item.position.x * cellSize + cellSize / 2}, ${item.position.y * cellSize + cellSize / 2})`}>
-                {renderContent()}
-            </g>
-        );
-    }
+    return (
+        <g transform={`translate(${item.position.x * cellSize + cellSize / 2}, ${item.position.y * cellSize + cellSize / 2})`}>
+            {renderContent()}
+        </g>
+    );
 }
