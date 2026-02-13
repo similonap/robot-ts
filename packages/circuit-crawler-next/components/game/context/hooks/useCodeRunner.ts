@@ -4,6 +4,7 @@ import { MazeConfig, RobotState, SharedWorldState } from "circuit-crawler";
 
 interface UseCodeRunnerProps {
     maze: MazeConfig;
+    setMaze: (maze: MazeConfig) => void;
     worldActions: SharedWorldState;
     updateRobotState: (name: string, state: RobotState) => void;
     addLog: (msg: string, type: 'robot' | 'user') => void;
@@ -12,7 +13,7 @@ interface UseCodeRunnerProps {
     onCompletion: (success: boolean, msg: string) => void;
 }
 
-export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, files, setLogs, onCompletion }: UseCodeRunnerProps) => {
+export const useCodeRunner = ({ maze, setMaze, worldActions, updateRobotState, addLog, files, setLogs, onCompletion }: UseCodeRunnerProps) => {
     const engineRef = useRef<CircuitCrawlerEngine | null>(null);
 
     const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -22,10 +23,10 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
     const inputResolveRef = useRef<((value: string) => void) | null>(null);
 
     // Refs for stable callbacks
-    const callbacksRef = useRef({ addLog, updateRobotState, setLogs, worldActions, onCompletion });
+    const callbacksRef = useRef({ addLog, updateRobotState, setLogs, worldActions, onCompletion, setMaze });
     useEffect(() => {
-        callbacksRef.current = { addLog, updateRobotState, setLogs, worldActions, onCompletion };
-    }, [addLog, updateRobotState, setLogs, worldActions, onCompletion]);
+        callbacksRef.current = { addLog, updateRobotState, setLogs, worldActions, onCompletion, setMaze };
+    }, [addLog, updateRobotState, setLogs, worldActions, onCompletion, setMaze]);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -54,7 +55,14 @@ export const useCodeRunner = ({ maze, worldActions, updateRobotState, addLog, fi
                     reset: () => { }
                 },
                 onLog: (msg, type) => callbacksRef.current.addLog(msg, type),
-                onRobotUpdate: (name, state) => callbacksRef.current.updateRobotState(name, state),
+                onRobotUpdate: (name, state) => {
+                    callbacksRef.current.updateRobotState(name, state);
+                    // Sync engine's maze items back to context so MazeDisplay renders updated positions
+                    const eng = engineRef.current;
+                    if (eng) {
+                        callbacksRef.current.setMaze({ ...eng.maze });
+                    }
+                },
                 onStateChange: () => {
                     const eng = engineRef.current;
                     if (!eng) return;

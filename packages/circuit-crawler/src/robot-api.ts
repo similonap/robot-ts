@@ -277,6 +277,54 @@ export class RobotController {
         }
     }
 
+    async drop(item: Item): Promise<Item | null> {
+        this.checkAborted();
+        const { x, y } = this.robotState.position;
+
+        // Find the item in the robot's inventory
+        const inventoryIndex = this.robotState.inventory.findIndex(i => i.id === item.id);
+        if (inventoryIndex === -1) {
+            this.onUpdate({ ...this.robotState }, `You don't have ${item.name} in your inventory.`);
+            await this.wait(this.delayMs / 2);
+            return null;
+        }
+
+        // Check if there's already an uncollected item at this position
+        const existingItem = this.items.find(i =>
+            i.position?.x === x &&
+            i.position?.y === y &&
+            !this.world.isItemCollected(i.id)
+        );
+        if (existingItem) {
+            this.onUpdate({ ...this.robotState }, `Can't drop here, ${existingItem.icon} ${existingItem.name} is already at this position.`);
+            await this.wait(this.delayMs / 2);
+            return null;
+        }
+
+        // Remove from inventory
+        const droppedItem = this.robotState.inventory[inventoryIndex];
+        this.robotState.inventory = this.robotState.inventory.filter((_, idx) => idx !== inventoryIndex);
+
+        // Place the item at the robot's current position
+        const itemWithPosition: Item = { ...droppedItem, position: { x, y } };
+
+        // Update the master item in the items array with the new position
+        const masterItem = this.items.find(i => i.id === item.id);
+        if (masterItem) {
+            masterItem.position = { x, y };
+        }
+
+        // Mark as uncollected so it shows on the map again
+        this.world.uncollectItem(item.id);
+        this.world.dropItem(item.id, { x, y });
+        this.world.flushUpdates();
+
+        this.onUpdate({ ...this.robotState }, `Dropped ${droppedItem.icon} ${droppedItem.name} at ${x}, ${y}`);
+        this.emit('drop', itemWithPosition);
+        await this.wait(this.delayMs);
+        return itemWithPosition;
+    }
+
     async echo(): Promise<number> {
         this.checkAborted();
         const { x, y } = this.robotState.position;

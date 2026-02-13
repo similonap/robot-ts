@@ -54,6 +54,15 @@ export const useWorld = (initialMaze: MazeConfig) => {
             collectedItemIdsRef.current.add(id);
             pendingUpdates.current = true;
         },
+        uncollectItem: (id: string) => {
+            collectedItemIdsRef.current.delete(id);
+            pendingUpdates.current = true;
+        },
+        dropItem: (_id: string, _position: import('circuit-crawler').Position) => {
+            // Position tracking is handled by the engine's maze.items array.
+            // The UI re-renders based on collectedItemIds, so uncollectItem is sufficient.
+            pendingUpdates.current = true;
+        },
         isDoorOpen: (id: string) => !!doorStatesRef.current[id],
         openDoor: (id: string) => {
             doorStatesRef.current[id] = true;

@@ -118,6 +118,8 @@ export interface SharedWorldState {
     flushUpdates: () => void;
     isItemCollected: (id: string) => boolean;
     collectItem: (id: string) => void;
+    uncollectItem: (id: string) => void;
+    dropItem: (id: string, position: Position) => void;
     isDoorOpen: (id: string) => boolean;
     openDoor: (id: string) => void;
     closeDoor: (id: string) => void;
@@ -152,6 +154,7 @@ export interface Robot {
     turnLeft(): Promise<void>;
     turnRight(): Promise<void>;
     pickup(): Promise<Item | null>;
+    drop(item: Item): Promise<Item | null>;
     scan(): Promise<Item | Door | null>;
     echo(): Promise<number>;
     openDoor(key?: string | Item | Item[]): Promise<OpenResult>;

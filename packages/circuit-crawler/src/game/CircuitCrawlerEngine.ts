@@ -25,6 +25,7 @@ interface EngineConfig {
 
 export class CircuitCrawlerEngine {
     public maze: MazeConfig;
+    private initialMaze: MazeConfig;
 
     // World State Management
     public worldActions: import('../types').SharedWorldState;
@@ -62,7 +63,8 @@ export class CircuitCrawlerEngine {
     private inputResolve: ((value: string) => void) | null = null;
 
     constructor(config: EngineConfig) {
-        this.maze = config.maze;
+        this.initialMaze = structuredClone(config.maze);
+        this.maze = structuredClone(config.maze);
         this.onLog = config.onLog;
         this.onStateChange = config.onStateChange;
         this.onRobotUpdate = config.onRobotUpdate;
@@ -96,6 +98,10 @@ export class CircuitCrawlerEngine {
         this.listeners = {};
         this.robots.clear();
         this.activeControllers.clear();
+
+        // Restore maze to original deep copy so item positions are reset
+        this.maze = structuredClone(this.initialMaze);
+
         this.worldReset();
 
         if (this.maze.initialRobots) {
@@ -443,6 +449,12 @@ export class CircuitCrawlerEngine {
                     }
                 });
 
+                this.controller.addEventListener('drop', (item: Item) => {
+                    if (itemListeners[item.id] && itemListeners[item.id]['drop']) {
+                        itemListeners[item.id]['drop'].forEach(h => h(item));
+                    }
+                });
+
                 engine.activeControllers.set(this.name, this.controller);
                 wrapperRobots.set(this.name, this);
             }
@@ -484,6 +496,7 @@ export class CircuitCrawlerEngine {
             damage(amount: number) { return this.safeExec(() => this.controller.damage(amount)); }
             destroy() { return this.safeExec(() => this.controller.destroy()); }
             executePath(path: any[]) { return this.safeExec(() => this.controller.executePath(path)); }
+            drop(item: any) { return this.safeExec(() => this.controller.drop(item)); }
 
             toJSON() {
                 return {
@@ -586,7 +599,12 @@ export class CircuitCrawlerEngine {
                     get isRevealed() {
                         return item.isRevealed !== false || engine.worldActions.isItemRevealed(id);
                     },
-                    addEventListener: (event: 'pickup' | 'move' | 'leave', handler: (payload?: any) => void) => {
+                    addEventListener: (event: 'pickup' | 'move' | 'leave' | 'drop', handler: (payload?: any) => void) => {
+                        if (!itemListeners[id]) itemListeners[id] = {};
+                        if (!itemListeners[id][event]) itemListeners[id][event] = [];
+                        itemListeners[id][event].push(handler);
+                    },
+                    on: (event: 'pickup' | 'move' | 'leave' | 'drop', handler: (payload?: any) => void) => {
                         if (!itemListeners[id]) itemListeners[id] = {};
                         if (!itemListeners[id][event]) itemListeners[id][event] = [];
                         itemListeners[id][event].push(handler);
@@ -618,7 +636,12 @@ export class CircuitCrawlerEngine {
                     get isRevealed() {
                         return item.isRevealed !== false || engine.worldActions.isItemRevealed(item.id);
                     },
-                    addEventListener: (event: 'pickup' | 'move' | 'leave', handler: (payload?: any) => void) => {
+                    addEventListener: (event: 'pickup' | 'move' | 'leave' | 'drop', handler: (payload?: any) => void) => {
+                        if (!itemListeners[item.id]) itemListeners[item.id] = {};
+                        if (!itemListeners[item.id][event]) itemListeners[item.id][event] = [];
+                        itemListeners[item.id][event].push(handler);
+                    },
+                    on: (event: 'pickup' | 'move' | 'leave' | 'drop', handler: (payload?: any) => void) => {
                         if (!itemListeners[item.id]) itemListeners[item.id] = {};
                         if (!itemListeners[item.id][event]) itemListeners[item.id][event] = [];
                         itemListeners[item.id][event].push(handler);

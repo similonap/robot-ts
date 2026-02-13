@@ -1,9 +1,10 @@
-import { MazeConfig, SharedWorldState } from '../types';
+import { MazeConfig, Position, SharedWorldState } from '../types';
 
 export interface WorldState {
     doorStates: Record<string, boolean>;
     revealedItemIds: Set<string>;
     collectedItemIds: Set<string>;
+    droppedItemPositions: Map<string, Position>;
 }
 
 export class WorldManager {
@@ -16,7 +17,8 @@ export class WorldManager {
         this.state = {
             doorStates: {},
             revealedItemIds: new Set(),
-            collectedItemIds: new Set()
+            collectedItemIds: new Set(),
+            droppedItemPositions: new Map()
         };
         this.reset(initialMaze);
     }
@@ -31,7 +33,8 @@ export class WorldManager {
         this.state = {
             doorStates: initialDoors,
             revealedItemIds: new Set(),
-            collectedItemIds: new Set()
+            collectedItemIds: new Set(),
+            droppedItemPositions: new Map()
         };
         this.notify();
     }
@@ -57,6 +60,14 @@ export class WorldManager {
             isItemCollected: (id: string) => this.state.collectedItemIds.has(id),
             collectItem: (id: string) => {
                 this.state.collectedItemIds.add(id);
+                this.notify();
+            },
+            uncollectItem: (id: string) => {
+                this.state.collectedItemIds.delete(id);
+                this.notify();
+            },
+            dropItem: (id: string, position: Position) => {
+                this.state.droppedItemPositions.set(id, { ...position });
                 this.notify();
             },
             isDoorOpen: (id: string) => !!this.state.doorStates[id],
