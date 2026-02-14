@@ -149,7 +149,7 @@ async function main() {
 }`;
 
 export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFiles, sharedTypes, slug, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
-    const { maze, setMaze, resetMaze } = useMaze(initialMaze);
+    const { maze, setMaze, onMazeLoaded: setMazeWithOriginal, resetMaze } = useMaze(initialMaze);
     const { robots, updateRobotState, clearRobots, removeRobot, initializeRobots } = useRobots();
     const { doorStates, revealedItemIds, collectedItemIds, worldActions, resetWorld } = useWorld(initialMaze);
 
@@ -181,7 +181,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     };
 
     const loadProject = (newMaze: MazeConfig, newFiles: Record<string, string>, newSolutionFiles?: Record<string, string>) => {
-        setMaze(newMaze);
+        setMazeWithOriginal(newMaze);
         setFiles(newFiles);
         setCurrentSolutionFiles(newSolutionFiles);
         setHasUsedSolution(false);
@@ -273,7 +273,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     };
 
     const onMazeLoaded = (newMaze: MazeConfig) => {
-        setMaze(newMaze);
+        setMazeWithOriginal(newMaze);
         clearRobots();
 
         if (newMaze.initialRobots) {
