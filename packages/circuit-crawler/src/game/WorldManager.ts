@@ -5,6 +5,7 @@ export interface WorldState {
     revealedItemIds: Set<string>;
     collectedItemIds: Set<string>;
     droppedItemPositions: Map<string, Position>;
+    pressurePlateStates: Record<string, boolean>;
 }
 
 export class WorldManager {
@@ -18,7 +19,8 @@ export class WorldManager {
             doorStates: {},
             revealedItemIds: new Set(),
             collectedItemIds: new Set(),
-            droppedItemPositions: new Map()
+            droppedItemPositions: new Map(),
+            pressurePlateStates: {}
         };
         this.reset(initialMaze);
     }
@@ -30,11 +32,20 @@ export class WorldManager {
                 initialDoors[d.id] = d.isOpen;
             });
         }
+
+        const initialPlates: Record<string, boolean> = {};
+        if (maze.pressurePlates) {
+            maze.pressurePlates.forEach(p => {
+                initialPlates[p.id] = p.isActive || false;
+            });
+        }
+
         this.state = {
             doorStates: initialDoors,
             revealedItemIds: new Set(),
             collectedItemIds: new Set(),
-            droppedItemPositions: new Map()
+            droppedItemPositions: new Map(),
+            pressurePlateStates: initialPlates
         };
         this.notify();
     }
@@ -43,7 +54,8 @@ export class WorldManager {
         return {
             doorStates: { ...this.state.doorStates },
             revealedItemIds: Array.from(this.state.revealedItemIds),
-            collectedItemIds: Array.from(this.state.collectedItemIds)
+            collectedItemIds: Array.from(this.state.collectedItemIds),
+            pressurePlateStates: { ...this.state.pressurePlateStates }
         };
     }
 
@@ -84,6 +96,13 @@ export class WorldManager {
                 this.notify();
             },
             isItemRevealed: (id: string) => this.state.revealedItemIds.has(id),
+            isPressurePlateActive: (id: string) => !!this.state.pressurePlateStates[id],
+            setPressurePlateActive: (id: string, active: boolean) => {
+                if (this.state.pressurePlateStates[id] !== active) {
+                    this.state.pressurePlateStates[id] = active;
+                    this.notify();
+                }
+            }
         };
     }
 }

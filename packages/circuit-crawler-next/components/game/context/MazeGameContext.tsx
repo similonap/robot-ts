@@ -26,6 +26,7 @@ interface MazeGameContextType {
     // Shared World State
     worldState: {
         doorStates: Record<string, boolean>;
+        pressurePlateStates: Record<string, boolean>;
         revealedItemIds: string[];
         collectedItemIds: string[];
     };
@@ -79,6 +80,7 @@ export const MazeGameContext = createContext<MazeGameContextType>({
     setShowRobotHealth: () => { },
     worldState: {
         doorStates: {},
+        pressurePlateStates: {},
         revealedItemIds: [],
         collectedItemIds: []
     },
@@ -151,7 +153,7 @@ async function main() {
 export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFiles, sharedTypes, slug, children }: React.PropsWithChildren<MazeGameProviderProps>) => {
     const { maze, setMaze, onMazeLoaded: setMazeWithOriginal, resetMaze } = useMaze(initialMaze);
     const { robots, updateRobotState, clearRobots, removeRobot, initializeRobots } = useRobots();
-    const { doorStates, revealedItemIds, collectedItemIds, worldActions, resetWorld } = useWorld(initialMaze);
+    const { doorStates, pressurePlateStates, revealedItemIds, collectedItemIds, worldActions, resetWorld } = useWorld(initialMaze);
 
     const { logs, setLogs, addLog, showRobotLogs, setShowRobotLogs, clearLogs } = useGameLogs();
     const { files, setFiles, handleAddFile, handleDeleteFile, activeFile, setActiveFile, changeFile } = useFileManager({ initialFiles, initialCode: INITIAL_CODE });
@@ -324,6 +326,7 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
             setShowRobotHealth,
             worldState: {
                 doorStates,
+                pressurePlateStates,
                 revealedItemIds,
                 collectedItemIds
             },

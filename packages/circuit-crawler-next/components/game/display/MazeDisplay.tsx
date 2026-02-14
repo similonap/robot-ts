@@ -4,6 +4,7 @@ import { MazeConfig, RobotState } from 'circuit-crawler';
 import { useState, useRef, useEffect } from 'react';
 import { useMazeGameContext } from '../context/MazeGameContext';
 import MazeItemDisplay from './MazeItemDisplay';
+import MazePressurePlateDisplay from './MazePressurePlateDisplay';
 
 export default function MazeDisplay() {
     const { maze, robots, worldState, showRobotHealth, setShowRobotHealth } = useMazeGameContext();
@@ -112,6 +113,19 @@ export default function MazeDisplay() {
                         )
                     ))
                 ))}
+
+                {/* Pressure Plates */}
+                {maze.pressurePlates?.map((plate) => {
+                    const isActive = !!worldState.pressurePlateStates?.[plate.id];
+                    return (
+                        <MazePressurePlateDisplay
+                            key={plate.id}
+                            plate={plate}
+                            isActive={isActive}
+                            cellSize={cellSize}
+                        />
+                    );
+                })}
 
                 {/* Doors */}
                 {maze.doors?.map((door) => {

@@ -146,6 +146,49 @@ export class CircuitCrawlerEngine {
         }
     }
 
+    // --- Pressure Plate Logic ---
+
+    private checkPressurePlates() {
+        if (!this.maze.pressurePlates) return;
+
+        this.maze.pressurePlates.forEach(plate => {
+            let isActive = false;
+
+            // Check Robots
+            for (const robot of this.robots.values()) {
+                if (robot.position.x === plate.position.x && robot.position.y === plate.position.y && !robot.isDestroyed) {
+                    isActive = true;
+                    break;
+                }
+            }
+
+            // Check Items
+            if (!isActive) {
+                // Check items in the maze (not collected)
+                // Note: items that are dropped are in the maze items array with updated position
+                const itemOnPlate = this.maze.items.find(i =>
+                    i.position?.x === plate.position.x &&
+                    i.position?.y === plate.position.y &&
+                    !this.worldActions.isItemCollected(i.id)
+                );
+                if (itemOnPlate) isActive = true;
+            }
+
+            const wasActive = this.worldActions.isPressurePlateActive(plate.id);
+            if (isActive !== wasActive) {
+                this.worldActions.setPressurePlateActive(plate.id, isActive);
+
+                // Emit events
+                const eventName = isActive ? 'activate' : 'deactivate';
+                if (this.listeners[`pressure_plate:${plate.id}:${eventName}`]) {
+                    this.listeners[`pressure_plate:${plate.id}:${eventName}`].forEach(h => h());
+                }
+
+                this.log(`Pressure Plate ${plate.id} is now ${isActive ? 'Active' : 'Inactive'}`, 'user');
+            }
+        });
+    }
+
     // --- Execution Logic ---
 
     private formatLogArg(arg: any): string {
@@ -441,18 +484,26 @@ export class CircuitCrawlerEngine {
 
                     // Update last position
                     lastPos = { ...pos };
+
+                    engine.checkPressurePlates();
                 });
 
                 this.controller.addEventListener('pickup', (item: Item) => {
                     if (itemListeners[item.id] && itemListeners[item.id]['pickup']) {
                         itemListeners[item.id]['pickup'].forEach(h => h(item));
                     }
+                    engine.checkPressurePlates();
                 });
 
                 this.controller.addEventListener('drop', (item: Item) => {
                     if (itemListeners[item.id] && itemListeners[item.id]['drop']) {
                         itemListeners[item.id]['drop'].forEach(h => h(item));
                     }
+                    // We need to wait for the drop to actually update the maze items position?
+                    // The WorldManager.dropItem just updates the map, but the engine.maze.items needs to be updated too?
+                    // Actually, RobotController updates the global item position in `maze.items`.
+                    // So we are good to check immediately.
+                    engine.checkPressurePlates();
                 });
 
                 engine.activeControllers.set(this.name, this.controller);
@@ -656,6 +707,24 @@ export class CircuitCrawlerEngine {
             },
             get robots() {
                 return Array.from(wrapperRobots.values());
+            },
+            getPressurePlate: (id: string) => {
+                const plate = engine.maze.pressurePlates?.find(p => p.id === id);
+                if (!plate) return undefined;
+
+                return {
+                    get isActive() {
+                        return engine.worldActions.isPressurePlateActive(id);
+                    },
+                    addEventListener: (event: 'activate' | 'deactivate', handler: (payload?: any) => void) => {
+                        const eventKey = `pressure_plate:${id}:${event}`;
+                        engine.addEventListener(eventKey, handler);
+                    },
+                    on: (event: 'activate' | 'deactivate', handler: (payload?: any) => void) => {
+                        const eventKey = `pressure_plate:${id}:${event}`;
+                        engine.addEventListener(eventKey, handler);
+                    }
+                };
             },
             addEventListener: (event: string, handler: (payload?: any) => void) => {
                 this.addEventListener(event, handler);

@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { MazeConfig, Position, Item, Door, InitialRobotConfig } from 'circuit-crawler';
+import { MazeConfig, Position, Item, Door, InitialRobotConfig, PressurePlate } from 'circuit-crawler';
 import CodeEditor from './CodeEditor';
 import MazeItemDisplay from './game/display/MazeItemDisplay';
+import MazePressurePlateDisplay from './game/display/MazePressurePlateDisplay';
 import ResizableSplit from './ResizableSplit';
 
 const INITIAL_WIDTH = 15;
@@ -29,7 +30,7 @@ const ITEM_TYPES = [
     { name: 'Map', icon: '🗺️', tags: ['Tool'] },
 ];
 
-type Tool = 'wall' | 'path' | 'robot' | 'item' | 'door' | null;
+type Tool = 'wall' | 'path' | 'robot' | 'item' | 'door' | 'pressure_plate' | null;
 
 export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     const [width, setWidth] = useState(INITIAL_WIDTH);
@@ -40,6 +41,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     const [initialRobots, setInitialRobots] = useState<InitialRobotConfig[]>([]);
     const [items, setItems] = useState<Item[]>([]);
     const [doors, setDoors] = useState<Door[]>([]);
+    const [pressurePlates, setPressurePlates] = useState<PressurePlate[]>([]);
     const [globalModule, setGlobalModule] = useState(DEFAULT_STEP_CODE);
     const [zoom, setZoom] = useState(1);
 
@@ -79,6 +81,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
         // Filter items out of bounds
         setItems(prev => prev.filter(i => i.position && i.position.x < newW && i.position.y < newH));
         setDoors(prev => prev.filter(d => d.position.x < newW && d.position.y < newH));
+        setPressurePlates(prev => prev.filter(p => p.position.x < newW && p.position.y < newH));
 
         // Reset start if OOB - Removed
         // if (start.x >= newW || start.y >= newH) {
@@ -98,14 +101,15 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     };
 
     const handleCellClick = (x: number, y: number) => {
-        // Priority: If item/door/robot exists at this position, select it regardless of tool
+        // Priority: If entity exists at this position, select it regardless of tool
         const existingItem = items.find(i => i.position?.x === x && i.position?.y === y);
         const existingDoor = doors.find(d => d.position.x === x && d.position.y === y);
         const existingRobot = initialRobots.find(r => r.position.x === x && r.position.y === y);
+        const existingPlate = pressurePlates.find(p => p.position.x === x && p.position.y === y);
 
-        if (existingItem || existingDoor || existingRobot) {
+        if (existingItem || existingDoor || existingRobot || existingPlate) {
             // Implicit Selection Logic
-            setSelectedItemId(existingItem?.id || existingDoor?.id || existingRobot?.name || null);
+            setSelectedItemId(existingItem?.id || existingDoor?.id || existingRobot?.name || existingPlate?.id || null);
             // Do not paint
             return;
         }
@@ -126,6 +130,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             setItems(prev => prev.filter(i => i.position?.x !== x || i.position?.y !== y));
             setDoors(prev => prev.filter(d => d.position.x !== x || d.position.y !== y));
             setInitialRobots(prev => prev.filter(r => r.position.x !== x || r.position.y !== y));
+            setPressurePlates(prev => prev.filter(p => p.position.x !== x || p.position.y !== y));
         } else if (selectedTool === 'path') {
             const newWalls = [...walls];
             newWalls[y] = [...newWalls[y]];
@@ -136,6 +141,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             const filteredItems = items.filter(i => i.position?.x !== x || i.position?.y !== y);
             const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
             const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
+            // Pressure plates are allowed under robots
 
             let baseName = `Robot ${filteredRobots.length + 1}`;
             let name = baseName;
@@ -155,6 +161,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             setItems(filteredItems);
             setDoors(filteredDoors);
             setInitialRobots([...filteredRobots, newRobot]);
+            // Do not clear plates
             setSelectedItemId(newRobot.name);
 
             // Ensure path
@@ -166,6 +173,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             // Remove existing entities at pos
             const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
             const filteredItems = items.filter(i => i.position?.x !== x || i.position?.y !== y);
+            // Allow items on pressure plates
 
             const newItem: Item = {
                 id: `item-${Date.now()}`,
@@ -178,6 +186,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             setItems([...filteredItems, newItem]);
             setInitialRobots(filteredRobots);
+            // Do not clear plates
             // Auto-select new item
             setSelectedItemId(newItem.id);
 
@@ -190,6 +199,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             const filteredItems = items.filter(i => i.position?.x !== x || i.position?.y !== y);
             const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
             const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
+            const filteredPlates = pressurePlates.filter(p => p.position.x !== x || p.position.y !== y);
 
             const newDoor: Door = {
                 id: `door-${Date.now()}`,
@@ -202,9 +212,35 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             setItems(filteredItems);
             setDoors([...filteredDoors, newDoor]);
             setInitialRobots(filteredRobots);
+            setPressurePlates(filteredPlates);
             setSelectedItemId(newDoor.id);
 
             // Ensure path (doors are placed on paths, effectively)
+            const newWalls = [...walls];
+            newWalls[y][x] = false;
+            setWalls(newWalls);
+        } else if (selectedTool === 'pressure_plate') {
+            // Remove existing entities? Allow distinct items/robots on top.
+            // But if we are placing a plate, we probably want to keep existing items/robots?
+            // Let's decide: Placing a plate *under* an item is useful.
+            // So do NOT clear items or robots.
+
+            const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
+            const filteredPlates = pressurePlates.filter(p => p.position.x !== x || p.position.y !== y);
+
+            const newPlate: PressurePlate = {
+                id: `plate-${Date.now()}`,
+                type: 'pressure_plate',
+                position: { x, y }
+            };
+
+            // Keep items and robots
+            setDoors(filteredDoors);
+            // Keep items and robots
+            setPressurePlates([...filteredPlates, newPlate]);
+            setSelectedItemId(newPlate.id);
+
+            // Ensure path
             const newWalls = [...walls];
             newWalls[y][x] = false;
             setWalls(newWalls);
@@ -225,6 +261,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             walls,
             items,
             doors,
+            pressurePlates,
             globalModule
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
@@ -275,6 +312,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
                     setItems(json.items || []);
                     setDoors(json.doors || []);
+                    setPressurePlates(json.pressurePlates || []);
                     setGlobalModule(json.globalModule || DEFAULT_STEP_CODE);
                 } else {
                     alert('Invalid maze file format');
@@ -380,6 +418,12 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                             >
                                 <div className="w-4 h-4 bg-yellow-900 border border-yellow-700"></div> Door
                             </button>
+                            <button
+                                onClick={() => setSelectedTool(prev => prev === 'pressure_plate' ? null : 'pressure_plate')}
+                                className={`px-4 py-2 rounded text-left flex items-center gap-2 ${selectedTool === 'pressure_plate' ? 'bg-gray-700 border-l-4 border-blue-500' : 'hover:bg-gray-800'}`}
+                            >
+                                <div className="w-4 h-4 bg-green-900 border border-green-700"></div> Pressure Plate
+                            </button>
                         </div>
                     </div>
 
@@ -437,8 +481,11 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             const robotAtPos = initialRobots.find(r => r.position.x === x && r.position.y === y);
                                             const item = items.find(i => i.position?.x === x && i.position?.y === y);
                                             const door = doors.find(d => d.position.x === x && d.position.y === y);
+                                            const plate = pressurePlates.find(p => p.position.x === x && p.position.y === y);
+
                                             const isSelected = (item && selectedItemId === item.id) ||
                                                 (door && selectedItemId === door.id) ||
+                                                (plate && selectedItemId === plate.id) ||
                                                 (robotAtPos && selectedItemId === robotAtPos.name);
 
                                             return (
@@ -454,8 +501,19 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             `}
                                                 >
                                                     {robotAtPos && <div className="w-4 h-4 bg-cyan-500 rounded-full border border-cyan-300" title={robotAtPos.name} />}
+
+                                                    {plate && !robotAtPos && !item && (
+                                                        <div className="w-full h-full flex items-center justify-center pointer-events-none absolute">
+                                                            <svg width="32" height="32" viewBox="0 0 32 32">
+                                                                <g transform={`translate(${-(plate.position.x * 32)}, ${-(plate.position.y * 32)})`}>
+                                                                    <MazePressurePlateDisplay plate={plate} isActive={false} cellSize={32} />
+                                                                </g>
+                                                            </svg>
+                                                        </div>
+                                                    )}
+
                                                     {item && !robotAtPos && (
-                                                        <div className="w-full h-full flex items-center justify-center pointer-events-none">
+                                                        <div className="w-full h-full flex items-center justify-center pointer-events-none relative z-10">
                                                             <svg width="32" height="32" viewBox="0 0 32 32">
                                                                 <g transform={`translate(${-(item.position?.x ?? 0) * 32}, ${-(item.position?.y ?? 0) * 32})`}>
                                                                     <MazeItemDisplay item={item} cellSize={32} />
@@ -495,11 +553,12 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                 <div className="w-64 bg-gray-900 p-4 rounded border border-gray-700 overflow-y-auto">
                     <h3 className="font-bold mb-4 text-gray-400 uppercase text-xs">Properties</h3>
 
-                    {selectedItemId && (items.find(i => i.id === selectedItemId) || doors.find(d => d.id === selectedItemId) || initialRobots.find(r => r.name === selectedItemId)) ? (
+                    {selectedItemId && (items.find(i => i.id === selectedItemId) || doors.find(d => d.id === selectedItemId) || pressurePlates.find(p => p.id === selectedItemId) || initialRobots.find(r => r.name === selectedItemId)) ? (
                         <div className="flex flex-col gap-4">
                             {(() => {
                                 const item = items.find(i => i.id === selectedItemId);
                                 const door = doors.find(d => d.id === selectedItemId);
+                                const plate = pressurePlates.find(p => p.id === selectedItemId);
                                 const robot = initialRobots.find(r => r.name === selectedItemId);
 
                                 if (robot) {
@@ -840,6 +899,39 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 </label>
                                             </div>
 
+                                        </div>
+                                    );
+                                }
+
+                                if (plate) {
+                                    return (
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex gap-2 items-center text-green-500 font-bold border-b border-gray-700 pb-2">
+                                                <span>🔳 Pressure Plate</span>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-400">ID</label>
+                                                <input
+                                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
+                                                    value={plate.id}
+                                                    readOnly
+                                                />
+                                            </div>
+
+                                            <div className="bg-gray-800 p-2 rounded text-xs text-gray-400">
+                                                <p>Pressure plates trigger 'activate' and 'deactivate' events.</p>
+                                                <p className="mt-1">Connect to doors via ID in code or global module.</p>
+                                            </div>
+
+                                            <button
+                                                onClick={() => {
+                                                    setPressurePlates(prev => prev.filter(p => p.id !== plate.id));
+                                                    setSelectedItemId(null);
+                                                }}
+                                                className="bg-red-900 text-red-200 text-xs py-1 rounded hover:bg-red-800 mt-4"
+                                            >
+                                                Delete Plate
+                                            </button>
                                         </div>
                                     );
                                 }

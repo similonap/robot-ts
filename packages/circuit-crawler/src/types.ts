@@ -99,6 +99,31 @@ export interface RobotState {
 export type RunnerState = RobotState;
 
 
+export interface Wall {
+    type: 'wall';
+    position: Position;
+}
+
+export interface PressurePlate {
+    id: string;
+    position: Position;
+    type: 'pressure_plate';
+    isActive?: boolean; // Runtime state (optional in config)
+}
+
+export interface PressurePlateControl {
+    readonly isActive: boolean;
+    addEventListener(event: 'activate' | 'deactivate', handler: (payload?: any) => void): void;
+    on(event: 'activate' | 'deactivate', handler: (payload?: any) => void): void; // Alias for convenience
+}
+
+export interface OpenResult {
+    success: boolean;
+    message?: string;
+    requiredAuth?: 'PASSWORD' | 'ITEMS';
+    missingItems?: string[];
+}
+
 export interface MazeConfig {
     width: number;
     height: number;
@@ -111,6 +136,7 @@ export interface MazeConfig {
     // start: Position; // REMOVED
     items: Item[];
     doors: Door[];
+    pressurePlates?: PressurePlate[];
     globalModule?: string;
 }
 
@@ -125,19 +151,8 @@ export interface SharedWorldState {
     closeDoor: (id: string) => void;
     revealItem: (id: string) => void;
     isItemRevealed: (id: string) => boolean;
-}
-
-
-export interface Wall {
-    type: 'wall';
-    position: Position;
-}
-
-export interface OpenResult {
-    success: boolean;
-    message?: string;
-    requiredAuth?: 'PASSWORD' | 'ITEMS';
-    missingItems?: string[];
+    isPressurePlateActive: (id: string) => boolean;
+    setPressurePlateActive: (id: string, active: boolean) => void;
 }
 
 export type RobotCommand = 'FORWARD' | 'LEFT' | 'RIGHT';
@@ -194,6 +209,8 @@ export interface Game {
     getRobot(name: string): Robot | undefined;
     getDoor(id: string): DoorControl | undefined;
     getItem(id: string): ItemControl | undefined;
+    getDoor(id: string): DoorControl | undefined;
+    getPressurePlate(id: string): PressurePlateControl | undefined;
     getItemOnPosition(x: number, y: number): ItemControl | undefined;
     isRunning(): boolean;
     createRobot(config: RobotConfig): Robot;

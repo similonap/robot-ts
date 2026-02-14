@@ -280,19 +280,6 @@
   ],
   "items": [
     {
-      "id": "item-1769366223774",
-      "type": "item",
-      "name": "Coin",
-      "icon": "😀",
-      "tags": [
-        "Treasure"
-      ],
-      "position": {
-        "x": 10,
-        "y": 2
-      }
-    },
-    {
       "id": "item-1769366777036",
       "type": "item",
       "name": "Gem",
@@ -303,6 +290,16 @@
       "position": {
         "x": 10,
         "y": 6
+      }
+    }
+  ],
+  "pressurePlates": [
+    {
+      "id": "plate-1",
+      "type": "pressure_plate",
+      "position": {
+        "x": 10,
+        "y": 2
       }
     }
   ],

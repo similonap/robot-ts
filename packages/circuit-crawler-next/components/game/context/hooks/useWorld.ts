@@ -4,11 +4,13 @@ import { SharedWorldState, MazeConfig } from 'circuit-crawler';
 export const useWorld = (initialMaze: MazeConfig) => {
     // UI State
     const [doorStates, setDoorStates] = useState<Record<string, boolean>>({});
+    const [pressurePlateStates, setPressurePlateStates] = useState<Record<string, boolean>>({});
     const [revealedItemIds, setRevealedItemIds] = useState<string[]>([]);
     const [collectedItemIds, setCollectedItemIds] = useState<string[]>([]);
 
     // Logic State (Refs for synchronous access in game loop)
     const doorStatesRef = useRef<Record<string, boolean>>({});
+    const pressurePlateStatesRef = useRef<Record<string, boolean>>({});
     const revealedItemIdsRef = useRef<Set<string>>(new Set());
     const collectedItemIdsRef = useRef<Set<string>>(new Set());
 
@@ -18,10 +20,21 @@ export const useWorld = (initialMaze: MazeConfig) => {
     // Initialize
     useEffect(() => {
         const initialDoors: Record<string, boolean> = {};
-        initialMaze.doors.forEach(d => {
-            initialDoors[d.id] = d.isOpen;
-        });
+        if (initialMaze.doors) {
+            initialMaze.doors.forEach(d => {
+                initialDoors[d.id] = d.isOpen;
+            });
+        }
         doorStatesRef.current = initialDoors;
+
+        const initialPlates: Record<string, boolean> = {};
+        if (initialMaze.pressurePlates) {
+            initialMaze.pressurePlates.forEach(p => {
+                initialPlates[p.id] = p.isActive || false;
+            });
+        }
+        pressurePlateStatesRef.current = initialPlates;
+
         revealedItemIdsRef.current = new Set();
         collectedItemIdsRef.current = new Set();
 
@@ -30,6 +43,7 @@ export const useWorld = (initialMaze: MazeConfig) => {
 
     const flushUpdates = useCallback(() => {
         setDoorStates({ ...doorStatesRef.current });
+        setPressurePlateStates({ ...pressurePlateStatesRef.current });
         setRevealedItemIds(Array.from(revealedItemIdsRef.current));
         setCollectedItemIds(Array.from(collectedItemIdsRef.current));
         pendingUpdates.current = false;
@@ -37,10 +51,21 @@ export const useWorld = (initialMaze: MazeConfig) => {
 
     const resetWorld = useCallback(() => {
         const initialDoors: Record<string, boolean> = {};
-        initialMaze.doors.forEach(d => {
-            initialDoors[d.id] = d.isOpen;
-        });
+        if (initialMaze.doors) {
+            initialMaze.doors.forEach(d => {
+                initialDoors[d.id] = d.isOpen;
+            });
+        }
         doorStatesRef.current = initialDoors;
+
+        const initialPlates: Record<string, boolean> = {};
+        if (initialMaze.pressurePlates) {
+            initialMaze.pressurePlates.forEach(p => {
+                initialPlates[p.id] = p.isActive || false;
+            });
+        }
+        pressurePlateStatesRef.current = initialPlates;
+
         revealedItemIdsRef.current = new Set();
         collectedItemIdsRef.current = new Set();
         flushUpdates();
@@ -77,10 +102,16 @@ export const useWorld = (initialMaze: MazeConfig) => {
             pendingUpdates.current = true;
         },
         isItemRevealed: (id: string) => revealedItemIdsRef.current.has(id),
+        isPressurePlateActive: (id: string) => !!pressurePlateStatesRef.current[id],
+        setPressurePlateActive: (id: string, active: boolean) => {
+            pressurePlateStatesRef.current[id] = active;
+            pendingUpdates.current = true;
+        }
     };
 
     return {
         doorStates,
+        pressurePlateStates,
         revealedItemIds,
         collectedItemIds,
         worldActions,
