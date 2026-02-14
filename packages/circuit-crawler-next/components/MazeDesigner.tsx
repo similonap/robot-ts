@@ -77,7 +77,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
         setWalls(newWalls);
 
         // Filter items out of bounds
-        setItems(prev => prev.filter(i => i.position.x < newW && i.position.y < newH));
+        setItems(prev => prev.filter(i => i.position && i.position.x < newW && i.position.y < newH));
         setDoors(prev => prev.filter(d => d.position.x < newW && d.position.y < newH));
 
         // Reset start if OOB - Removed
@@ -99,7 +99,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
     const handleCellClick = (x: number, y: number) => {
         // Priority: If item/door/robot exists at this position, select it regardless of tool
-        const existingItem = items.find(i => i.position.x === x && i.position.y === y);
+        const existingItem = items.find(i => i.position?.x === x && i.position?.y === y);
         const existingDoor = doors.find(d => d.position.x === x && d.position.y === y);
         const existingRobot = initialRobots.find(r => r.position.x === x && r.position.y === y);
 
@@ -123,7 +123,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             newWalls[y][x] = true;
             setWalls(newWalls);
             // Remove items at this pos
-            setItems(prev => prev.filter(i => i.position.x !== x || i.position.y !== y));
+            setItems(prev => prev.filter(i => i.position?.x !== x || i.position?.y !== y));
             setDoors(prev => prev.filter(d => d.position.x !== x || d.position.y !== y));
             setInitialRobots(prev => prev.filter(r => r.position.x !== x || r.position.y !== y));
         } else if (selectedTool === 'path') {
@@ -133,7 +133,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             setWalls(newWalls);
         } else if (selectedTool === 'robot') {
             // Remove existing items at pos
-            const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
+            const filteredItems = items.filter(i => i.position?.x !== x || i.position?.y !== y);
             const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
             const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
 
@@ -165,7 +165,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
         } else if (selectedTool === 'item') {
             // Remove existing entities at pos
             const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
-            const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
+            const filteredItems = items.filter(i => i.position?.x !== x || i.position?.y !== y);
 
             const newItem: Item = {
                 id: `item-${Date.now()}`,
@@ -187,7 +187,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
             setWalls(newWalls);
         } else if (selectedTool === 'door') {
             // Remove existing item/door at pos
-            const filteredItems = items.filter(i => i.position.x !== x || i.position.y !== y);
+            const filteredItems = items.filter(i => i.position?.x !== x || i.position?.y !== y);
             const filteredDoors = doors.filter(d => d.position.x !== x || d.position.y !== y);
             const filteredRobots = initialRobots.filter(r => r.position.x !== x || r.position.y !== y);
 
@@ -435,7 +435,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                     {walls.map((row, y) =>
                                         row.map((isWall, x) => {
                                             const robotAtPos = initialRobots.find(r => r.position.x === x && r.position.y === y);
-                                            const item = items.find(i => i.position.x === x && i.position.y === y);
+                                            const item = items.find(i => i.position?.x === x && i.position?.y === y);
                                             const door = doors.find(d => d.position.x === x && d.position.y === y);
                                             const isSelected = (item && selectedItemId === item.id) ||
                                                 (door && selectedItemId === door.id) ||
@@ -457,7 +457,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     {item && !robotAtPos && (
                                                         <div className="w-full h-full flex items-center justify-center pointer-events-none">
                                                             <svg width="32" height="32" viewBox="0 0 32 32">
-                                                                <g transform={`translate(${-item.position.x * 32}, ${-item.position.y * 32})`}>
+                                                                <g transform={`translate(${-(item.position?.x ?? 0) * 32}, ${-(item.position?.y ?? 0) * 32})`}>
                                                                     <MazeItemDisplay item={item} cellSize={32} />
                                                                 </g>
                                                             </svg>
