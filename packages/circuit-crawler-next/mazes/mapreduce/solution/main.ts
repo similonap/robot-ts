@@ -30,7 +30,10 @@ async function main() {
         .sort((a, b) => a.order - b.order)
         .filter((v) => v.valid)
         .map(v => v.value)
+        .map(atob)
         .reduce((prev, curr) => prev + curr)
+
+    console.log(password);
 
     await robot.turnLeft();
     await moveAndPickup(6);

@@ -21,7 +21,8 @@ In this challenge, you will test your array manipulation skills. Scattered throu
     *   **Map**: Extract the `ItemValue` object from each `Item` in the inventory.
     *   **Sort**: Arrange the items based on their `order` property in ascending order.
     *   **Filter**: Keep only the items where `valid` is `true`.
-    *   **Reduce/Join**: Combine the `value` strings of the remaining valid items into a single password string.
+    *   **Map (Decode)**: The `value` string is encoded in Base64! Use the built-in `atob()` function to decode it back into plain text.
+    *   **Reduce/Join**: Combine the decoded strings of the remaining valid items into a single password string.
 4.  **Open the Door**: Navigate to the locked door and use the calculated password to open it: `robot.openDoor(password)`.
 5.  **Win**: Move through the open door and collect the final prize!
 
@@ -35,7 +36,12 @@ In this challenge, you will test your array manipulation skills. Scattered throu
   ```ts
   const password = robot.inventory
     .map(item => item.value)
-    // ... complete the chain with sort, filter, and reduce
+    // ... complete the chain with sort, filter, decode, and reduce
+  ```
+- To decode a Base64 string, simply pass it into the built-in `atob()` function:
+  ```ts
+  const decodedString = atob("SGVsbG8="); // Returns "Hello"
+  // You can pass the function directly into map! array.map(atob)
   ```
 - Make sure you collect all the necessary items before trying to compute the password! You can use loops to automate the collection process.
 - The `Array.prototype.sort()` method expects a comparator function to sort numbers correctly: `(a, b) => a.order - b.order`.
