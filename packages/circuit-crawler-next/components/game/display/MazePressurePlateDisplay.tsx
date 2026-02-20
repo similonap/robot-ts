@@ -10,60 +10,36 @@ interface MazePressurePlateDisplayProps {
 export default function MazePressurePlateDisplay({ plate, isActive, cellSize }: MazePressurePlateDisplayProps) {
     return (
         <g transform={`translate(${plate.position.x * cellSize + cellSize / 2}, ${plate.position.y * cellSize + cellSize / 2})`}>
-            {/* Housing: The base on the floor */}
-            <rect
-                x={-cellSize * 0.45}
-                y={-cellSize * 0.45}
-                width={cellSize * 0.9}
-                height={cellSize * 0.9}
-                rx={6}
-                fill="#1e293b" // slate-800
-                stroke="#334155" // slate-700
-                strokeWidth={1}
-            />
-
-            {/* The actual plate button */}
+            {/* Plate Base */}
             <motion.rect
                 animate={{
-                    scale: isActive ? 0.92 : 1, // Slight scaling to simulate being pressed
-                    fill: isActive ? '#0e7490' : '#475569', // cyan-700 (active) vs slate-600 (inactive)
-                    stroke: isActive ? '#22d3ee' : '#cbd5e1', // cyan-400 vs slate-300
+                    fill: isActive ? '#22c55e' : '#334155',
+                    fillOpacity: isActive ? 0.6 : 0.3,
+                    stroke: isActive ? '#4ade80' : '#475569',
                     strokeWidth: isActive ? 2 : 1,
-                    fillOpacity: isActive ? 0.8 : 1
+                    scale: isActive ? 0.9 : 0.8
                 }}
-                transition={{ duration: 0.1, ease: 'easeOut' }}
-                x={-cellSize * 0.35}
-                y={-cellSize * 0.35}
-                width={cellSize * 0.7}
-                height={cellSize * 0.7}
+                x={-cellSize * 0.4}
+                y={-cellSize * 0.4}
+                width={cellSize * 0.8}
+                height={cellSize * 0.8}
                 rx={4}
+                transition={{ duration: 0.2 }}
             />
 
-            {/* Inner Indicator Light */}
-            <motion.circle
-                animate={{
-                    fill: isActive ? '#a5f3fc' : '#0f172a', // cyan-200 vs slate-900
-                    r: isActive ? cellSize * 0.1 : cellSize * 0.08,
-                    opacity: isActive ? 1 : 0.5
-                }}
-                cx={0}
-                cy={0}
-            />
-
-            {/* Active Glow Ring */}
+            {/* Active Glow/Indicator */}
             {isActive && (
                 <motion.rect
-                    x={-cellSize * 0.45}
-                    y={-cellSize * 0.45}
-                    width={cellSize * 0.9}
-                    height={cellSize * 0.9}
-                    rx={6}
-                    fill="none"
-                    stroke="#22d3ee"
-                    strokeWidth={2}
-                    initial={{ opacity: 0.8, scale: 1 }}
-                    animate={{ opacity: 0, scale: 1.15 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'easeOut' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    x={-cellSize * 0.3}
+                    y={-cellSize * 0.3}
+                    width={cellSize * 0.6}
+                    height={cellSize * 0.6}
+                    rx={3}
+                    fill="#4ade80"
+                    fillOpacity="0.4"
                 />
             )}
         </g>
