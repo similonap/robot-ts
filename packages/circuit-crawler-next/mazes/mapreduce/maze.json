@@ -375,7 +375,7 @@
       }
     },
     {
-      "id": "item-8",
+      "id": "item-prize",
       "type": "item",
       "name": "Gem",
       "icon": "💎",
@@ -400,7 +400,7 @@
       },
       "lock": {
         "type": "password",
-        "value": "somekey"
+        "value": "SIX7!"
       }
     }
   ],

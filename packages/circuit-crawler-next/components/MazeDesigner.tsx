@@ -866,9 +866,45 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     }}
                                                 />
                                             </div>
-                                            {item.imageUrl && (
-                                                <div className="mt-2"></div>
-                                            )}
+                                            <div className="mt-2">
+                                                <label className="text-xs text-gray-400 flex justify-between">
+                                                    <span>Value (JSON)</span>
+                                                    {(() => {
+                                                        if (!item.value) return null;
+                                                        try {
+                                                            JSON.parse(typeof item.value === 'string' ? item.value : JSON.stringify(item.value));
+                                                            return <span className="text-green-500">Valid JSON</span>;
+                                                        } catch (e) {
+                                                            return <span className="text-red-500">Invalid JSON</span>;
+                                                        }
+                                                    })()}
+                                                </label>
+                                                <textarea
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-blue-300 font-mono resize-y min-h-[80px]"
+                                                    placeholder='{"key": "value"}'
+                                                    value={typeof item.value === 'string' ? item.value : (item.value ? JSON.stringify(item.value, null, 2) : '')}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: val } : i));
+                                                    }}
+                                                    onBlur={e => {
+                                                        const val = e.target.value;
+                                                        if (!val.trim()) {
+                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: undefined } : i));
+                                                            return;
+                                                        }
+                                                        try {
+                                                            const parsed = JSON.parse(val);
+                                                            // Store as parsed object to match what we expect in the engine if needed, 
+                                                            // or just keep as string. Let's keep as parsed object if it's valid JSON,
+                                                            // otherwise keep as string so they don't lose data while typing.
+                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: parsed } : i));
+                                                        } catch (err) {
+                                                            // Invalid JSON, leave as string representation
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
                                             <div className="border-t border-gray-700 pt-3 mt-1 mb-3">
                                                 {/* Removed Damage Properties */}
                                             </div>
