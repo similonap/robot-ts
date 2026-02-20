@@ -629,7 +629,7 @@ export class CircuitCrawlerEngine {
                 const item = engine.maze.items?.find(i => i.id === id);
                 if (!item) return undefined;
 
-                return {
+                const control = {
                     collect: () => {
                         if (!engine.worldActions.isItemCollected(id)) {
                             engine.worldActions.collectItem(id);
@@ -661,12 +661,23 @@ export class CircuitCrawlerEngine {
                         itemListeners[id][event].push(handler);
                     }
                 };
+
+                return new Proxy(item as any, {
+                    get(target, prop) {
+                        if (prop in control) return (control as any)[prop];
+                        return target[prop];
+                    },
+                    set(target, prop, value) {
+                        target[prop] = value;
+                        return true;
+                    }
+                }) as any;
             },
             getItemOnPosition: (x: number, y: number) => {
                 const item = engine.maze.items?.find(i => i.position?.x === x && i.position?.y === y && !engine.worldActions.isItemCollected(i.id));
                 if (!item) return undefined;
 
-                return {
+                const control = {
                     collect: () => {
                         if (!engine.worldActions.isItemCollected(item.id)) {
                             engine.worldActions.collectItem(item.id);
@@ -698,6 +709,17 @@ export class CircuitCrawlerEngine {
                         itemListeners[item.id][event].push(handler);
                     }
                 };
+
+                return new Proxy(item as any, {
+                    get(target, prop) {
+                        if (prop in control) return (control as any)[prop];
+                        return target[prop];
+                    },
+                    set(target, prop, value) {
+                        target[prop] = value;
+                        return true;
+                    }
+                }) as any;
             },
             isRunning: () => this.isRunning,
             createRobot: (config: RobotConfig) => {

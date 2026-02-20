@@ -260,16 +260,15 @@ export class RobotController {
 
         if (itemAtPos) {
             this.world.collectItem(itemAtPos.id);
-            // Add to local inventory without position (item is no longer on the map)
-            const { position, ...itemWithoutPosition } = itemAtPos;
-            const inventoryItem: Item = { ...itemWithoutPosition };
-            this.robotState.inventory = [...this.robotState.inventory, inventoryItem];
+            // Remove position from the actual item object so it stays consistent
+            delete itemAtPos.position;
+            this.robotState.inventory = [...this.robotState.inventory, itemAtPos];
 
             this.world.flushUpdates();
             this.onUpdate({ ...this.robotState }, `Collected ${itemAtPos.icon} ${itemAtPos.name}!`);
-            this.emit('pickup', inventoryItem);
+            this.emit('pickup', itemAtPos);
             await this.wait(this.delayMs);
-            return inventoryItem;
+            return itemAtPos;
         } else {
             this.onUpdate({ ...this.robotState }, `Nothing to pick up here.`);
             await this.wait(this.delayMs / 2);

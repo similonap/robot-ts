@@ -1,6 +1,7 @@
 import CodeEditor from "@/components/CodeEditor";
 import { useMazeGameContext } from "../context/MazeGameContext";
 import { useExternalTypes } from "./hooks/useExternalTypes";
+import { useTypeInjection } from "./hooks/useTypeInjection";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm';
 import { useRef } from "react";
@@ -15,6 +16,7 @@ const GameEditor = () => {
     } = useMazeGameContext();
 
     const externalModules = useExternalTypes(files);
+    const { processedSharedTypes } = useTypeInjection(sharedTypes, maze.globalModule);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,9 +231,9 @@ const GameEditor = () => {
                         files={files}
                         activeFile={activeFile}
                         onChange={(val) => changeFile(activeFile, val)}
-                        sharedTypes={sharedTypes}
+                        sharedTypes={processedSharedTypes}
                         modules={{
-                            'circuit-crawler': maze.globalModule || '',
+                            'globalModule': maze.globalModule || 'export {}',
                             ...externalModules
                         }}
                     />

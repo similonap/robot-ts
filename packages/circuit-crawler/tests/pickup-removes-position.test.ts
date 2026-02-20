@@ -86,4 +86,36 @@ describe('Pickup removes item position', () => {
         const passLog = logs.find(msg => msg.includes('PASS: inventory item has no position'));
         expect(passLog).toBeDefined();
     });
+    it('should retain custom properties set via game.getItem()', async () => {
+        const onLog = jest.fn();
+        engine = new CircuitCrawlerEngine({ maze, onLog });
+
+        const code = `
+            // Add custom property via the global game.getItem proxy
+            game.getItem('gem-1').customProp = 'hello';
+
+            const robot = game.getRobot('TestBot');
+            await robot.moveForward();
+            const item = await robot.pickup();
+
+            if (!item) throw new Error('No item picked up');
+            if (item.customProp !== 'hello') {
+                throw new Error('Item should retain customProp, got: ' + item.customProp);
+            }
+
+            // Also check inventory directly
+            if (robot.inventory[0].customProp !== 'hello') {
+                throw new Error('Inventory item should retain customProp, got: ' + robot.inventory[0].customProp);
+            }
+
+            console.log('PASS: item has custom properties');
+            game.win('Done');
+        `;
+
+        await engine.run({ 'main.ts': code });
+
+        const logs = onLog.mock.calls.map(call => call[0]);
+        const passLog = logs.find(msg => msg.includes('PASS: item has custom properties'));
+        expect(passLog).toBeDefined();
+    });
 });
