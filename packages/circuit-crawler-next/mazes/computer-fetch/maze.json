@@ -1,0 +1,352 @@
+{
+  "width": 15,
+  "height": 15,
+  "initialRobots": [
+    {
+      "position": {
+        "x": 2,
+        "y": 3
+      },
+      "direction": "North",
+      "name": "Robot 1",
+      "color": "#38bdf8"
+    }
+  ],
+  "walls": [
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  ],
+  "items": [
+    {
+      "id": "item-1771604351546",
+      "type": "item",
+      "name": "Laptop",
+      "icon": "💻",
+      "tags": [
+        "Tool"
+      ],
+      "value": "/json/computer/terminal1.json",
+      "position": {
+        "x": 2,
+        "y": 2
+      }
+    }
+  ],
+  "doors": [
+    {
+      "id": "door-1771604661321",
+      "type": "door",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 5,
+        "y": 7
+      }
+    },
+    {
+      "id": "door-1771604665060",
+      "type": "door",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 5,
+        "y": 12
+      }
+    },
+    {
+      "id": "door-1771604666195",
+      "type": "door",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 7,
+        "y": 12
+      }
+    },
+    {
+      "id": "door-1771604667860",
+      "type": "door",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 9,
+        "y": 4
+      }
+    },
+    {
+      "id": "door-1771604676048",
+      "type": "door",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 5,
+        "y": 3
+      }
+    },
+    {
+      "id": "door-1771604680987",
+      "type": "door",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 10,
+        "y": 8
+      }
+    }
+  ],
+  "pressurePlates": [],
+  "globalModule": "// Check conditions every step\n// Available: game\nexport { robot, game, Robot };\n\n/*\nif (game.items.length === 0) {\n    game.win(\"All items collected!\");\n}\n*/\n"
+}

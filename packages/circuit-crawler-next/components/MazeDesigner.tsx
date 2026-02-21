@@ -658,9 +658,13 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             <div>
                                                 <label className="text-xs text-gray-400">ID</label>
                                                 <input
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white font-mono"
                                                     value={door.id}
-                                                    readOnly
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setDoors(prev => prev.map(d => d.id === door.id ? { ...d, id: val } : d));
+                                                        if (selectedItemId === door.id) setSelectedItemId(val);
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -794,9 +798,13 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             <div>
                                                 <label className="text-xs text-gray-400">ID</label>
                                                 <input
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white font-mono"
                                                     value={item.id}
-                                                    readOnly
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, id: val } : i));
+                                                        if (selectedItemId === item.id) setSelectedItemId(val);
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -868,20 +876,20 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             </div>
                                             <div className="mt-2">
                                                 <label className="text-xs text-gray-400 flex justify-between">
-                                                    <span>Value (JSON)</span>
+                                                    <span>Value (JSON or String)</span>
                                                     {(() => {
                                                         if (!item.value) return null;
                                                         try {
                                                             JSON.parse(typeof item.value === 'string' ? item.value : JSON.stringify(item.value));
                                                             return <span className="text-green-500">Valid JSON</span>;
                                                         } catch (e) {
-                                                            return <span className="text-red-500">Invalid JSON</span>;
+                                                            return <span className="text-blue-500">Plain String</span>;
                                                         }
                                                     })()}
                                                 </label>
                                                 <textarea
                                                     className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-blue-300 font-mono resize-y min-h-[80px]"
-                                                    placeholder='{"key": "value"}'
+                                                    placeholder='{"key": "value"} or plain text'
                                                     value={typeof item.value === 'string' ? item.value : (item.value ? JSON.stringify(item.value, null, 2) : '')}
                                                     onChange={e => {
                                                         const val = e.target.value;
@@ -895,12 +903,11 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         }
                                                         try {
                                                             const parsed = JSON.parse(val);
-                                                            // Store as parsed object to match what we expect in the engine if needed, 
-                                                            // or just keep as string. Let's keep as parsed object if it's valid JSON,
-                                                            // otherwise keep as string so they don't lose data while typing.
+                                                            // Store as parsed object if it's valid JSON
                                                             setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: parsed } : i));
                                                         } catch (err) {
-                                                            // Invalid JSON, leave as string representation
+                                                            // Not JSON, store as raw string
+                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: val } : i));
                                                         }
                                                     }}
                                                 />
@@ -948,9 +955,13 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             <div>
                                                 <label className="text-xs text-gray-400">ID</label>
                                                 <input
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-500 font-mono"
+                                                    className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white font-mono"
                                                     value={plate.id}
-                                                    readOnly
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setPressurePlates(prev => prev.map(p => p.id === plate.id ? { ...p, id: val } : p));
+                                                        if (selectedItemId === plate.id) setSelectedItemId(val);
+                                                    }}
                                                 />
                                             </div>
 
