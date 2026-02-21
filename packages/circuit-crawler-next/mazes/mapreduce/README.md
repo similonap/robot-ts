@@ -18,9 +18,9 @@ In this challenge, you will test your array manipulation skills. Scattered throu
     }
     ```
 3.  **Process the Data**: You must extract the correct password from your robot's inventory. To do this, you'll need to use standard JavaScript/TypeScript array methods:
-    *   **Map/Cast**: Ensure you cast your `Item` objects down to the `Key` interface.
+    *   **Filter (Type Guard)**: Keep only the items that are Keys using the provided `isKey(item)` function. This also tells TypeScript the item is a `Key`!
+    *   **Filter (Valid)**: Keep only the items where `valid` is `true`.
     *   **Sort**: Arrange the items based on their `order` property in ascending order.
-    *   **Filter**: Keep only the items where `valid` is `true`.
     *   **Map**: Extract the `secret` string from each valid item.
     *   **Map (Decode)**: The `secret` string is encoded in Base64! Use the built-in `atob()` function to decode it back into plain text.
     *   **Reduce/Join**: Combine the decoded strings of the remaining valid items into a single password string.
@@ -29,15 +29,16 @@ In this challenge, you will test your array manipulation skills. Scattered throu
 
 ### Hints
 
-- To get the custom properties from an item you picked up, you can cast it to your custom interface:
+- To safely narrow down an item to your custom `Key` interface, you can pass the provided `isKey(item)` function directly to `filter`:
   ```ts
-  const key = item as Key;
+  const keysOnly = robot.inventory.filter(isKey);
+  // Now TypeScript knows that every item in keysOnly is a Key!
   ```
 - You can chain array methods together for a clean solution:
   ```ts
   const password = robot.inventory
-    .map((item: any) => item as Key)
-    // ... complete the chain with sort, filter, map (to get secret), map (atob), and reduce
+    .filter(isKey)
+    // ... complete the chain with filter (valid), sort, map (secret), map (atob), and reduce
   ```
 - To decode a Base64 string, simply pass it into the built-in `atob()` function:
   ```ts
