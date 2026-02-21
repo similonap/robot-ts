@@ -13,3 +13,6 @@ Object.assign(game.getItem("item-6"), { secret: btoa(password[2]), valid: true, 
 Object.assign(game.getItem("item-7"), { secret: btoa(password[3]), valid: true, order: 7 });
 Object.assign(game.getItem("item-8"), { secret: btoa(password[4]), valid: true, order: 8 });
 
+game.getItem("item-prize").addEventListener("pickup", () => {
+    game.win("You collected the treasure!");
+});

@@ -26,8 +26,10 @@ async function main() {
     await moveAndPickup(8);
 
     let password: string = robot.inventory
-        .sort((a, b) => a.order - b.order)
+        .filter((i) => i.tags.includes("Key"))
+        .map(key => key as Key)
         .filter((v) => v.valid)
+        .sort((a, b) => a.order - b.order)
         .map(v => v.secret)
         .map(atob)
         .reduce((prev, curr) => prev + curr)

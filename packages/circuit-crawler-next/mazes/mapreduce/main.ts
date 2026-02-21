@@ -1,4 +1,4 @@
-import { game, Item } from "circuit-crawler";
+import { game } from "circuit-crawler";
 
 const robot = game.getRobot("robot");
 
