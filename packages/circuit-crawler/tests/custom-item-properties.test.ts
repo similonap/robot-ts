@@ -12,10 +12,10 @@ describe('Custom Item Properties', () => {
                 items: [
                     {
                         id: 'item-1',
-                        type: 'item',
-                        name: 'Key',
-                        icon: '🔑',
-                        tags: ['key'],
+                        kind: 'item',
+                        name: 'Door Password',
+                        icon: '💻',
+                        type: 'password',
                         position: { x: 2, y: 2 },
                         secretPassword: "open sesame",
                         valid: true,

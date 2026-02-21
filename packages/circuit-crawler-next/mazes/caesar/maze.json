@@ -272,17 +272,15 @@
   "items": [
     {
       "id": "item-1770560354975",
-      "type": "item",
       "name": "Gem",
       "icon": "💎",
-      "tags": [
-        "Treasure"
-      ],
       "position": {
         "x": 8,
         "y": 6
       },
-      "isRevealed": false
+      "isRevealed": false,
+      "kind": "item",
+      "type": "Treasure"
     }
   ],
   "doors": [],

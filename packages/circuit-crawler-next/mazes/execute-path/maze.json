@@ -272,16 +272,14 @@
   "items": [
     {
       "id": "item-1770558780963",
-      "type": "item",
       "name": "Apple",
       "icon": "🍎",
-      "tags": [
-        "Food"
-      ],
       "position": {
         "x": 12,
         "y": 2
-      }
+      },
+      "kind": "item",
+      "type": "Food"
     }
   ],
   "doors": [],

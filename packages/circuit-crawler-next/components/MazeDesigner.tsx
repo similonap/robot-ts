@@ -21,13 +21,13 @@ if (game.items.length === 0) {
 `;
 
 const ITEM_TYPES = [
-    { name: 'Apple', icon: '🍎', tags: ['Food'] },
-    { name: 'Battery', icon: '🔋', tags: ['Energy'] },
-    { name: 'Gem', icon: '💎', tags: ['Treasure'] },
-    { name: 'Key', icon: '🗝️', tags: ['Tool'] },
-    { name: 'Potion', icon: '🧪', tags: ['Consumable'] },
-    { name: 'Coin', icon: '🪙', tags: ['Treasure'] },
-    { name: 'Map', icon: '🗺️', tags: ['Tool'] },
+    { name: 'Apple', icon: '🍎', type: 'Food' },
+    { name: 'Battery', icon: '🔋', type: 'Energy' },
+    { name: 'Gem', icon: '💎', type: 'Treasure' },
+    { name: 'Key', icon: '🗝️', type: 'Tool' },
+    { name: 'Potion', icon: '🧪', type: 'Consumable' },
+    { name: 'Coin', icon: '🪙', type: 'Treasure' },
+    { name: 'Map', icon: '🗺️', type: 'Tool' },
 ];
 
 type Tool = 'wall' | 'path' | 'robot' | 'item' | 'door' | 'pressure_plate' | null;
@@ -48,7 +48,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
-    const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', tags: ['Food'] });
+    const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', type: 'Food' });
     // ... (existing state)
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // Items or Doors
     const [tempName, setTempName] = useState(''); // Temp state for name editing
@@ -178,10 +178,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             const newItem: Item = {
                 id: `item-${Date.now()}`,
-                type: 'item',
+                kind: 'item',
                 name: selectedItemTemplate.name,
                 icon: selectedItemTemplate.icon,
-                tags: [...selectedItemTemplate.tags],
+                type: selectedItemTemplate.type,
                 position: { x, y }
             };
 
@@ -204,7 +204,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             const newDoor: Door = {
                 id: `door-${Date.now()}`,
-                type: 'door',
+                kind: 'door',
                 isOpen: false, // Default closed
                 name: 'Door',
                 position: { x, y }
@@ -231,7 +231,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             const newPlate: PressurePlate = {
                 id: `plate-${Date.now()}`,
-                type: 'pressure_plate',
+                kind: 'pressure_plate',
                 position: { x, y }
             };
 
@@ -830,34 +830,15 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                     />
                                                 </div>
                                                 <div className="flex-1">
-                                                    <label className="text-xs text-gray-400">Tags</label>
-                                                    <div className="flex flex-wrap gap-1 mb-2">
-                                                        {item.tags.map((tag, idx) => (
-                                                            <span key={idx} className="bg-gray-800 text-xs px-2 py-1 rounded flex items-center gap-1 border border-gray-700">
-                                                                {tag}
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: i.tags.filter((_, tIdx) => tIdx !== idx) } : i));
-                                                                    }}
-                                                                    className="text-gray-500 hover:text-red-400"
-                                                                >
-                                                                    ×
-                                                                </button>
-                                                            </span>
-                                                        ))}
-                                                    </div>
+                                                    <label className="text-xs text-gray-400">Type</label>
                                                     <div className="flex gap-1">
                                                         <input
                                                             className="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
-                                                            placeholder="Add tag..."
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter') {
-                                                                    const val = e.currentTarget.value.trim();
-                                                                    if (val && !item.tags.includes(val)) {
-                                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, tags: [...i.tags, val] } : i));
-                                                                        e.currentTarget.value = '';
-                                                                    }
-                                                                }
+                                                            placeholder="Type (e.g. Key)"
+                                                            value={item.type || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.currentTarget.value;
+                                                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, type: val } : i));
                                                             }}
                                                         />
                                                     </div>
@@ -897,7 +878,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         if (rawStr !== undefined) return rawStr;
 
                                                         // Extract custom props
-                                                        const { id, name, type, icon, position, isRevealed, tags, imageUrl, ...customProps } = item;
+                                                        const { id, name, kind, icon, type, position, isRevealed, imageUrl, ...customProps } = item;
                                                         return Object.keys(customProps).length > 0 ? JSON.stringify(customProps, null, 2) : '';
                                                     })()}
                                                     onChange={e => {
@@ -912,8 +893,8 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         if (!val.trim()) {
                                                             setItems(prev => prev.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const { id, name, type, icon, position, isRevealed, tags, imageUrl } = i;
-                                                                return { id, name, type, icon, position, isRevealed, tags, imageUrl };
+                                                                const { id, name, kind, icon, type, position, isRevealed, imageUrl } = i;
+                                                                return { id, name, kind, icon, type, position, isRevealed, imageUrl };
                                                             }));
                                                             setCustomPropsStates(prev => {
                                                                 const newState = { ...prev };
@@ -931,10 +912,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
                                                             setItems(prev => prev.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const { id, name, type, icon, position, isRevealed, tags, imageUrl } = i;
+                                                                const { id, name, kind, icon, type, position, isRevealed, imageUrl } = i;
                                                                 // Also keep old structure if parsed somehow dropped things?
                                                                 // parsed overrides existing custom props.
-                                                                return { id, name, type, icon, position, isRevealed, tags, imageUrl, ...parsed };
+                                                                return { id, name, kind, icon, type, position, isRevealed, imageUrl, ...parsed };
                                                             }));
 
                                                             setCustomPropsStates(prev => {

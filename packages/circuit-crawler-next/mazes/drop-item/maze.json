@@ -1,323 +1,319 @@
 {
-    "width": 15,
-    "height": 15,
-    "initialRobots": [
-        {
-            "position": {
-                "x": 2,
-                "y": 2
-            },
-            "direction": "East",
-            "name": "robot",
-            "color": "#38bdf8"
-        }
+  "width": 15,
+  "height": 15,
+  "initialRobots": [
+    {
+      "position": {
+        "x": 2,
+        "y": 2
+      },
+      "direction": "East",
+      "name": "robot",
+      "color": "#38bdf8"
+    }
+  ],
+  "walls": [
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ],
-    "walls": [
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            false,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            true,
-            true,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ]
+    [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
     ],
-    "items": [
-        {
-            "id": "item-1771102144406",
-            "type": "item",
-            "name": "Apple",
-            "icon": "🍎",
-            "tags": [
-                "Food"
-            ],
-            "position": {
-                "x": 5,
-                "y": 2
-            }
-        },
-        {
-            "id": "item-1771102172313",
-            "type": "item",
-            "name": "Gem",
-            "icon": "💎",
-            "tags": [
-                "Treasure"
-            ],
-            "position": {
-                "x": 2,
-                "y": 4
-            }
-        }
+    [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
     ],
-    "doors": [
-        {
-            "id": "door-1771102131986",
-            "type": "door",
-            "isOpen": false,
-            "name": "Door",
-            "position": {
-                "x": 2,
-                "y": 3
-            }
-        }
+    [
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
     ],
-    "pressurePlates": [
-        {
-            "id": "plate-1771102135082",
-            "type": "pressure_plate",
-            "position": {
-                "x": 11,
-                "y": 2
-            }
-        }
+    [
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ],
-    "globalModule": "// Check conditions every step\n// Available: game\nexport { robot, game, Robot };\n\n/*\nif (game.items.length === 0) {\n    game.win(\"All items collected!\");\n}\n*/\n"
+    [
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  ],
+  "items": [
+    {
+      "id": "item-1771102144406",
+      "name": "Apple",
+      "icon": "🍎",
+      "position": {
+        "x": 5,
+        "y": 2
+      },
+      "kind": "item",
+      "type": "Food"
+    },
+    {
+      "id": "item-1771102172313",
+      "name": "Gem",
+      "icon": "💎",
+      "position": {
+        "x": 2,
+        "y": 4
+      },
+      "kind": "item",
+      "type": "Treasure"
+    }
+  ],
+  "doors": [
+    {
+      "id": "door-1771102131986",
+      "isOpen": false,
+      "name": "Door",
+      "position": {
+        "x": 2,
+        "y": 3
+      },
+      "kind": "door"
+    }
+  ],
+  "pressurePlates": [
+    {
+      "id": "plate-1771102135082",
+      "position": {
+        "x": 11,
+        "y": 2
+      },
+      "kind": "pressure_plate"
+    }
+  ],
+  "globalModule": "// Check conditions every step\n// Available: game\nexport { robot, game, Robot };\n\n/*\nif (game.items.length === 0) {\n    game.win(\"All items collected!\");\n}\n*/\n"
 }

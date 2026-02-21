@@ -9,6 +9,7 @@ interface Password {
 
 async function move(n: number) {
     const robot = game.getRobot("robot");
+    if (!robot) return;
     for (let i: number = 0; i < n; i++) {
         await robot.moveForward();
     }
@@ -17,6 +18,7 @@ async function move(n: number) {
 async function main() {
     const passwords: Password[] = passwordsJson;
     const robot = game.getRobot("robot");
+    if (!robot) return;
 
     const nonExpiredPasswords: Password[] = passwords.filter(password => !password.expired);
 
@@ -24,9 +26,9 @@ async function main() {
     do {
         await move(2);
         let scannedObject = await robot.scan();
-        if (scannedObject.type === "door") {
-            let door: Door = scannedObject;
-            let password: string = nonExpiredPasswords.find(password => password.name === door.name).password);
+        if (scannedObject && scannedObject.kind === "door") {
+            let door = scannedObject;
+            let password: string = nonExpiredPasswords.find(password => password.name === door.name)?.password || '';
             await robot.openDoor(password);
             await robot.moveForward();
             running = true;

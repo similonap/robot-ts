@@ -272,35 +272,30 @@
   "items": [
     {
       "id": "item-1769266174098",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Tool"
-      ],
       "position": {
         "x": 13,
         "y": 5
-      }
+      },
+      "kind": "item",
+      "type": "Tool"
     },
     {
       "id": "item-1769266196107",
-      "type": "item",
       "name": "Gem",
       "icon": "💎",
-      "tags": [
-        "Treasure"
-      ],
       "position": {
         "x": 10,
         "y": 7
-      }
+      },
+      "kind": "item",
+      "type": "Treasure"
     }
   ],
   "doors": [
     {
       "id": "door-1769266104141",
-      "type": "door",
       "isOpen": false,
       "position": {
         "x": 10,
@@ -309,11 +304,11 @@
       "lock": {
         "type": "password",
         "value": "password"
-      }
+      },
+      "kind": "door"
     },
     {
       "id": "door-1769266129748",
-      "type": "door",
       "isOpen": false,
       "position": {
         "x": 2,
@@ -324,16 +319,17 @@
         "itemIds": [
           "item-1769266174098"
         ]
-      }
+      },
+      "kind": "door"
     },
     {
       "id": "door-1769266188653",
-      "type": "door",
       "isOpen": false,
       "position": {
         "x": 11,
         "y": 3
-      }
+      },
+      "kind": "door"
     }
   ]
 }

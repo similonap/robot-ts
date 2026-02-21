@@ -17,7 +17,7 @@ describe('Pressure Plate', () => {
         items: [],
         doors: [],
         pressurePlates: [
-            { id: 'plate-1', type: 'pressure_plate', position: { x: 2, y: 0 } }
+            { id: 'plate-1', kind: 'pressure_plate', position: { x: 2, y: 0 } }
         ],
         initialRobots: [{
             position: { x: 0, y: 0 },
@@ -79,7 +79,7 @@ describe('Pressure Plate', () => {
         // Maze with robot having an item
         const mazeWithItem = JSON.parse(JSON.stringify(mazeData));
         mazeWithItem.items = [{
-            id: 'rock-1', type: 'item', name: 'Rock', icon: '🪨', tags: [],
+            id: 'rock-1', kind: 'item', name: 'Rock', icon: '🪨', type: '',
             position: { x: 0, y: 0 } // Under robot initially
         }];
 
@@ -125,7 +125,7 @@ describe('Pressure Plate', () => {
         // Maze with item ALREADY on plate
         const mazeWithItemOnPlate = JSON.parse(JSON.stringify(mazeData));
         mazeWithItemOnPlate.items = [{
-            id: 'rock-1', type: 'item', name: 'Rock', icon: '🪨', tags: [],
+            id: 'rock-1', kind: 'item', name: 'Rock', icon: '🪨', type: '',
             position: { x: 2, y: 0 } // On the plate
         }];
         // Robot starts at 1,0 to avoid being on plate initially

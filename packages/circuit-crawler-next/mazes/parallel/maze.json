@@ -281,29 +281,25 @@
   "items": [
     {
       "id": "item-1768915491386",
-      "type": "item",
       "name": "Apple",
       "icon": "🍎",
-      "tags": [
-        "Food"
-      ],
       "position": {
         "x": 10,
         "y": 6
-      }
+      },
+      "kind": "item",
+      "type": "Food"
     },
     {
       "id": "item-1769112206538",
-      "type": "item",
       "name": "Coin",
       "icon": "🪙",
-      "tags": [
-        "Treasure"
-      ],
       "position": {
         "x": 10,
         "y": 2
-      }
+      },
+      "kind": "item",
+      "type": "Treasure"
     }
   ],
   "doors": []

@@ -272,126 +272,107 @@
   "items": [
     {
       "id": "item-1",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 3,
         "y": 3
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-2",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 11,
         "y": 3
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-3",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 11,
         "y": 11
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-4",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 3,
         "y": 11
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-5",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 7,
         "y": 3
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-6",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 11,
         "y": 7
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-7",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 7,
         "y": 11
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-8",
-      "type": "item",
       "name": "Key",
       "icon": "🗝️",
-      "tags": [
-        "Key"
-      ],
       "position": {
         "x": 3,
         "y": 7
-      }
+      },
+      "kind": "item",
+      "type": "Key"
     },
     {
       "id": "item-prize",
-      "type": "item",
       "name": "Gem",
       "icon": "💎",
-      "tags": [
-        "Prize"
-      ],
       "position": {
         "x": 7,
         "y": 7
-      }
+      },
+      "kind": "item",
+      "type": "Prize"
     }
   ],
   "doors": [
     {
       "id": "door-1",
-      "type": "door",
       "isOpen": false,
       "name": "Door",
       "position": {
@@ -401,7 +382,8 @@
       "lock": {
         "type": "password",
         "value": "SIX7!"
-      }
+      },
+      "kind": "door"
     }
   ],
   "pressurePlates": [],

@@ -11,7 +11,16 @@ export function generateGlobalItemDeclaration(globalModuleContent?: string) {
         return `type Item = import("globalModule").Item;`;
     }
 
-    return `interface Item extends BaseItem {}`;
+    return `export interface Item {
+    id: string;
+    kind: 'item';
+    name: string;
+    icon: string;
+    type: string;
+    position?: Position;
+    isRevealed?: boolean;
+    imageUrl?: string;
+}`;
 }
 
 export function useTypeInjection(sharedTypes: string, globalModuleContent?: string) {

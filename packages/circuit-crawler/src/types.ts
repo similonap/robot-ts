@@ -50,10 +50,10 @@ export interface Position {
 
 export interface Item {
     id: string;
-    type: 'item';
+    kind: 'item';
     name: string;
     icon: string;
-    tags: string[];
+    type: string;
     position?: Position;
     isRevealed?: boolean;
     damageAmount?: never; // Removed
@@ -65,7 +65,7 @@ export interface Item {
 export interface Door {
     id: string;
     position: Position;
-    type: 'door';
+    kind: 'door';
     isOpen: boolean;
     name?: string;
     lock?: {
@@ -102,14 +102,14 @@ export type RunnerState = RobotState;
 
 
 export interface Wall {
-    type: 'wall';
+    kind: 'wall';
     position: Position;
 }
 
 export interface PressurePlate {
     id: string;
     position: Position;
-    type: 'pressure_plate';
+    kind: 'pressure_plate';
     isActive?: boolean; // Runtime state (optional in config)
 }
 

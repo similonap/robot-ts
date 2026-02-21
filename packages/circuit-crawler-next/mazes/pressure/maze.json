@@ -281,37 +281,35 @@
   "items": [
     {
       "id": "item-1769366777036",
-      "type": "item",
       "name": "Gem",
       "icon": "💎",
-      "tags": [
-        "Treasure"
-      ],
       "position": {
         "x": 10,
         "y": 6
-      }
+      },
+      "kind": "item",
+      "type": "Treasure"
     }
   ],
   "pressurePlates": [
     {
       "id": "plate-1",
-      "type": "pressure_plate",
       "position": {
         "x": 10,
         "y": 2
-      }
+      },
+      "kind": "pressure_plate"
     }
   ],
   "doors": [
     {
       "id": "door-1769366150309",
-      "type": "door",
       "isOpen": false,
       "position": {
         "x": 8,
         "y": 6
-      }
+      },
+      "kind": "door"
     }
   ]
 }

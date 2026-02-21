@@ -4,7 +4,16 @@ describe('useTypeInjection utilities', () => {
     describe('processSharedTypes', () => {
         it('should replace standalone Item with BaseItem', () => {
             const sharedTypes = `
-                export interface Item { id: string; }
+                export interface Item {
+                    id: string;
+                    kind: 'item';
+                    name: string;
+                    icon: string;
+                    type: string;
+                    position?: Position;
+                    isRevealed?: boolean;
+                    imageUrl?: string;
+                }
                 export interface Robot { inventory: Item[]; }
                 export interface ItemControl { collect(): void; }
                 export interface SharedWorldState { isItemCollected(id: string): boolean; }
