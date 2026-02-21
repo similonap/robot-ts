@@ -12,7 +12,7 @@ async function main() {
 
     if (item.type === "item") {
         let computer: Item = item;
-        let response = await fetch(computer.value);
+        let response = await fetch(computer.url);
         let json: PasswordResponse = await response.json();
 
         console.log(json);

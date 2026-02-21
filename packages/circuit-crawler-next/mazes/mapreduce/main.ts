@@ -1,9 +1,9 @@
-import { game } from "circuit-crawler";
+import { game, Item } from "circuit-crawler";
 
 const robot = game.getRobot("robot");
 
-interface ItemValue {
-    value: string;
+interface Key extends Item {
+    secret: string;
     valid: boolean;
     order: number;
 }

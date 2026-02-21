@@ -9,34 +9,35 @@ In this challenge, you will test your array manipulation skills. Scattered throu
 ### Instructions
 
 1.  **Collect the Data**: Navigate your robot to pick up all the items in the central area.
-2.  **Analyze the Inventory**: Each item you picked up has a special `value` property. This property contains a JSON object with the following structure:
+2.  **Analyze the Inventory**: Each item you picked up has custom properties assigned directly to it. These properties include:
     ```ts
-    interface ItemValue {
-        value: string;
+    interface Key extends Item {
+        secret: string;
         valid: boolean;
         order: number;
     }
     ```
 3.  **Process the Data**: You must extract the correct password from your robot's inventory. To do this, you'll need to use standard JavaScript/TypeScript array methods:
-    *   **Map**: Extract the `ItemValue` object from each `Item` in the inventory.
+    *   **Map/Cast**: Ensure you cast your `Item` objects down to the `Key` interface.
     *   **Sort**: Arrange the items based on their `order` property in ascending order.
     *   **Filter**: Keep only the items where `valid` is `true`.
-    *   **Map (Decode)**: The `value` string is encoded in Base64! Use the built-in `atob()` function to decode it back into plain text.
+    *   **Map**: Extract the `secret` string from each valid item.
+    *   **Map (Decode)**: The `secret` string is encoded in Base64! Use the built-in `atob()` function to decode it back into plain text.
     *   **Reduce/Join**: Combine the decoded strings of the remaining valid items into a single password string.
 4.  **Open the Door**: Navigate to the locked door and use the calculated password to open it: `robot.openDoor(password)`.
 5.  **Win**: Move through the open door and collect the final prize!
 
 ### Hints
 
-- To get the `ItemValue` object from an item you picked up, you can access its `value` property.
+- To get the custom properties from an item you picked up, you can cast it to your custom interface:
   ```ts
-  const itemValue = item.value as ItemValue;
+  const key = item as Key;
   ```
 - You can chain array methods together for a clean solution:
   ```ts
   const password = robot.inventory
-    .map(item => item.value)
-    // ... complete the chain with sort, filter, decode, and reduce
+    .map((item: any) => item as Key)
+    // ... complete the chain with sort, filter, map (to get secret), map (atob), and reduce
   ```
 - To decode a Base64 string, simply pass it into the built-in `atob()` function:
   ```ts

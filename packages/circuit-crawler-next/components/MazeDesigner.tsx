@@ -44,6 +44,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
     const [pressurePlates, setPressurePlates] = useState<PressurePlate[]>([]);
     const [globalModule, setGlobalModule] = useState(DEFAULT_STEP_CODE);
     const [zoom, setZoom] = useState(1);
+    const [customPropsStates, setCustomPropsStates] = useState<Record<string, string>>({});
 
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
@@ -876,11 +877,12 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                             </div>
                                             <div className="mt-2">
                                                 <label className="text-xs text-gray-400 flex justify-between">
-                                                    <span>Value (JSON)</span>
+                                                    <span>Custom Properties (JSON)</span>
                                                     {(() => {
-                                                        if (!item.value) return null;
+                                                        const rawStr = customPropsStates[item.id];
+                                                        if (rawStr === undefined) return null; // Unedited
                                                         try {
-                                                            JSON.parse(typeof item.value === 'string' ? item.value : JSON.stringify(item.value));
+                                                            JSON.parse(rawStr);
                                                             return <span className="text-green-500">Valid JSON</span>;
                                                         } catch (e) {
                                                             return <span className="text-red-500">Invalid JSON</span>;
@@ -889,26 +891,59 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                 </label>
                                                 <textarea
                                                     className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-blue-300 font-mono resize-y min-h-[80px]"
-                                                    placeholder='{"key": "value"}'
-                                                    value={typeof item.value === 'string' ? item.value : (item.value ? JSON.stringify(item.value, null, 2) : '')}
+                                                    placeholder='{"password": "123"}'
+                                                    value={(() => {
+                                                        const rawStr = customPropsStates[item.id];
+                                                        if (rawStr !== undefined) return rawStr;
+
+                                                        // Extract custom props
+                                                        const { id, name, type, icon, position, isRevealed, tags, imageUrl, ...customProps } = item;
+                                                        return Object.keys(customProps).length > 0 ? JSON.stringify(customProps, null, 2) : '';
+                                                    })()}
                                                     onChange={e => {
                                                         const val = e.target.value;
-                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: val } : i));
+                                                        setCustomPropsStates(prev => ({ ...prev, [item.id]: val }));
                                                     }}
                                                     onBlur={e => {
+                                                        const rawStr = customPropsStates[item.id];
+                                                        if (rawStr === undefined) return; // Nothing changed
+
                                                         const val = e.target.value;
                                                         if (!val.trim()) {
-                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: undefined } : i));
+                                                            setItems(prev => prev.map(i => {
+                                                                if (i.id !== item.id) return i;
+                                                                const { id, name, type, icon, position, isRevealed, tags, imageUrl } = i;
+                                                                return { id, name, type, icon, position, isRevealed, tags, imageUrl };
+                                                            }));
+                                                            setCustomPropsStates(prev => {
+                                                                const newState = { ...prev };
+                                                                delete newState[item.id];
+                                                                return newState;
+                                                            });
                                                             return;
                                                         }
+
                                                         try {
                                                             const parsed = JSON.parse(val);
-                                                            // Store as parsed object to match what we expect in the engine if needed, 
-                                                            // or just keep as string. Let's keep as parsed object if it's valid JSON,
-                                                            // otherwise keep as string so they don't lose data while typing.
-                                                            setItems(prev => prev.map(i => i.id === item.id ? { ...i, value: parsed } : i));
+                                                            if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
+                                                                throw new Error("Must be an object");
+                                                            }
+
+                                                            setItems(prev => prev.map(i => {
+                                                                if (i.id !== item.id) return i;
+                                                                const { id, name, type, icon, position, isRevealed, tags, imageUrl } = i;
+                                                                // Also keep old structure if parsed somehow dropped things?
+                                                                // parsed overrides existing custom props.
+                                                                return { id, name, type, icon, position, isRevealed, tags, imageUrl, ...parsed };
+                                                            }));
+
+                                                            setCustomPropsStates(prev => {
+                                                                const newState = { ...prev };
+                                                                delete newState[item.id];
+                                                                return newState;
+                                                            });
                                                         } catch (err) {
-                                                            // Invalid JSON, leave as string representation
+                                                            // Invalid JSON, leave in customPropsStates
                                                         }
                                                     }}
                                                 />

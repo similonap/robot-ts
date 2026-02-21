@@ -2,8 +2,8 @@ import { game } from "circuit-crawler";
 
 const robot = game.getRobot("robot");
 
-interface ItemValue {
-    value: string;
+interface Key extends Item {
+    secret: string;
     valid: boolean;
     order: number;
 }
@@ -26,10 +26,9 @@ async function main() {
     await moveAndPickup(8);
 
     let password: string = robot.inventory
-        .map((v): ItemValue => v.value)
         .sort((a, b) => a.order - b.order)
         .filter((v) => v.valid)
-        .map(v => v.value)
+        .map(v => v.secret)
         .map(atob)
         .reduce((prev, curr) => prev + curr)
 

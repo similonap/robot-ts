@@ -27,7 +27,7 @@ export interface ItemControl {
     readonly isCollected: boolean;
     readonly isRevealed: boolean;
     addEventListener(event: 'pickup' | 'move' | 'leave', handler: (payload?: any) => void): void;
-    value?: any;
+    [key: string]: any;
 }
 
 export interface RobotAppearance {
@@ -59,7 +59,7 @@ export interface Item {
     damageAmount?: never; // Removed
     destroyOnContact?: never; // Removed
     imageUrl?: string;
-    value?: any;
+    [key: string]: any;
 }
 
 export interface Door {
