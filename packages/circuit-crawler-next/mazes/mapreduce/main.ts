@@ -8,6 +8,10 @@ interface Key extends Item {
     order: number;
 }
 
+function isKey(item: Item): item is Key {
+    return item.type === "Key";
+}
+
 async function moveAndPickup(steps: number) {
     for (let i = 0; i < steps; i++) {
         await robot.moveForward();

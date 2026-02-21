@@ -15,6 +15,10 @@ async function moveAndPickup(steps: number) {
     }
 }
 
+function isKey(item: Item): item is Key {
+    return item.type === "Key";
+}
+
 async function main() {
     robot.setSpeed(20);
     await moveAndPickup(9);
@@ -26,8 +30,7 @@ async function main() {
     await moveAndPickup(8);
 
     let password: string = robot.inventory
-        .filter((i) => i.tags.includes("Key"))
-        .map(key => key as Key)
+        .filter(isKey)
         .filter((v) => v.valid)
         .sort((a, b) => a.order - b.order)
         .map(v => v.secret)
