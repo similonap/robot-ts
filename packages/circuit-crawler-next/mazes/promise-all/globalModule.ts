@@ -17,3 +17,7 @@ game.getItem("item-storage").urls = [
         url: "/json/promise-all/terminal-ff22aa.json",
     },
 ]
+
+game.getItem("item-prize").addEventListener("pickup", () => {
+    game.win("You collected the treasure!");
+});

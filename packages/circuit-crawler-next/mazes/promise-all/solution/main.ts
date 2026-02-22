@@ -1,5 +1,7 @@
 import { game } from "circuit-crawler";
 
+const robot = game.getRobot("robot");
+
 interface Url {
     url: string;
 }
@@ -31,26 +33,42 @@ function isStorage(object: Item | Door | undefined): object is Storage {
     return false;
 }
 
+async function move(steps: number) {
+    for (let i = 0; i < steps; i++)
+        await robot.moveForward()
+}
+
 async function main() {
     try {
-        const robot = game.getRobot("robot");
-
         await robot.moveForward();
 
         let scannedObject = await robot.scan();
 
+        let password: string = "";
         if (isItem(scannedObject)) {
             if (isStorage(scannedObject)) {
                 let results = await Promise.all(scannedObject.urls.map(url => fetch(url.url)));
                 let responses: Passwords[] = await Promise.all(results.map(result => result.json()));
 
-                let password: string = responses.sort((a, b) => a.order - b.order)
+                password = responses.sort((a, b) => a.order - b.order)
                     .map(val => val.value)
                     .reduce((acc, curr) => acc + curr);
-
-                console.log(password);
             }
         }
+
+        await robot.turnRight();
+        await move(4);
+        await robot.turnRight();
+        await move(1);
+        await robot.turnLeft();
+
+        await robot.openDoor(password);
+
+        await move(2);
+
+        await robot.pickup();
+
+
     } catch (e) {
         console.log(e);
     }

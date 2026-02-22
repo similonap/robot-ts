@@ -283,7 +283,7 @@
       "urls": []
     },
     {
-      "id": "item-1771769437880",
+      "id": "item-prize",
       "type": "item",
       "name": "Gem",
       "icon": "💎",
@@ -306,7 +306,7 @@
       },
       "lock": {
         "type": "password",
-        "value": "TempPass"
+        "value": "PurpleDinosaurWithAHandbag"
       }
     }
   ],
