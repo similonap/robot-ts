@@ -342,6 +342,43 @@ export default function MazeDisplay() {
                             </motion.g>
                         )}
 
+                        {/* Say Bubble */}
+                        <AnimatePresence>
+                            {robot.sayBubble && !robot.isDestroyed && (
+                                <motion.g
+                                    key={`say-${robot.sayBubble.timestamp}`}
+                                    initial={{
+                                        opacity: 0,
+                                        scale: 0.5,
+                                        x: robot.position.x * cellSize + cellSize / 2,
+                                        y: robot.position.y * cellSize
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        scale: 1,
+                                        x: robot.position.x * cellSize + cellSize / 2,
+                                        y: robot.position.y * cellSize - cellSize * 0.4
+                                    }}
+                                    exit={{
+                                        opacity: 0,
+                                        scale: 0.5,
+                                        y: robot.position.y * cellSize - cellSize * 0.8
+                                    }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                >
+                                    <foreignObject x="-75" y="-60" width="150" height="60" style={{ overflow: 'visible' }}>
+                                        <div className="flex justify-center items-end h-[60px] w-[150px] pb-2 pointer-events-none">
+                                            <div className="relative bg-[#e0f2fe] text-[#030712] text-[10px] font-mono font-bold p-1.5 px-2.5 border-2 border-[#030712] rounded shadow-[2px_2px_0px_rgba(3,7,18,1)] uppercase text-center max-w-[140px] break-words leading-tight">
+                                                {robot.sayBubble.text}
+                                                <div className="absolute -bottom-[7px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-[#030712]"></div>
+                                                <div className="absolute -bottom-[3px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3px] border-r-[3px] border-t-[4px] border-l-transparent border-r-transparent border-t-[#e0f2fe]"></div>
+                                            </div>
+                                        </div>
+                                    </foreignObject>
+                                </motion.g>
+                            )}
+                        </AnimatePresence>
+
                         {/* Robot Name (Hover only) */}
                         {!robot.isDestroyed && hoveredRobotId === robotId && (
                             <motion.g

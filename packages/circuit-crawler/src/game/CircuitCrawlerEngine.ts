@@ -556,6 +556,7 @@ export class CircuitCrawlerEngine {
             pickup() { return this.safeExec(() => this.controller.pickup()); }
             scan() { return this.safeExec(() => this.controller.scan()); }
             echo() { return this.safeExec(() => this.controller.echo()); }
+            say(text: string) { return this.safeExec(() => this.controller.say(text)); }
             openDoor(key?: any) { return this.safeExec(() => this.controller.openDoor(key)); }
             closeDoor() { return this.safeExec(() => this.controller.closeDoor()); }
             setSpeed(delay: number) { return this.controller.setSpeed(delay); }

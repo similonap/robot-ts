@@ -93,6 +93,7 @@ export interface RobotState {
     echoHit?: { x: number; y: number; timestamp: number };
     pen?: { color: string; size: number; opacity: number } | null;
     trail?: Array<{ x1: number, y1: number, x2: number, y2: number, color: string, size: number, opacity: number }>;
+    sayBubble?: { text: string, timestamp: number };
 }
 
 // Deprecated: Alias for backward compatibility if needed, or remove.
@@ -175,6 +176,7 @@ export interface Robot {
     drop(item: Item): Promise<Item | null>;
     scan(): Promise<Item | Door | null>;
     echo(): Promise<number>;
+    say(text: string): Promise<void>;
     openDoor(key?: string | Item | Item[]): Promise<OpenResult>;
     closeDoor(): Promise<void>;
     setSpeed(delay: number): void;

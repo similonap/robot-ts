@@ -441,6 +441,21 @@ export class RobotController {
         return distance;
     }
 
+    async say(text: string): Promise<void> {
+        this.checkAborted();
+        const timestamp = Date.now();
+        this.robotState.sayBubble = { text, timestamp };
+        this.onUpdate({ ...this.robotState }, `Said: "${text}"`);
+
+        const readingTime = Math.max(1500, Math.min(4000, text.length * 100));
+        await this.wait(readingTime);
+
+        if (this.robotState.sayBubble && this.robotState.sayBubble.timestamp === timestamp) {
+            this.robotState.sayBubble = undefined;
+            this.onUpdate({ ...this.robotState }, '');
+        }
+    }
+
     async scan(): Promise<Item | Door | null> {
         this.checkAborted();
         const { x, y } = this.robotState.position;
