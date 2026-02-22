@@ -81,6 +81,11 @@ export class RobotController {
         }
     }
 
+    incrementTicks(amount: number = 1) {
+        this.robotState.ticks = (this.robotState.ticks || 0) + amount;
+        this.onUpdate({ ...this.robotState }, '');
+    }
+
     private async wait(ms: number) {
         this.checkAborted();
         return new Promise<void>((resolve, reject) => {

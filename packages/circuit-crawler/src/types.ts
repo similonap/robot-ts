@@ -79,6 +79,7 @@ export interface Door {
 
 export interface RobotState {
     name: string; // Unique identifier
+    ticks?: number;
     color?: string;
     position: Position;
     direction: Direction;

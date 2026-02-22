@@ -6,7 +6,7 @@ interface Url {
     url: string;
 }
 
-interface Passwords {
+interface PasswordResponse {
     value: string;
     type: string;
     order: number;
@@ -48,7 +48,7 @@ async function main() {
         if (isItem(scannedObject)) {
             if (isStorage(scannedObject)) {
                 let results = await Promise.all(scannedObject.urls.map(url => fetch(url.url)));
-                let responses: Passwords[] = await Promise.all(results.map(result => result.json()));
+                let responses: PasswordResponse[] = await Promise.all(results.map(result => result.json()));
 
                 password = responses.sort((a, b) => a.order - b.order)
                     .map(val => val.value)

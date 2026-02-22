@@ -6,10 +6,10 @@ describe('useTypeInjection utilities', () => {
             const sharedTypes = `
                 export interface Item {
                     id: string;
-                    type: 'item';
+                    kind: 'item';
                     name: string;
                     icon: string;
-                    category: string;
+                    type: string;
                     position?: Position;
                     isRevealed?: boolean;
                     imageUrl?: string;

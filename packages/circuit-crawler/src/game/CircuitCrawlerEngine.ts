@@ -361,6 +361,24 @@ export class CircuitCrawlerEngine {
                 };
             };
 
+            const awaitWrapperTransformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
+                return (sourceFile) => {
+                    const visitor: ts.Visitor = (node) => {
+                        if (ts.isAwaitExpression(node)) {
+                            const innerExpression = ts.visitEachChild(node, visitor, context).expression;
+                            const tickCall = context.factory.createCallExpression(
+                                context.factory.createIdentifier('__tick'),
+                                undefined,
+                                [innerExpression]
+                            );
+                            return context.factory.createAwaitExpression(tickCall);
+                        }
+                        return ts.visitEachChild(node, visitor, context);
+                    };
+                    return ts.visitNode(sourceFile, visitor) as ts.SourceFile;
+                };
+            };
+
             const result = ts.transpileModule(source, {
                 compilerOptions: {
                     module: ts.ModuleKind.CommonJS,
@@ -368,7 +386,7 @@ export class CircuitCrawlerEngine {
                     resolveJsonModule: true,
                     esModuleInterop: true
                 },
-                transformers: { before: [autoAwaitTransformer] }
+                transformers: { before: [autoAwaitTransformer, awaitWrapperTransformer] }
             });
             return result.outputText;
         } catch (e: any) {
@@ -803,6 +821,12 @@ export class CircuitCrawlerEngine {
             }
         };
 
+        const __tick = async (promise: any) => {
+            if (signal.aborted) throw new CancelError();
+            engine.activeControllers.forEach(c => c.incrementTicks(1));
+            return await promise;
+        };
+
         // Compilation & Execution
         try {
             const modules: Record<string, any> = {};
@@ -856,8 +880,8 @@ export class CircuitCrawlerEngine {
 
                 const module = { exports: moduleExports };
 
-                const modFn = new Function('module', 'exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', transpiledFiles[filename]);
-                modFn(module, moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT');
+                const modFn = new Function('module', 'exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', '__tick', transpiledFiles[filename]);
+                modFn(module, moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT', __tick);
 
                 // Update exports if module.exports was reassigned
                 modules[filename] = module.exports;
@@ -867,15 +891,15 @@ export class CircuitCrawlerEngine {
             // Now run Global Module
             if (this.maze.globalModule && this.maze.globalModule.trim()) {
                 const transpiledGlobal = this.transpileCode(this.maze.globalModule);
-                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', 'FORWARD', 'LEFT', 'RIGHT', transpiledGlobal);
-                globalFn(globalExports, customRequire, RobotProxy, gameApi, consoleApi, this.fetchImpl, 'FORWARD', 'LEFT', 'RIGHT');
+                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', 'FORWARD', 'LEFT', 'RIGHT', '__tick', transpiledGlobal);
+                globalFn(globalExports, customRequire, RobotProxy, gameApi, consoleApi, this.fetchImpl, 'FORWARD', 'LEFT', 'RIGHT', __tick);
             }
 
             this.log("Running...", 'user');
 
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
             const finalCode = transpiledFiles['main.ts'] + '\n\nif (typeof main === "function") { await main(); }';
-            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', 'FORWARD', 'LEFT', 'RIGHT', finalCode);
+            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', 'FORWARD', 'LEFT', 'RIGHT', '__tick', finalCode);
 
             const stopPromise = new Promise((_, reject) => {
                 if (signal.aborted) return reject(new CancelError());
@@ -883,7 +907,7 @@ export class CircuitCrawlerEngine {
             });
 
             await Promise.race([
-                runFn(gameApi, RobotProxy, readlineApi, this.fetchImpl, consoleApi, customRequire, {}, 'FORWARD', 'LEFT', 'RIGHT'),
+                runFn(gameApi, RobotProxy, readlineApi, this.fetchImpl, consoleApi, customRequire, {}, 'FORWARD', 'LEFT', 'RIGHT', __tick),
                 stopPromise
             ]);
 

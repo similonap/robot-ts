@@ -12,7 +12,7 @@ import { MazeConfig } from "circuit-crawler";
 const GameEditor = () => {
 
     const { files, activeFile, setActiveFile, handleAddFile, handleDeleteFile, changeFile, sharedTypes, maze,
-        onMazeLoaded, loadProject, isRunning, stopExecution, resetGame, runCode, loadSolution, hasSolution
+        onMazeLoaded, loadProject, isRunning, stopExecution, resetGame, runCode, loadSolution, hasSolution, robots
     } = useMazeGameContext();
 
     const externalModules = useExternalTypes(files);
@@ -142,6 +142,9 @@ const GameEditor = () => {
                 </div>
 
                 <div className="flex items-center px-2 gap-1">
+                    <div className="text-cyan-400 font-mono text-sm mr-4">
+                        Ticks: {Object.values(robots).reduce((sum, r) => sum + (r.ticks || 0), 0)}
+                    </div>
                     <input
                         type="file"
                         ref={fileInputRef}
