@@ -10,7 +10,7 @@ interface UseCodeRunnerProps {
     addLog: (msg: string, type: 'robot' | 'user') => void;
     files: Record<string, string>;
     setLogs: (logs: any[]) => void;
-    onCompletion: (success: boolean, msg: string) => void;
+    onCompletion: (success: boolean, msg: string, totalTicks?: number) => void;
 }
 
 export const useCodeRunner = ({ maze, setMaze, worldActions, updateRobotState, addLog, files, setLogs, onCompletion }: UseCodeRunnerProps) => {
@@ -79,7 +79,14 @@ export const useCodeRunner = ({ maze, setMaze, worldActions, updateRobotState, a
                         inputResolveRef.current = null;
                     }
                 },
-                onCompletion: (success, msg) => callbacksRef.current.onCompletion(success, msg)
+                onCompletion: (success, msg) => {
+                    let totalTicks = undefined;
+                    if (engineRef.current) {
+                        totalTicks = Array.from(engineRef.current.robots.values())
+                            .reduce((sum, r) => sum + (r.ticks || 0), 0);
+                    }
+                    callbacksRef.current.onCompletion(success, msg, totalTicks);
+                }
             });
         }
 

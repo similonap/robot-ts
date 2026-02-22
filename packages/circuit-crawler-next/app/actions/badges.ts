@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 
-export async function awardBadge(slug: string) {
+export async function awardBadge(slug: string, ticks?: number) {
     const supabase = await createClient();
 
     // Check if user is authenticated
@@ -11,22 +11,43 @@ export async function awardBadge(slug: string) {
         return { success: false, message: 'User not authenticated' };
     }
 
-    // Try to insert the badge
-    // We rely on the UNIQUE constraint to fail if it already exists
-    const { error } = await supabase
+    // Check if the badge already exists
+    const { data: existingBadge } = await supabase
+        .from('user_badges')
+        .select('id, ticks')
+        .eq('user_id', user.id)
+        .eq('badge_slug', slug)
+        .single();
+
+    if (existingBadge) {
+        // We already have the badge. Update ticks if the new solve is more efficient (fewer ticks).
+        // If you explicitly meant strictly "higher" ticks, you can change the `<` to `>`.
+        if (ticks !== undefined && (existingBadge.ticks === null || ticks < existingBadge.ticks)) {
+            const { error: updateError } = await supabase
+                .from('user_badges')
+                .update({ ticks })
+                .eq('id', existingBadge.id);
+
+            if (updateError) {
+                console.error('Error updating badge ticks:', updateError);
+                return { success: false, message: updateError.message };
+            }
+        }
+        return { success: true, new: false, slug };
+    }
+
+    // Otherwise, insert the new badge
+    const { error: insertError } = await supabase
         .from('user_badges')
         .insert({
             user_id: user.id,
-            badge_slug: slug
+            badge_slug: slug,
+            ticks,
         });
 
-    if (error) {
-        // If error code is unique violation (23505), it's fine, they already have it
-        if (error.code === '23505') {
-            return { success: true, new: false, slug };
-        }
-        console.error('Error awarding badge:', error);
-        return { success: false, message: error.message };
+    if (insertError) {
+        console.error('Error awarding badge:', insertError);
+        return { success: false, message: insertError.message };
     }
 
     return { success: true, new: true, slug };

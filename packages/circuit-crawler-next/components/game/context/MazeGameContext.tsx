@@ -225,11 +225,12 @@ export const MazeGameContextProvider = ({ initialMaze, initialFiles, solutionFil
     const [showBadgeModal, setShowBadgeModal] = useState(false);
     const [newBadgeSlug, setNewBadgeSlug] = useState<string | null>(null);
 
-    const handleGameCompletion = async (success: boolean, msg: string) => {
+    const handleGameCompletion = async (success: boolean, msg: string, engineTotalTicks?: number) => {
         if (success && slug && !hasUsedSolution) {
             // Award badge
             try {
-                const result = await awardBadge(slug);
+                const totalTicks = engineTotalTicks ?? Object.values(robots).reduce((sum, r) => sum + (r.ticks || 0), 0);
+                const result = await awardBadge(slug, totalTicks);
                 if (result.success && result.new) {
                     setNewBadgeSlug(slug);
                     setShowBadgeModal(true);
