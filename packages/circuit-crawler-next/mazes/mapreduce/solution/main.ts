@@ -16,7 +16,7 @@ async function moveAndPickup(steps: number) {
 }
 
 function isKey(item: Item): item is Key {
-    return item.type === "Key";
+    return item.category === "Key";
 }
 
 async function main() {

@@ -279,8 +279,8 @@
         "y": 6
       },
       "isRevealed": false,
-      "kind": "item",
-      "type": "Treasure"
+      "category": "Treasure",
+      "type": "item"
     }
   ],
   "doors": [],

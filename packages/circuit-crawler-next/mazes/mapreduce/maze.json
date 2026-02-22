@@ -278,8 +278,8 @@
         "x": 3,
         "y": 3
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-2",
@@ -289,8 +289,8 @@
         "x": 11,
         "y": 3
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-3",
@@ -300,8 +300,8 @@
         "x": 11,
         "y": 11
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-4",
@@ -311,8 +311,8 @@
         "x": 3,
         "y": 11
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-5",
@@ -322,8 +322,8 @@
         "x": 7,
         "y": 3
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-6",
@@ -333,8 +333,8 @@
         "x": 11,
         "y": 7
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-7",
@@ -344,8 +344,8 @@
         "x": 7,
         "y": 11
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-8",
@@ -355,8 +355,8 @@
         "x": 3,
         "y": 7
       },
-      "kind": "item",
-      "type": "Key"
+      "category": "Key",
+      "type": "item"
     },
     {
       "id": "item-prize",
@@ -366,8 +366,8 @@
         "x": 7,
         "y": 7
       },
-      "kind": "item",
-      "type": "Prize"
+      "category": "Prize",
+      "type": "item"
     }
   ],
   "doors": [
@@ -383,7 +383,7 @@
         "type": "password",
         "value": "SIX7!"
       },
-      "kind": "door"
+      "type": "door"
     }
   ],
   "pressurePlates": [],

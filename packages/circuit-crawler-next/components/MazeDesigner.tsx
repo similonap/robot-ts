@@ -21,13 +21,13 @@ if (game.items.length === 0) {
 `;
 
 const ITEM_TYPES = [
-    { name: 'Apple', icon: '🍎', type: 'Food' },
-    { name: 'Battery', icon: '🔋', type: 'Energy' },
-    { name: 'Gem', icon: '💎', type: 'Treasure' },
-    { name: 'Key', icon: '🗝️', type: 'Tool' },
-    { name: 'Potion', icon: '🧪', type: 'Consumable' },
-    { name: 'Coin', icon: '🪙', type: 'Treasure' },
-    { name: 'Map', icon: '🗺️', type: 'Tool' },
+    { name: 'Apple', icon: '🍎', category: 'Food' },
+    { name: 'Battery', icon: '🔋', category: 'Energy' },
+    { name: 'Gem', icon: '💎', category: 'Treasure' },
+    { name: 'Key', icon: '🗝️', category: 'Tool' },
+    { name: 'Potion', icon: '🧪', category: 'Consumable' },
+    { name: 'Coin', icon: '🪙', category: 'Treasure' },
+    { name: 'Map', icon: '🗺️', category: 'Tool' },
 ];
 
 type Tool = 'wall' | 'path' | 'robot' | 'item' | 'door' | 'pressure_plate' | null;
@@ -48,7 +48,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
     // UI State
     const [selectedTool, setSelectedTool] = useState<Tool>('wall');
-    const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', type: 'Food' });
+    const [selectedItemTemplate, setSelectedItemTemplate] = useState({ name: 'Apple', icon: '🍎', category: 'Food' });
     // ... (existing state)
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // Items or Doors
     const [tempName, setTempName] = useState(''); // Temp state for name editing
@@ -178,10 +178,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             const newItem: Item = {
                 id: `item-${Date.now()}`,
-                kind: 'item',
+                type: 'item',
                 name: selectedItemTemplate.name,
                 icon: selectedItemTemplate.icon,
-                type: selectedItemTemplate.type,
+                category: selectedItemTemplate.category,
                 position: { x, y }
             };
 
@@ -204,7 +204,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             const newDoor: Door = {
                 id: `door-${Date.now()}`,
-                kind: 'door',
+                type: 'door',
                 isOpen: false, // Default closed
                 name: 'Door',
                 position: { x, y }
@@ -231,7 +231,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
             const newPlate: PressurePlate = {
                 id: `plate-${Date.now()}`,
-                kind: 'pressure_plate',
+                type: 'pressure_plate',
                 position: { x, y }
             };
 
@@ -835,10 +835,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         <input
                                                             className="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm"
                                                             placeholder="Type (e.g. Key)"
-                                                            value={item.type || ''}
+                                                            value={item.category || ''}
                                                             onChange={(e) => {
                                                                 const val = e.currentTarget.value;
-                                                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, type: val } : i));
+                                                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, category: val } : i));
                                                             }}
                                                         />
                                                     </div>
@@ -878,7 +878,7 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         if (rawStr !== undefined) return rawStr;
 
                                                         // Extract custom props
-                                                        const { id, name, kind, icon, type, position, isRevealed, imageUrl, ...customProps } = item;
+                                                        const { id, name, type, icon, category, position, isRevealed, imageUrl, ...customProps } = item;
                                                         return Object.keys(customProps).length > 0 ? JSON.stringify(customProps, null, 2) : '';
                                                     })()}
                                                     onChange={e => {
@@ -893,8 +893,8 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
                                                         if (!val.trim()) {
                                                             setItems(prev => prev.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const { id, name, kind, icon, type, position, isRevealed, imageUrl } = i;
-                                                                return { id, name, kind, icon, type, position, isRevealed, imageUrl };
+                                                                const { id, name, type, icon, category, position, isRevealed, imageUrl } = i;
+                                                                return { id, name, type, icon, category, position, isRevealed, imageUrl };
                                                             }));
                                                             setCustomPropsStates(prev => {
                                                                 const newState = { ...prev };
@@ -912,10 +912,10 @@ export default function MazeDesigner({ sharedTypes }: { sharedTypes: string }) {
 
                                                             setItems(prev => prev.map(i => {
                                                                 if (i.id !== item.id) return i;
-                                                                const { id, name, kind, icon, type, position, isRevealed, imageUrl } = i;
+                                                                const { id, name, type, icon, category, position, isRevealed, imageUrl } = i;
                                                                 // Also keep old structure if parsed somehow dropped things?
                                                                 // parsed overrides existing custom props.
-                                                                return { id, name, kind, icon, type, position, isRevealed, imageUrl, ...parsed };
+                                                                return { id, name, type, icon, category, position, isRevealed, imageUrl, ...parsed };
                                                             }));
 
                                                             setCustomPropsStates(prev => {

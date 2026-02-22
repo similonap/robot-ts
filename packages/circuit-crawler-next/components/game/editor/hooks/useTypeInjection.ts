@@ -13,7 +13,7 @@ export function generateGlobalItemDeclaration(globalModuleContent?: string) {
 
     return `export interface Item {
     id: string;
-    kind: 'item';
+    type: 'item';
     name: string;
     icon: string;
     type: string;

@@ -44,7 +44,7 @@ The `passwords.json` file looks like this:
 - Use `robot.scan()` to find out which door is in front of you.
   ```ts
   const entity = await robot.scan();
-  if (entity && entity.kind === 'door') {
+  if (entity && entity.type === 'door') {
       console.log("Door name:", entity.name);
   }
   ```

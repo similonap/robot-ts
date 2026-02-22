@@ -16,10 +16,10 @@ describe('Pickup removes item position', () => {
         ],
         items: [{
             id: 'gem-1',
-            kind: 'item',
+            type: 'item',
             name: 'Key',
             icon: '🔑',
-            type: 'key',
+            category: 'key',
             position: { x: 1, y: 1 }
         }],
         doors: [],

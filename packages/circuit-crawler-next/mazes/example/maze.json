@@ -278,8 +278,8 @@
         "x": 10,
         "y": 6
       },
-      "kind": "item",
-      "type": "Food"
+      "category": "Food",
+      "type": "item"
     }
   ],
   "doors": []

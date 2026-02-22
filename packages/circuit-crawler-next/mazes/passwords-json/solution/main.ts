@@ -26,7 +26,7 @@ async function main() {
     do {
         await move(2);
         let scannedObject = await robot.scan();
-        if (scannedObject && scannedObject.kind === "door") {
+        if (scannedObject && scannedObject.type === "door") {
             let door = scannedObject;
             let password: string = nonExpiredPasswords.find(password => password.name === door.name)?.password || '';
             await robot.openDoor(password);

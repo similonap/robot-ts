@@ -278,8 +278,8 @@
         "x": 13,
         "y": 2
       },
-      "kind": "item",
-      "type": "Treasure"
+      "category": "Treasure",
+      "type": "item"
     }
   ],
   "doors": [
@@ -295,7 +295,7 @@
         "value": "hunter2"
       },
       "name": "Door 1",
-      "kind": "door"
+      "type": "door"
     },
     {
       "id": "door-1770843973516",
@@ -309,7 +309,7 @@
         "value": "admin123"
       },
       "name": "Door 2",
-      "kind": "door"
+      "type": "door"
     },
     {
       "id": "door-1770843974918",
@@ -323,7 +323,7 @@
         "value": "goodbusy"
       },
       "name": "Door 3",
-      "kind": "door"
+      "type": "door"
     }
   ],
   "globalModule": "// Check conditions every step\n// Available: game\nexport { robot, game, Robot };\n\n/*\nif (game.items.length === 0) {\n    game.win(\"All items collected!\");\n}\n*/\n"

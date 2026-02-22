@@ -12,10 +12,10 @@ describe('Drop item', () => {
         ],
         items: [{
             id: 'key-1',
-            kind: 'item',
+            type: 'item',
             name: 'Key',
             icon: '🔑',
-            type: 'key',
+            category: 'key',
             position: { x: 2, y: 0 }
         }],
         doors: [],
@@ -77,7 +77,7 @@ describe('Drop item', () => {
         const code = `
             const robot = game.getRobot('TestBot');
             // Try to drop an item we don't have
-            const fakeItem = { id: 'key-1', kind: 'item' as const, name: 'Key', icon: '🔑', type: 'key' };
+            const fakeItem = { id: 'key-1', type: 'item' as const, name: 'Key', icon: '🔑', category: 'key' };
             const result = await robot.drop(fakeItem);
             if (result !== null) throw new Error('Drop should return null for item not in inventory');
 
@@ -159,8 +159,8 @@ describe('Drop item', () => {
             height: 1,
             walls: [[false, false, false, false, false]],
             items: [
-                { id: 'key-1', kind: 'item', name: 'Key', icon: '🔑', type: 'key', position: { x: 2, y: 0 } },
-                { id: 'gem-1', kind: 'item', name: 'Gem', icon: '💎', type: '', position: { x: 3, y: 0 } }
+                { id: 'key-1', type: 'item', name: 'Key', icon: '🔑', category: 'key', position: { x: 2, y: 0 } },
+                { id: 'gem-1', type: 'item', name: 'Gem', icon: '💎', category: '', position: { x: 3, y: 0 } }
             ],
             doors: [],
             initialRobots: [{ position: { x: 0, y: 0 }, direction: 'East', name: 'TestBot' }]

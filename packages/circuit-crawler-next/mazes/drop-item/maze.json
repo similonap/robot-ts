@@ -278,8 +278,8 @@
         "x": 5,
         "y": 2
       },
-      "kind": "item",
-      "type": "Food"
+      "category": "Food",
+      "type": "item"
     },
     {
       "id": "item-1771102172313",
@@ -289,8 +289,8 @@
         "x": 2,
         "y": 4
       },
-      "kind": "item",
-      "type": "Treasure"
+      "category": "Treasure",
+      "type": "item"
     }
   ],
   "doors": [
@@ -302,7 +302,7 @@
         "x": 2,
         "y": 3
       },
-      "kind": "door"
+      "type": "door"
     }
   ],
   "pressurePlates": [
@@ -312,7 +312,7 @@
         "x": 11,
         "y": 2
       },
-      "kind": "pressure_plate"
+      "type": "pressure_plate"
     }
   ],
   "globalModule": "// Check conditions every step\n// Available: game\nexport { robot, game, Robot };\n\n/*\nif (game.items.length === 0) {\n    game.win(\"All items collected!\");\n}\n*/\n"

@@ -287,8 +287,8 @@
         "x": 10,
         "y": 6
       },
-      "kind": "item",
-      "type": "Food"
+      "category": "Food",
+      "type": "item"
     },
     {
       "id": "item-1769112206538",
@@ -298,8 +298,8 @@
         "x": 10,
         "y": 2
       },
-      "kind": "item",
-      "type": "Treasure"
+      "category": "Treasure",
+      "type": "item"
     }
   ],
   "doors": []

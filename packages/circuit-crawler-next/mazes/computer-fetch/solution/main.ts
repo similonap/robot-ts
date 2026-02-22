@@ -10,7 +10,7 @@ async function main() {
 
     let item = await robot.scan();
 
-    if (item.kind === "item") {
+    if (item.type === "item") {
         let computer: Item = item;
         let response = await fetch(computer.url);
         let json: PasswordResponse = await response.json();

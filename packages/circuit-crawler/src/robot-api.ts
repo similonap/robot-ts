@@ -466,7 +466,7 @@ export class RobotController {
             // Sanitize door object to avoid leaking lock
             return {
                 id: doorAtPos.id,
-                kind: 'door',
+                type: 'door',
                 name: doorAtPos.name || 'Door',
                 position: doorAtPos.position,
                 isOpen

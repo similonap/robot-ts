@@ -278,8 +278,8 @@
         "x": 13,
         "y": 5
       },
-      "kind": "item",
-      "type": "Tool"
+      "category": "Tool",
+      "type": "item"
     },
     {
       "id": "item-1769266196107",
@@ -289,8 +289,8 @@
         "x": 10,
         "y": 7
       },
-      "kind": "item",
-      "type": "Treasure"
+      "category": "Treasure",
+      "type": "item"
     }
   ],
   "doors": [
@@ -305,7 +305,7 @@
         "type": "password",
         "value": "password"
       },
-      "kind": "door"
+      "type": "door"
     },
     {
       "id": "door-1769266129748",
@@ -320,7 +320,7 @@
           "item-1769266174098"
         ]
       },
-      "kind": "door"
+      "type": "door"
     },
     {
       "id": "door-1769266188653",
@@ -329,7 +329,7 @@
         "x": 11,
         "y": 3
       },
-      "kind": "door"
+      "type": "door"
     }
   ]
 }

@@ -6,7 +6,7 @@ describe('useTypeInjection utilities', () => {
             const sharedTypes = `
                 export interface Item {
                     id: string;
-                    kind: 'item';
+                    type: 'item';
                     name: string;
                     icon: string;
                     type: string;
