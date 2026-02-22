@@ -1,3 +1,5 @@
+declare const game: any;
+
 const robot = game.getRobot("robot");
 
 const checkWin = () => {

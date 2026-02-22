@@ -789,7 +789,7 @@ export class CircuitCrawlerEngine {
         const readlineApi = {
             question: (promptText: string) => {
                 return new Promise<string>((resolve, reject) => {
-                    if (signal.aborted) return reject(new CancelError());
+                    if (signal.aborted) return;
                     this.inputPrompt = promptText;
                     this.isWaitingForInput = true;
                     this.inputResolve = resolve;
@@ -799,7 +799,6 @@ export class CircuitCrawlerEngine {
                         this.isWaitingForInput = false;
                         this.inputResolve = null;
                         this.handleStateChange();
-                        reject(new CancelError());
                     });
                 });
             },
@@ -823,7 +822,7 @@ export class CircuitCrawlerEngine {
         };
 
         const __tick = async (promise: any) => {
-            if (signal.aborted) throw new CancelError();
+            if (signal.aborted) return new Promise(() => { });
             engine.activeControllers.forEach(c => c.incrementTicks(1));
             return await promise;
         };
