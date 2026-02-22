@@ -9,7 +9,7 @@ describe('useTypeInjection utilities', () => {
                     type: 'item';
                     name: string;
                     icon: string;
-                    type: string;
+                    category: string;
                     position?: Position;
                     isRevealed?: boolean;
                     imageUrl?: string;

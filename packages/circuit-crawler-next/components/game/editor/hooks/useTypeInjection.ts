@@ -16,7 +16,7 @@ export function generateGlobalItemDeclaration(globalModuleContent?: string) {
     type: 'item';
     name: string;
     icon: string;
-    type: string;
+    category: string;
     position?: Position;
     isRevealed?: boolean;
     imageUrl?: string;
