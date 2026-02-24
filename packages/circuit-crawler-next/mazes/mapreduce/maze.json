@@ -368,6 +368,28 @@
       },
       "category": "Prize",
       "type": "item"
+    },
+    {
+      "id": "item-poop-1",
+      "type": "item",
+      "name": "Poop",
+      "icon": "💩",
+      "category": "Poop",
+      "position": {
+        "x": 3,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-poop-2",
+      "type": "item",
+      "name": "Poop",
+      "icon": "💩",
+      "category": "Poop",
+      "position": {
+        "x": 11,
+        "y": 5
+      }
     }
   ],
   "doors": [
