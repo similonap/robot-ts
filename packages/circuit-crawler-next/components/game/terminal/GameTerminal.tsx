@@ -37,10 +37,17 @@ const GameTerminal = () => {
             </div>
             <div className="flex-1 overflow-y-auto">
                 {logs
-                    .filter(log => log.type === 'user' || showRobotLogs)
+                    .filter(log => log.type === 'user' || log.type === 'react' || showRobotLogs)
                     .map((log) => (
                         <div key={log.id} className={`mb-1 break-words ${log.type === 'robot' ? 'text-gray-500' : 'text-gray-200'}`}>
-                            {log.message}
+                            {log.type === 'react' && log.payload?.component ? (
+                                <>
+                                    {log.message && <span className="mr-2">{log.message}</span>}
+                                    <log.payload.component {...log.payload.props} />
+                                </>
+                            ) : (
+                                log.message
+                            )}
                         </div>
                     ))}
                 <div ref={logsEndRef} />

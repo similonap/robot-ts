@@ -31,7 +31,8 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             esModuleInterop: true,
             allowSyntheticDefaultImports: true,
             moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-            resolveJsonModule: true
+            resolveJsonModule: true,
+            jsx: monaco.languages.typescript.JsxEmit.React
         });
 
         let libContent = sharedTypes.replace(/export /g, '');
@@ -46,6 +47,12 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
             `declare module "*.json" {
     const value: any;
     export default value;
+}
+declare var React: any;
+declare namespace JSX {
+    interface IntrinsicElements {
+        [elemName: string]: any;
+    }
 }`,
             'ts:filename/json-module.d.ts'
         );
@@ -57,10 +64,11 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
         const monaco = monacoRef.current;
 
         Object.entries(files).forEach(([filename, content]) => {
-            const uri = monaco.Uri.parse(`file:///${filename}`);
+            const mappedFilename = filename.endsWith('.ts') ? filename + 'x' : filename;
+            const uri = monaco.Uri.parse(`file:///${mappedFilename}`);
             let model = monaco.editor.getModel(uri);
             if (!model) {
-                const language = filename.endsWith('.json') ? 'json' : 'typescript';
+                const language = mappedFilename.endsWith('.json') ? 'json' : 'typescript';
                 model = monaco.editor.createModel(content, language, uri);
             } else if (model.getValue() !== content) {
                 // Avoid cursor jumping by only updating if content is different (e.g. external change)
@@ -68,7 +76,8 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
                 // We only need to sync inactive files if they changed externally, which they won't in this app structure yet.
                 // However, if we rename support later, this is needed.
                 // For now, simple check.
-                if (filename !== activeFile) {
+                const mappedActiveFile = activeFile.endsWith('.ts') ? activeFile + 'x' : activeFile;
+                if (mappedFilename !== mappedActiveFile) {
                     model.setValue(content);
                 }
             }
@@ -105,7 +114,7 @@ export default function CodeEditor({ files, activeFile, onChange, sharedTypes, m
     return (
         <div className="h-full w-full border border-gray-700 overflow-hidden">
             <Editor
-                path={`file:///${activeFile}`}
+                path={`file:///${activeFile.endsWith('.ts') ? activeFile + 'x' : activeFile}`}
                 height="100%"
                 defaultLanguage={activeFile.endsWith('.json') ? 'json' : 'typescript'}
                 theme="vs-dark"

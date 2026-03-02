@@ -1,8 +1,12 @@
 import { game } from "circuit-crawler";
 
-interface PasswordResponse {
-    value: string,
-    type: string
+
+interface Laptop extends Item {
+    activate: () => Promise<void>
+}
+
+function isLaptop(item: any): item is Laptop {
+    return item.type === "item" && item.category === "Laptop";
 }
 
 async function main() {
@@ -11,12 +15,10 @@ async function main() {
 
     let item = await robot.scan();
 
-    if (item && item.type === "item") {
-        let computer = item;
-        let response = await fetch(computer.url);
-        let json: PasswordResponse = await response.json();
-
-        console.log(json);
-
+    if (isLaptop(item)) {
+        await item.activate();
     }
+
+
+
 }

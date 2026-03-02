@@ -196,7 +196,12 @@ export interface LogEntry {
     id: string;
     timestamp: number;
     message: string;
-    type: 'robot' | 'user';
+    type: 'robot' | 'user' | 'react' | 'react_update';
+    payload?: any;
+}
+
+export interface ReactComponentController {
+    updateProps(newProps: any): void;
 }
 
 export interface RobotConfig {
@@ -222,6 +227,7 @@ export interface Game {
     readonly robots: Robot[];
     addEventListener(event: 'robot_created', handler: (robot: Robot) => void): void;
     addEventListener(event: string, handler: (payload?: any) => void): void;
+    addLog(msg: string, component?: any, props?: any): ReactComponentController;
 }
 
 

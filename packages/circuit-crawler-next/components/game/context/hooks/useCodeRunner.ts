@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { CircuitCrawlerEngine } from "circuit-crawler";
 import { MazeConfig, RobotState, SharedWorldState } from "circuit-crawler";
@@ -7,7 +8,7 @@ interface UseCodeRunnerProps {
     setMaze: (maze: MazeConfig) => void;
     worldActions: SharedWorldState;
     updateRobotState: (name: string, state: RobotState) => void;
-    addLog: (msg: string, type: 'robot' | 'user') => void;
+    addLog: (msg: string, type: 'robot' | 'user' | 'react' | 'react_update', payload?: any) => void;
     files: Record<string, string>;
     setLogs: (logs: any[]) => void;
     onCompletion: (success: boolean, msg: string, totalTicks?: number) => void;
@@ -54,7 +55,10 @@ export const useCodeRunner = ({ maze, setMaze, worldActions, updateRobotState, a
                     // We don't want the engine to reset the world logic, because MazeGameContext handles that.
                     reset: () => { }
                 },
-                onLog: (msg, type) => callbacksRef.current.addLog(msg, type),
+                onLog: (msg, type, payload) => callbacksRef.current.addLog(msg, type, payload),
+                injectedGlobals: {
+                    React: React
+                },
                 onRobotUpdate: (name, state) => {
                     callbacksRef.current.updateRobotState(name, state);
                     // Sync engine's maze items back to context so MazeDisplay renders updated positions

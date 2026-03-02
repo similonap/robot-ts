@@ -4,8 +4,8 @@ import { WorldManager } from "./WorldManager";
 import * as ts from "typescript";
 
 // Event types
-type LogType = 'user' | 'robot';
-type LogCallback = (msg: string, type: LogType) => void;
+type LogType = 'user' | 'robot' | 'react' | 'react_update';
+type LogCallback = (msg: string, type: LogType, payload?: any) => void;
 type StateChangeCallback = () => void;
 type RobotUpdateCallback = (name: string, state: RobotState) => void;
 type CompletionCallback = (success: boolean, msg: string) => void;
@@ -21,6 +21,8 @@ interface EngineConfig {
         actions: import('../types').SharedWorldState;
         reset: () => void;
     };
+    injectedGlobals?: Record<string, any>;
+    injectedModules?: Record<string, any>;
 }
 
 export class CircuitCrawlerEngine {
@@ -43,6 +45,8 @@ export class CircuitCrawlerEngine {
     private onRobotUpdate?: RobotUpdateCallback;
     private onCompletion?: CompletionCallback;
     private fetchImpl: typeof fetch;
+    public injectedGlobals?: Record<string, any>;
+    public injectedModules?: Record<string, any>;
 
     private listeners: Record<string, ((payload?: any) => void)[]> = {};
 
@@ -70,6 +74,8 @@ export class CircuitCrawlerEngine {
         this.onRobotUpdate = config.onRobotUpdate;
         this.onCompletion = config.onCompletion;
         this.fetchImpl = config.fetchImpl || globalThis.fetch;
+        this.injectedGlobals = config.injectedGlobals;
+        this.injectedModules = config.injectedModules;
 
         if (config.externalWorld) {
             this.worldActions = config.externalWorld.actions;
@@ -89,8 +95,8 @@ export class CircuitCrawlerEngine {
         if (this.onStateChange) this.onStateChange();
     }
 
-    private log(msg: string, type: LogType) {
-        if (this.onLog) this.onLog(msg, type);
+    private log(msg: string, type: LogType, payload?: any) {
+        if (this.onLog) this.onLog(msg, type, payload);
     }
 
     public reset() {
@@ -380,11 +386,13 @@ export class CircuitCrawlerEngine {
             };
 
             const result = ts.transpileModule(source, {
+                fileName: "module.tsx",
                 compilerOptions: {
                     module: ts.ModuleKind.CommonJS,
                     target: ts.ScriptTarget.ES2017,
                     resolveJsonModule: true,
-                    esModuleInterop: true
+                    esModuleInterop: true,
+                    jsx: ts.JsxEmit.React
                 },
                 transformers: { before: [autoAwaitTransformer, awaitWrapperTransformer] }
             });
@@ -769,6 +777,15 @@ export class CircuitCrawlerEngine {
             },
             addEventListener: (event: string, handler: (payload?: any) => void) => {
                 this.addEventListener(event, handler);
+            },
+            addLog: (msg: string, component?: any, props?: any) => {
+                const id = Math.random().toString(36).substring(7);
+                engine.log(msg, 'react', { id, component, props });
+                return {
+                    updateProps: (newProps: any) => {
+                        engine.log('', 'react_update', { id, props: newProps });
+                    }
+                };
             }
         };
 
@@ -853,6 +870,10 @@ export class CircuitCrawlerEngine {
                 if (path === 'circuit-crawler') return { default: gameApi, game: gameApi };
                 if (path === 'readline-sync') return { default: readlineApi, ...readlineApi };
 
+                if (engine.injectedModules && engine.injectedModules[path]) {
+                    return engine.injectedModules[path];
+                }
+
                 // check if it is an external module
                 if (externalModules[path]) {
                     return externalModules[path];
@@ -864,9 +885,11 @@ export class CircuitCrawlerEngine {
                 if (!transpiledFiles[filename]) {
                     if (transpiledFiles[`${filename}.ts`]) {
                         filename += '.ts';
+                    } else if (transpiledFiles[`${filename}.tsx`]) {
+                        filename += '.tsx';
                     } else if (transpiledFiles[`${filename}.json`]) {
                         filename += '.json';
-                    } else if (!filename.endsWith('.ts') && !filename.endsWith('.json')) {
+                    } else if (!filename.endsWith('.ts') && !filename.endsWith('.tsx') && !filename.endsWith('.json')) {
                         // default to .ts if no extension
                         filename += '.ts';
                     }
@@ -880,8 +903,11 @@ export class CircuitCrawlerEngine {
 
                 const module = { exports: moduleExports };
 
-                const modFn = new Function('module', 'exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', '__tick', transpiledFiles[filename]);
-                modFn(module, moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT', __tick);
+                const globalKeys = engine.injectedGlobals ? Object.keys(engine.injectedGlobals) : [];
+                const globalValues = engine.injectedGlobals ? Object.values(engine.injectedGlobals) : [];
+
+                const modFn = new Function('module', 'exports', 'require', 'Robot', 'readline', 'fetch', 'console', 'FORWARD', 'LEFT', 'RIGHT', '__tick', ...globalKeys, transpiledFiles[filename]);
+                modFn(module, moduleExports, customRequire, RobotProxy, readlineApi, this.fetchImpl, consoleApi, 'FORWARD', 'LEFT', 'RIGHT', __tick, ...globalValues);
 
                 // Update exports if module.exports was reassigned
                 modules[filename] = module.exports;
@@ -890,16 +916,22 @@ export class CircuitCrawlerEngine {
 
             // Now run Global Module
             if (this.maze.globalModule && this.maze.globalModule.trim()) {
+                const globalKeys = engine.injectedGlobals ? Object.keys(engine.injectedGlobals) : [];
+                const globalValues = engine.injectedGlobals ? Object.values(engine.injectedGlobals) : [];
                 const transpiledGlobal = this.transpileCode(this.maze.globalModule);
-                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', 'FORWARD', 'LEFT', 'RIGHT', '__tick', transpiledGlobal);
-                globalFn(globalExports, customRequire, RobotProxy, gameApi, consoleApi, this.fetchImpl, 'FORWARD', 'LEFT', 'RIGHT', __tick);
+                const globalFn = new Function('exports', 'require', 'Robot', 'game', 'console', 'fetch', 'FORWARD', 'LEFT', 'RIGHT', '__tick', ...globalKeys, transpiledGlobal);
+                globalFn(globalExports, customRequire, RobotProxy, gameApi, consoleApi, this.fetchImpl, 'FORWARD', 'LEFT', 'RIGHT', __tick, ...globalValues);
             }
 
             this.log("Running...", 'user');
 
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
             const finalCode = transpiledFiles['main.ts'] + '\n\nif (typeof main === "function") { await main(); }';
-            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', 'FORWARD', 'LEFT', 'RIGHT', '__tick', finalCode);
+
+            const globalKeys = engine.injectedGlobals ? Object.keys(engine.injectedGlobals) : [];
+            const globalValues = engine.injectedGlobals ? Object.values(engine.injectedGlobals) : [];
+
+            const runFn = new AsyncFunction('game', 'Robot', 'readline', 'fetch', 'console', 'require', 'exports', 'FORWARD', 'LEFT', 'RIGHT', '__tick', ...globalKeys, finalCode);
 
             const stopPromise = new Promise((_, reject) => {
                 if (signal.aborted) return reject(new CancelError());
@@ -907,7 +939,7 @@ export class CircuitCrawlerEngine {
             });
 
             await Promise.race([
-                runFn(gameApi, RobotProxy, readlineApi, this.fetchImpl, consoleApi, customRequire, {}, 'FORWARD', 'LEFT', 'RIGHT', __tick),
+                runFn(gameApi, RobotProxy, readlineApi, this.fetchImpl, consoleApi, customRequire, {}, 'FORWARD', 'LEFT', 'RIGHT', __tick, ...globalValues),
                 stopPromise
             ]);
 

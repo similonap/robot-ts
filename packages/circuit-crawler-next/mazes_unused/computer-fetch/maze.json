@@ -271,7 +271,7 @@
   ],
   "items": [
     {
-      "id": "item-1771604351546",
+      "id": "item-laptop",
       "name": "Laptop",
       "icon": "💻",
       "url": "/json/computer/terminal1.json",
@@ -279,7 +279,7 @@
         "x": 2,
         "y": 2
       },
-      "category": "Tool",
+      "category": "Laptop",
       "type": "item"
     }
   ],

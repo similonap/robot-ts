@@ -53,7 +53,7 @@ export default async function Page({ params }: Props) {
         initialFiles = {};
         for (const entry of entries) {
             if (entry.isFile()) {
-                if (entry.name === 'globalModule.ts') {
+                if (entry.name === 'globalModule.ts' || entry.name === 'globalModule.tsx') {
                     const content = fs.readFileSync(path.join(mazeDir, entry.name), 'utf-8');
                     mazeConfig.globalModule = content;
                 } else if (entry.name !== 'maze.json') {
