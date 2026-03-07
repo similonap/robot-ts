@@ -111,6 +111,7 @@ export default function MazeItemDisplay({ item, cellSize }: MazeItemDisplayProps
                     textAnchor="middle"
                     dominantBaseline="central"
                     fontSize={cellSize * 0.6}
+                    fill="white"
                     style={{ userSelect: 'none' }}
                 >
                     {item.icon}

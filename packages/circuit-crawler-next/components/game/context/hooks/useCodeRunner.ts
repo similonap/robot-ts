@@ -14,6 +14,8 @@ interface UseCodeRunnerProps {
     onCompletion: (success: boolean, msg: string, totalTicks?: number) => void;
 }
 
+import * as superdough from 'superdough';
+
 export const useCodeRunner = ({ maze, setMaze, worldActions, updateRobotState, addLog, files, setLogs, onCompletion }: UseCodeRunnerProps) => {
     const engineRef = useRef<CircuitCrawlerEngine | null>(null);
 
@@ -58,6 +60,9 @@ export const useCodeRunner = ({ maze, setMaze, worldActions, updateRobotState, a
                 onLog: (msg, type, payload) => callbacksRef.current.addLog(msg, type, payload),
                 injectedGlobals: {
                     React: React
+                },
+                injectedModules: {
+                    'superdough': superdough
                 },
                 onRobotUpdate: (name, state) => {
                     callbacksRef.current.updateRobotState(name, state);
