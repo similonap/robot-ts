@@ -54,81 +54,51 @@ async function main() {
 
     robot.setSpeed(10);
 
-    // Tempo constants (ms)
-    const e = 150;   // eighth note
-    const q = 300;   // quarter note
-    const dq = 450;  // dotted quarter
-    const h = 600;   // half note
-    const t = 100;   // triplet eighth
+    // ==========================================
+    // SONGS LIBRARY
+    // ==========================================
 
-    // Super Mario Bros — Full Overworld Theme
-    // [note, sharp?, duration]  |  null = rest
-    const melody: MelodyNote[] = [
-
-        // ===== INTRO =====
-        ['E5', false, e], ['E5', false, q], ['E5', false, q],
-        ['C5', false, e], ['E5', false, q],
-        ['G5', false, h],
-        ['G4', false, h],
-
-        // ===== PART A (first pass) =====
-        ['C5', false, dq], ['G4', false, dq], ['E4', false, dq],
-        ['A4', false, q], ['B4', false, q],
-        ['A4', true, e], ['A4', false, q],           // Bb → A#
-        ['G4', false, t], ['E5', false, t], ['G5', false, t],
-        ['A5', false, q], ['F5', false, e], ['G5', false, q],
-        ['E5', false, q], ['C5', false, e], ['D5', false, e], ['B4', false, dq],
-
-        // ===== PART A (second pass) =====
-        ['C5', false, dq], ['G4', false, dq], ['E4', false, dq],
-        ['A4', false, q], ['B4', false, q],
-        ['A4', true, e], ['A4', false, q],
-        ['G4', false, t], ['E5', false, t], ['G5', false, t],
-        ['A5', false, q], ['F5', false, e], ['G5', false, q],
-        ['E5', false, q], ['C5', false, e], ['D5', false, e], ['B4', false, dq],
-
-        // ===== PART B: Bridge (phrase 1) =====
-        null,
-        ['G5', false, e], ['F5', true, e], ['F5', false, e], ['D5', true, q],  // F#5, D#5
-        ['E5', false, q],
-        ['G4', true, e], ['A4', false, e], ['C5', false, q],                   // G#4
-        ['A4', false, e], ['C5', false, e], ['D5', false, q],
-
-        // ===== PART B: Bridge (phrase 2) =====
-        null,
-        ['G5', false, e], ['F5', true, e], ['F5', false, e], ['D5', true, q],
-        ['E5', false, q],
-        ['C5', false, e], ['C5', false, e], ['C5', false, h],
-        null,
-
-        // ===== PART B: Bridge (phrase 3) =====
-        null,
-        ['G5', false, e], ['F5', true, e], ['F5', false, e], ['D5', true, q],
-        ['E5', false, q],
-        ['G4', true, e], ['A4', false, e], ['C5', false, q],
-        ['A4', false, e], ['C5', false, e], ['D5', false, q],
-
-        // ===== PART B: Resolution =====
-        null,
-        ['D5', true, dq], ['D5', false, dq], ['C5', false, h],
-        null,
-
-        // ===== PART A (third pass — da capo) =====
-        ['C5', false, dq], ['G4', false, dq], ['E4', false, dq],
-        ['A4', false, q], ['B4', false, q],
-        ['A4', true, e], ['A4', false, q],
-        ['G4', false, t], ['E5', false, t], ['G5', false, t],
-        ['A5', false, q], ['F5', false, e], ['G5', false, q],
-        ['E5', false, q], ['C5', false, e], ['D5', false, e], ['B4', false, dq],
-
-        // ===== PART A (fourth pass) =====
-        ['C5', false, dq], ['G4', false, dq], ['E4', false, dq],
-        ['A4', false, q], ['B4', false, q],
-        ['A4', true, e], ['A4', false, q],
-        ['G4', false, t], ['E5', false, t], ['G5', false, t],
-        ['A5', false, q], ['F5', false, e], ['G5', false, q],
-        ['E5', false, q], ['C5', false, e], ['D5', false, e], ['B4', false, dq],
+    // 1. Super Mario Bros — Overworld Theme
+    const m_e = 150, m_q = 300, m_dq = 450, m_h = 600, m_t = 100;
+    const mario: MelodyNote[] = [
+        ['E5', false, m_e], ['E5', false, m_q], ['E5', false, m_q], ['C5', false, m_e], ['E5', false, m_q], ['G5', false, m_h], ['G4', false, m_h],
+        ['C5', false, m_dq], ['G4', false, m_dq], ['E4', false, m_dq], ['A4', false, m_q], ['B4', false, m_q], ['A4', true, m_e], ['A4', false, m_q],
+        ['G4', false, m_t], ['E5', false, m_t], ['G5', false, m_t], ['A5', false, m_q], ['F5', false, m_e], ['G5', false, m_q], ['E5', false, m_q], ['C5', false, m_e], ['D5', false, m_e], ['B4', false, m_dq],
     ];
+
+    // 2. Tetris (Korobeiniki)
+    // Famous Russian folk song! Note the harmonic G# in the minor scale
+    const t_e = 200, t_q = 400, t_dq = 600, t_h = 800;
+    const tetris: MelodyNote[] = [
+        ['E5', false, t_q], ['B4', false, t_e], ['C5', false, t_e], ['D5', false, t_q], ['C5', false, t_e], ['B4', false, t_e],
+        ['A4', false, t_q], ['A4', false, t_e], ['C5', false, t_e], ['E5', false, t_q], ['D5', false, t_e], ['C5', false, t_e],
+        ['G4', true, t_dq], ['C5', false, t_e], ['D5', false, t_q], ['E5', false, t_q],
+        ['C5', false, t_q], ['A4', false, t_q], ['A4', false, t_h], null,
+
+        ['D5', false, t_dq], ['F5', false, t_e], ['A5', false, t_q], ['G5', false, t_e], ['F5', false, t_e],
+        ['E5', false, t_dq], ['C5', false, t_e], ['E5', false, t_q], ['D5', false, t_e], ['C5', false, t_e],
+        ['G4', true, t_q], ['G4', true, t_e], ['C5', false, t_e], ['D5', false, t_q], ['E5', false, t_q],
+        ['C5', false, t_q], ['A4', false, t_q], ['A4', false, t_h], null
+    ];
+
+    // 3. Megalovania (Undertale)
+    // Transposed to C# minor to completely fit the robot's 2-octave range
+    const s_s = 120, s_e = 240;
+    const megaRiff: MelodyNote[] = [
+        ['E5', false, s_e], ['B4', false, s_e + s_s], null,
+        ['A4', true, s_e], ['A4', false, s_e], ['G4', false, s_e], ['E4', false, s_s], ['G4', false, s_s], ['A4', false, s_e]
+    ];
+    const megalovania: MelodyNote[] = [
+        ['E4', false, s_s], ['E4', false, s_s], ...megaRiff,
+        ['D4', false, s_s], ['D4', false, s_s], ...megaRiff,
+        ['C4', true, s_s], ['C4', true, s_s], ...megaRiff,
+        ['C4', false, s_s], ['C4', false, s_s], ...megaRiff,
+    ];
+
+    // ==========================================
+    // Which song should the robot play?
+    // ==========================================
+    const melody: MelodyNote[] = tetris;
 
     for (const entry of melody) {
         if (entry === null) {
