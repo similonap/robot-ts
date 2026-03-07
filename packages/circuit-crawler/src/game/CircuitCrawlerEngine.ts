@@ -835,6 +835,27 @@ export class CircuitCrawlerEngine {
                     if (!isNaN(num)) return num;
                     consoleApi.error("Please enter a valid number.");
                 }
+            },
+            keyInSelect: async (items: string[], query?: string) => {
+                const prompt = query ? query + '\n' : '';
+                const optionsText = items.map((item, index) => `[${index + 1}] ${item}`).join('\n');
+                const cancelText = `[0] CANCEL`;
+                const fullPrompt = `${prompt}${optionsText}\n${cancelText}\n\n> `;
+
+                while (true) {
+                    const val = await readlineApi.question(fullPrompt);
+                    const num = parseInt(val, 10);
+
+                    if (val.trim() === '0' || num === 0) {
+                        return -1;
+                    }
+
+                    if (!isNaN(num) && num >= 1 && num <= items.length) {
+                        return num - 1; // Return 0-indexed selected item
+                    }
+
+                    consoleApi.error(`Please enter a valid number between 0 and ${items.length}.`);
+                }
             }
         };
 

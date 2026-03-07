@@ -1,4 +1,5 @@
 import { game } from "circuit-crawler";
+import readline from "readline-sync";
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -95,10 +96,35 @@ async function main() {
         ['C4', false, s_s], ['C4', false, s_s], ...megaRiff,
     ];
 
+    // 4. Ode to Joy (Beethoven)
+    const o_q = 400, o_dq = 600, o_e = 200, o_h = 800;
+    const odeToJoy: MelodyNote[] = [
+        ['E5', false, o_q], ['E5', false, o_q], ['F5', false, o_q], ['G5', false, o_q],
+        ['G5', false, o_q], ['F5', false, o_q], ['E5', false, o_q], ['D5', false, o_q],
+        ['C5', false, o_q], ['C5', false, o_q], ['D5', false, o_q], ['E5', false, o_q],
+        ['E5', false, o_dq], ['D5', false, o_e], ['D5', false, o_h],
+    ];
+
     // ==========================================
-    // Which song should the robot play?
+    // Interactive Song Selection
     // ==========================================
-    const melody: MelodyNote[] = tetris;
+    const songNames = [
+        "Super Mario Bros — Overworld Theme",
+        "Tetris (Korobeiniki)",
+        "Megalovania (Undertale)",
+        "Ode To Joy (Beethoven)"
+    ];
+    const songMelodies = [mario, tetris, megalovania, odeToJoy];
+
+    const selectedIndex = await readline.keyInSelect(songNames, "Which song should the robot play?");
+
+    if (selectedIndex === -1) {
+        console.log("No song selected. Stopping the robot.");
+        return;
+    }
+
+    const melody: MelodyNote[] = songMelodies[selectedIndex];
+    console.log(`Now playing: ${songNames[selectedIndex]}`);
 
     for (const entry of melody) {
         if (entry === null) {
