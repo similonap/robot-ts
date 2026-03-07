@@ -52,7 +52,7 @@ async function main() {
     const robot = game.getRobot("Robot");
     if (!robot) return;
 
-    robot.setSpeed(80);
+    robot.setSpeed(10);
 
     // Tempo constants (ms)
     const e = 150;   // eighth note
