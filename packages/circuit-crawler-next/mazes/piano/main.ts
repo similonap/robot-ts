@@ -106,7 +106,7 @@ async function main() {
 
     let cd: number = -1;
     do {
-        cd = readline.questionInt("What CD do you want to play?");
+        cd = readline.questionInt("What CD do you want to play? ");
 
         await moveToCD(robot, cd);
 

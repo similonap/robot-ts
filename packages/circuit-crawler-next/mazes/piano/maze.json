@@ -335,17 +335,6 @@
       }
     },
     {
-      "id": "item-B4",
-      "type": "item",
-      "name": "Note",
-      "icon": "B4",
-      "category": "Note",
-      "position": {
-        "x": 7,
-        "y": 1
-      }
-    },
-    {
       "id": "item-A4",
       "type": "item",
       "name": "Note",
@@ -353,6 +342,17 @@
       "category": "Note",
       "position": {
         "x": 6,
+        "y": 1
+      }
+    },
+    {
+      "id": "item-B4",
+      "type": "item",
+      "name": "Note",
+      "icon": "B4",
+      "category": "Note",
+      "position": {
+        "x": 7,
         "y": 1
       }
     },
@@ -390,6 +390,17 @@
       }
     },
     {
+      "id": "item-F5",
+      "type": "item",
+      "name": "Note",
+      "icon": "F5",
+      "category": "Food",
+      "position": {
+        "x": 4,
+        "y": 3
+      }
+    },
+    {
       "id": "item-G5",
       "type": "item",
       "name": "Note",
@@ -397,17 +408,6 @@
       "category": "Note",
       "position": {
         "x": 5,
-        "y": 3
-      }
-    },
-    {
-      "id": "item-B5",
-      "type": "item",
-      "name": "Note",
-      "icon": "B5",
-      "category": "Note",
-      "position": {
-        "x": 7,
         "y": 3
       }
     },
@@ -423,20 +423,154 @@
       }
     },
     {
-      "id": "item-F5",
+      "id": "item-B5",
       "type": "item",
       "name": "Note",
-      "icon": "F5",
-      "category": "Food",
+      "icon": "B5",
+      "category": "Note",
       "position": {
-        "x": 4,
+        "x": 7,
         "y": 3
       }
     },
     {
-      "id": "item-cd-tetris",
+      "id": "item-cd-1",
       "type": "item",
-      "name": "CD Tetris (Korobeiniki)",
+      "name": "Super Mario Bros",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "square",
+      "melody": [
+        [
+          "E5",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "G5",
+          false,
+          600
+        ],
+        [
+          "G4",
+          false,
+          600
+        ],
+        [
+          "C5",
+          false,
+          450
+        ],
+        [
+          "G4",
+          false,
+          450
+        ],
+        [
+          "E4",
+          false,
+          450
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "B4",
+          false,
+          300
+        ],
+        [
+          "A4",
+          true,
+          150
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "G4",
+          false,
+          100
+        ],
+        [
+          "E5",
+          false,
+          100
+        ],
+        [
+          "G5",
+          false,
+          100
+        ],
+        [
+          "A5",
+          false,
+          300
+        ],
+        [
+          "F5",
+          false,
+          150
+        ],
+        [
+          "G5",
+          false,
+          300
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          150
+        ],
+        [
+          "B4",
+          false,
+          450
+        ]
+      ],
+      "position": {
+        "x": 1,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-2",
+      "type": "item",
+      "name": "Tetris (Korobeiniki)",
       "icon": "💿",
       "category": "CD",
       "instrument": "pulse",
@@ -630,148 +764,14 @@
         null
       ],
       "position": {
-        "x": 1,
-        "y": 5
-      }
-    },
-    {
-      "id": "item-cd-mario",
-      "type": "item",
-      "name": "CD Super Mario Bros",
-      "icon": "💿",
-      "category": "CD",
-      "instrument": "square",
-      "melody": [
-        [
-          "E5",
-          false,
-          150
-        ],
-        [
-          "E5",
-          false,
-          300
-        ],
-        [
-          "E5",
-          false,
-          300
-        ],
-        [
-          "C5",
-          false,
-          150
-        ],
-        [
-          "E5",
-          false,
-          300
-        ],
-        [
-          "G5",
-          false,
-          600
-        ],
-        [
-          "G4",
-          false,
-          600
-        ],
-        [
-          "C5",
-          false,
-          450
-        ],
-        [
-          "G4",
-          false,
-          450
-        ],
-        [
-          "E4",
-          false,
-          450
-        ],
-        [
-          "A4",
-          false,
-          300
-        ],
-        [
-          "B4",
-          false,
-          300
-        ],
-        [
-          "A4",
-          true,
-          150
-        ],
-        [
-          "A4",
-          false,
-          300
-        ],
-        [
-          "G4",
-          false,
-          100
-        ],
-        [
-          "E5",
-          false,
-          100
-        ],
-        [
-          "G5",
-          false,
-          100
-        ],
-        [
-          "A5",
-          false,
-          300
-        ],
-        [
-          "F5",
-          false,
-          150
-        ],
-        [
-          "G5",
-          false,
-          300
-        ],
-        [
-          "E5",
-          false,
-          300
-        ],
-        [
-          "C5",
-          false,
-          150
-        ],
-        [
-          "D5",
-          false,
-          150
-        ],
-        [
-          "B4",
-          false,
-          450
-        ]
-      ],
-      "position": {
         "x": 2,
         "y": 5
       }
     },
     {
-      "id": "item-cd-megalovania",
+      "id": "item-cd-3",
       "type": "item",
-      "name": "CD Megalovania",
+      "name": "Megalovania (Undertale)",
       "icon": "💿",
       "category": "CD",
       "instrument": "supersaw",
@@ -987,9 +987,1311 @@
       }
     },
     {
-      "id": "item-cd-ode",
+      "id": "item-cd-4",
       "type": "item",
-      "name": "CD Ode To Joy",
+      "name": "Zelda's Lullaby",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "triangle",
+      "melody": [
+        [
+          "B4",
+          false,
+          600
+        ],
+        [
+          "D5",
+          false,
+          300
+        ],
+        [
+          "A4",
+          false,
+          900
+        ],
+        [
+          "G4",
+          false,
+          600
+        ],
+        [
+          "A4",
+          false,
+          900
+        ],
+        [
+          "B4",
+          false,
+          600
+        ],
+        [
+          "D5",
+          false,
+          300
+        ],
+        [
+          "A5",
+          false,
+          900
+        ],
+        [
+          "G5",
+          false,
+          900
+        ],
+        null,
+        [
+          "D5",
+          false,
+          600
+        ],
+        [
+          "C5",
+          false,
+          300
+        ],
+        [
+          "B4",
+          false,
+          900
+        ],
+        [
+          "A4",
+          false,
+          600
+        ],
+        [
+          "B4",
+          false,
+          300
+        ],
+        [
+          "C5",
+          false,
+          600
+        ],
+        [
+          "D5",
+          false,
+          900
+        ]
+      ],
+      "position": {
+        "x": 4,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-5",
+      "type": "item",
+      "name": "Final Fantasy Victory",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "square",
+      "melody": [
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "C5",
+          false,
+          600
+        ],
+        [
+          "G4",
+          true,
+          200
+        ],
+        [
+          "A4",
+          true,
+          200
+        ],
+        [
+          "C5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          800
+        ],
+        null,
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          400
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          800
+        ]
+      ],
+      "position": {
+        "x": 5,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-6",
+      "type": "item",
+      "name": "Pac-Man",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "sine",
+      "melody": [
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "B5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          true,
+          200
+        ],
+        [
+          "D5",
+          true,
+          200
+        ],
+        [
+          "B5",
+          false,
+          400
+        ],
+        [
+          "F5",
+          true,
+          400
+        ],
+        [
+          "D5",
+          true,
+          600
+        ],
+        null,
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          true,
+          200
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          true,
+          400
+        ],
+        [
+          "G5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          600
+        ],
+        null,
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "B5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          true,
+          200
+        ],
+        [
+          "D5",
+          true,
+          200
+        ],
+        [
+          "B5",
+          false,
+          400
+        ],
+        [
+          "F5",
+          true,
+          200
+        ],
+        [
+          "D5",
+          true,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          600
+        ]
+      ],
+      "position": {
+        "x": 6,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-7",
+      "type": "item",
+      "name": "Sonic Green Hill Zone",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "square",
+      "melody": [
+        [
+          "G4",
+          false,
+          150
+        ],
+        [
+          "A4",
+          false,
+          150
+        ],
+        [
+          "B4",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          300
+        ],
+        null,
+        [
+          "B4",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          450
+        ],
+        null,
+        [
+          "B4",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          150
+        ],
+        [
+          "F5",
+          true,
+          300
+        ],
+        [
+          "E5",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          450
+        ],
+        [
+          "B4",
+          false,
+          300
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "G4",
+          false,
+          600
+        ],
+        null,
+        [
+          "G4",
+          false,
+          150
+        ],
+        [
+          "A4",
+          false,
+          150
+        ],
+        [
+          "B4",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          300
+        ],
+        [
+          "E5",
+          false,
+          150
+        ],
+        [
+          "F5",
+          true,
+          150
+        ],
+        [
+          "G5",
+          false,
+          600
+        ]
+      ],
+      "position": {
+        "x": 7,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-8",
+      "type": "item",
+      "name": "Kirby Green Greens",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "triangle",
+      "melody": [
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          400
+        ],
+        [
+          "A5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "A5",
+          false,
+          400
+        ],
+        [
+          "G5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          600
+        ]
+      ],
+      "position": {
+        "x": 1,
+        "y": 7
+      }
+    },
+    {
+      "id": "item-cd-9",
+      "type": "item",
+      "name": "Pokémon Route 1",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "pulse",
+      "melody": [
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          true,
+          200
+        ],
+        [
+          "A5",
+          false,
+          400
+        ],
+        [
+          "A5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          true,
+          200
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          true,
+          200
+        ],
+        [
+          "A5",
+          false,
+          200
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          400
+        ],
+        null,
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          true,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          true,
+          200
+        ],
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          600
+        ]
+      ],
+      "position": {
+        "x": 2,
+        "y": 7
+      }
+    },
+    {
+      "id": "item-cd-10",
+      "type": "item",
+      "name": "Castlevania",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "square",
+      "melody": [
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          400
+        ],
+        [
+          "G4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          100
+        ],
+        [
+          "D5",
+          false,
+          100
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        null,
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          600
+        ]
+      ],
+      "position": {
+        "x": 3,
+        "y": 7
+      }
+    },
+    {
+      "id": "item-cd-11",
+      "type": "item",
+      "name": "Mega Man 2 Dr. Wily",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "supersaw",
+      "melody": [
+        [
+          "E4",
+          false,
+          150
+        ],
+        [
+          "E4",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "D5",
+          true,
+          400
+        ],
+        [
+          "D5",
+          false,
+          150
+        ],
+        [
+          "C5",
+          true,
+          150
+        ],
+        [
+          "D5",
+          false,
+          300
+        ],
+        null,
+        [
+          "E4",
+          false,
+          150
+        ],
+        [
+          "E4",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "D5",
+          true,
+          400
+        ],
+        [
+          "D5",
+          false,
+          150
+        ],
+        [
+          "C5",
+          true,
+          150
+        ],
+        [
+          "D5",
+          false,
+          150
+        ],
+        [
+          "C5",
+          true,
+          150
+        ],
+        [
+          "C5",
+          false,
+          300
+        ],
+        null,
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "B4",
+          false,
+          150
+        ],
+        [
+          "C5",
+          false,
+          300
+        ],
+        [
+          "B4",
+          false,
+          150
+        ],
+        [
+          "A4",
+          false,
+          600
+        ]
+      ],
+      "position": {
+        "x": 4,
+        "y": 7
+      }
+    },
+    {
+      "id": "item-cd-12",
+      "type": "item",
+      "name": "Minecraft Sweden",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "triangle",
+      "melody": [
+        [
+          "F4",
+          true,
+          600
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "D5",
+          false,
+          900
+        ],
+        null,
+        [
+          "F4",
+          true,
+          600
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "C5",
+          true,
+          900
+        ],
+        null,
+        [
+          "F4",
+          true,
+          600
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "B4",
+          false,
+          900
+        ],
+        null,
+        [
+          "D5",
+          false,
+          300
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "F4",
+          true,
+          900
+        ],
+        null,
+        [
+          "F4",
+          true,
+          600
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "D5",
+          false,
+          900
+        ],
+        null,
+        [
+          "F4",
+          true,
+          600
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "C5",
+          true,
+          900
+        ]
+      ],
+      "position": {
+        "x": 5,
+        "y": 7
+      }
+    },
+    {
+      "id": "item-cd-13",
+      "type": "item",
+      "name": "Doom E1M1",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "supersaw",
+      "melody": [
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E5",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "A4",
+          true,
+          200
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "E4",
+          false,
+          100
+        ],
+        [
+          "A4",
+          true,
+          200
+        ],
+        [
+          "E4",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          200
+        ],
+        [
+          "E4",
+          false,
+          400
+        ],
+        null,
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "A5",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "F5",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "A4",
+          false,
+          100
+        ],
+        [
+          "D5",
+          true,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          400
+        ]
+      ],
+      "position": {
+        "x": 6,
+        "y": 7
+      }
+    },
+    {
+      "id": "item-cd-14",
+      "type": "item",
+      "name": "Ode To Joy",
       "icon": "💿",
       "category": "CD",
       "instrument": "triangle",
@@ -1071,8 +2373,8 @@
         ]
       ],
       "position": {
-        "x": 4,
-        "y": 5
+        "x": 7,
+        "y": 7
       }
     }
   ],
