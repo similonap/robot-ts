@@ -1,4 +1,5 @@
 import { superdough, initAudio, registerSynthSounds, getAudioContextCurrentTime, registerWorklet } from 'superdough';
+import { Item } from 'circuit-crawler';
 
 // Note name → frequency (Hz) mapping
 const NOTE_FREQUENCIES: Record<string, number> = {
@@ -25,19 +26,23 @@ async function ensureAudio() {
     }
 }
 
-async function playNote(note: string, sharp = false) {
+async function playNote(note: string, sharp = false, instrument = 'sine') {
     await ensureAudio();
     let freq = NOTE_FREQUENCIES[note];
     if (!freq) return;
     if (sharp) freq *= SEMITONE;
     const t = getAudioContextCurrentTime() + 0.01;
-    superdough({ s: 'sine', freq, gain: 0.15 }, t, 0.5);
+    superdough({ s: instrument, freq, gain: 0.15 }, t, 0.5);
 }
 
-// Attach play(sharp?) to each note item
+interface Note extends Item {
+    play: (sharp: boolean, instrument?: string) => Promise<void>;
+}
+
+// Attach play(sharp?, instrument?) to each note item
 for (const note of Object.keys(NOTE_FREQUENCIES)) {
     const item = game.getItem(`item-${note}`);
     if (item) {
-        Object.assign(item, { play: (sharp = false) => playNote(note, sharp) });
+        Object.assign(item, { play: (sharp = false, instrument = 'sine') => playNote(note, sharp, instrument) });
     }
 }

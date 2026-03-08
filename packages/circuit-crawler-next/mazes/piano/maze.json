@@ -8,8 +8,17 @@
         "y": 2
       },
       "direction": "North",
-      "name": "Robot",
+      "name": "Musician",
       "color": "#38bdf8"
+    },
+    {
+      "position": {
+        "x": 1,
+        "y": 6
+      },
+      "direction": "East",
+      "name": "Robot",
+      "color": "#ff0000"
     }
   ],
   "walls": [
@@ -99,6 +108,7 @@
       false
     ],
     [
+      true,
       false,
       false,
       false,
@@ -106,25 +116,7 @@
       false,
       false,
       false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
-    ],
-    [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
+      true,
       false,
       false,
       false,
@@ -133,6 +125,7 @@
       false
     ],
     [
+      true,
       false,
       false,
       false,
@@ -140,8 +133,7 @@
       false,
       false,
       false,
-      false,
-      false,
+      true,
       false,
       false,
       false,
@@ -150,6 +142,7 @@
       false
     ],
     [
+      true,
       false,
       false,
       false,
@@ -157,8 +150,24 @@
       false,
       false,
       false,
+      true,
       false,
       false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       false,
       false,
       false,
@@ -422,6 +431,648 @@
       "position": {
         "x": 4,
         "y": 3
+      }
+    },
+    {
+      "id": "item-cd-tetris",
+      "type": "item",
+      "name": "CD Tetris (Korobeiniki)",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "pulse",
+      "melody": [
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "B4",
+          false,
+          200
+        ],
+        [
+          "A4",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "G4",
+          true,
+          600
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          800
+        ],
+        null,
+        [
+          "D5",
+          false,
+          600
+        ],
+        [
+          "F5",
+          false,
+          200
+        ],
+        [
+          "A5",
+          false,
+          400
+        ],
+        [
+          "G5",
+          false,
+          200
+        ],
+        [
+          "F5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          600
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "G4",
+          true,
+          400
+        ],
+        [
+          "G4",
+          true,
+          200
+        ],
+        [
+          "C5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          400
+        ],
+        [
+          "A4",
+          false,
+          800
+        ],
+        null
+      ],
+      "position": {
+        "x": 1,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-mario",
+      "type": "item",
+      "name": "CD Super Mario Bros",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "square",
+      "melody": [
+        [
+          "E5",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "G5",
+          false,
+          600
+        ],
+        [
+          "G4",
+          false,
+          600
+        ],
+        [
+          "C5",
+          false,
+          450
+        ],
+        [
+          "G4",
+          false,
+          450
+        ],
+        [
+          "E4",
+          false,
+          450
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "B4",
+          false,
+          300
+        ],
+        [
+          "A4",
+          true,
+          150
+        ],
+        [
+          "A4",
+          false,
+          300
+        ],
+        [
+          "G4",
+          false,
+          100
+        ],
+        [
+          "E5",
+          false,
+          100
+        ],
+        [
+          "G5",
+          false,
+          100
+        ],
+        [
+          "A5",
+          false,
+          300
+        ],
+        [
+          "F5",
+          false,
+          150
+        ],
+        [
+          "G5",
+          false,
+          300
+        ],
+        [
+          "E5",
+          false,
+          300
+        ],
+        [
+          "C5",
+          false,
+          150
+        ],
+        [
+          "D5",
+          false,
+          150
+        ],
+        [
+          "B4",
+          false,
+          450
+        ]
+      ],
+      "position": {
+        "x": 2,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-megalovania",
+      "type": "item",
+      "name": "CD Megalovania",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "supersaw",
+      "melody": [
+        [
+          "E4",
+          false,
+          120
+        ],
+        [
+          "E4",
+          false,
+          120
+        ],
+        [
+          "E5",
+          false,
+          240
+        ],
+        [
+          "B4",
+          false,
+          360
+        ],
+        null,
+        [
+          "A4",
+          true,
+          240
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "G4",
+          false,
+          240
+        ],
+        [
+          "E4",
+          false,
+          120
+        ],
+        [
+          "G4",
+          false,
+          120
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "D4",
+          false,
+          120
+        ],
+        [
+          "D4",
+          false,
+          120
+        ],
+        [
+          "E5",
+          false,
+          240
+        ],
+        [
+          "B4",
+          false,
+          360
+        ],
+        null,
+        [
+          "A4",
+          true,
+          240
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "G4",
+          false,
+          240
+        ],
+        [
+          "E4",
+          false,
+          120
+        ],
+        [
+          "G4",
+          false,
+          120
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "C4",
+          true,
+          120
+        ],
+        [
+          "C4",
+          true,
+          120
+        ],
+        [
+          "E5",
+          false,
+          240
+        ],
+        [
+          "B4",
+          false,
+          360
+        ],
+        null,
+        [
+          "A4",
+          true,
+          240
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "G4",
+          false,
+          240
+        ],
+        [
+          "E4",
+          false,
+          120
+        ],
+        [
+          "G4",
+          false,
+          120
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "C4",
+          false,
+          120
+        ],
+        [
+          "C4",
+          false,
+          120
+        ],
+        [
+          "E5",
+          false,
+          240
+        ],
+        [
+          "B4",
+          false,
+          360
+        ],
+        null,
+        [
+          "A4",
+          true,
+          240
+        ],
+        [
+          "A4",
+          false,
+          240
+        ],
+        [
+          "G4",
+          false,
+          240
+        ],
+        [
+          "E4",
+          false,
+          120
+        ],
+        [
+          "G4",
+          false,
+          120
+        ],
+        [
+          "A4",
+          false,
+          240
+        ]
+      ],
+      "position": {
+        "x": 3,
+        "y": 5
+      }
+    },
+    {
+      "id": "item-cd-ode",
+      "type": "item",
+      "name": "CD Ode To Joy",
+      "icon": "💿",
+      "category": "CD",
+      "instrument": "triangle",
+      "melody": [
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "F5",
+          false,
+          400
+        ],
+        [
+          "G5",
+          false,
+          400
+        ],
+        [
+          "G5",
+          false,
+          400
+        ],
+        [
+          "F5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "D5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          400
+        ],
+        [
+          "C5",
+          false,
+          400
+        ],
+        [
+          "D5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          400
+        ],
+        [
+          "E5",
+          false,
+          600
+        ],
+        [
+          "D5",
+          false,
+          200
+        ],
+        [
+          "D5",
+          false,
+          800
+        ]
+      ],
+      "position": {
+        "x": 4,
+        "y": 5
       }
     }
   ],
