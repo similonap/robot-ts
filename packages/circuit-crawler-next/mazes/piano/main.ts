@@ -14,10 +14,22 @@ interface Note extends Item {
 interface CD extends Item {
     instrument: string;
     melody: MelodyNote[];
+    drumPattern: DrumHit[];
 }
+
+interface Drumpad extends Item {
+    hit: (drumType: string) => Promise<void>;
+}
+
+// Each entry: [drumType, durationMs] or null for rest
+type DrumHit = [string, number] | null;
 
 function isNote(item: any): item is Note {
     return item && item.type === "item" && item.category === "Note";
+}
+
+function isDrumPad(item: any): item is Drumpad {
+    return item && item.type === "item" && item.category === "Drum";
 }
 
 function isCD(item: any): item is CD {
@@ -58,7 +70,29 @@ async function playMelodyNote(robot: any, noteId: string, sharp: boolean, instru
     }
 }
 
-async function playSong(instrument: string, melody: MelodyNote[]) {
+async function startDrumPattern(drumPattern: DrumHit[]) {
+    const drummer = game.getRobot("Drummer");
+    if (!drummer) return;
+
+    const item = await drummer.scan();
+    if (!isDrumPad(item)) return;
+
+    for (const hit of drumPattern) {
+        if (hit === null) {
+            await sleep(250);
+        } else {
+            const [drumType, beatMs] = hit;
+            const start = Date.now();
+            await item.hit(drumType);
+            const elapsed = Date.now() - start;
+            await sleep(Math.max(0, beatMs - elapsed));
+        }
+    }
+}
+
+async function playSong(instrument: string, melody: MelodyNote[], drumPattern: DrumHit[]) {
+    startDrumPattern(drumPattern);
+
     const musician = game.getRobot("Musician");
     if (!musician) return;
     musician.setSpeed(10);
@@ -114,7 +148,7 @@ async function main() {
 
         let item = await robot.scan();
         if (isCD(item)) {
-            await playSong(item.instrument, item.melody);
+            await playSong(item.instrument, item.melody, item.drumPattern);
         }
 
         await moveToColumn(robot, 1);

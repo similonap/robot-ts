@@ -1,4 +1,4 @@
-import { superdough, initAudio, registerSynthSounds, getAudioContextCurrentTime, registerWorklet } from 'superdough';
+import { superdough, initAudio, registerSynthSounds, getAudioContextCurrentTime, registerWorklet, samples } from 'superdough';
 import { Item } from 'circuit-crawler';
 
 // Note name → frequency (Hz) mapping
@@ -19,9 +19,11 @@ async function ensureAudio() {
     try {
         registerWorklet('/superdough-worklets.mjs');
         await initAudio();
+        await samples('https://raw.githubusercontent.com/felixroos/dough-samples/main/tidal-drum-machines.json');
         await registerSynthSounds();
         audioReady = true;
     } catch (e) {
+        alert(e);
         console.error("Audio init failed", e);
     }
 }
@@ -39,10 +41,27 @@ interface Note extends Item {
     play: (sharp: boolean, instrument?: string) => Promise<void>;
 }
 
+interface Drumpad extends Item {
+    hit: (drumType: DrumType) => Promise<void>;
+}
+
 // Attach play(sharp?, instrument?) to each note item
 for (const note of Object.keys(NOTE_FREQUENCIES)) {
     const item = game.getItem(`item-${note}`);
     if (item) {
         Object.assign(item, { play: (sharp = false, instrument = 'sine') => playNote(note, sharp, instrument) });
     }
+}
+
+type DrumType = "bd" | "cb" | "cp" | "cr" | "hh" | "ht" | "lt" | "mt" | "oh" | "rd" | "sd" | "sh" | "tb";
+
+async function hitDrum(drumType: DrumType) {
+    await ensureAudio();
+    const t = getAudioContextCurrentTime() + 0.01;
+    await superdough({ s: "AkaiLinn_" + drumType, delay: 0 }, t, 0.5);
+}
+
+const drum = game.getItem("item-drum");
+if (drum) {
+    Object.assign(drum, { hit: (drumType: DrumType): Promise<void> => hitDrum(drumType) })
 }
